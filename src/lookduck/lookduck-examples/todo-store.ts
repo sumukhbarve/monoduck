@@ -13,7 +13,7 @@ export const coShownTodos = computed(function (): Todo[] {
     return obAllTodos.get()
   }
   return obAllTodos.get().filter(todo => !todo.done)
-}, [obShowDone, obAllTodos])
+})
 
 export const actAddTodo = function (todo: Todo): void {
   obAllTodos.set([...obAllTodos.get(), todo])
