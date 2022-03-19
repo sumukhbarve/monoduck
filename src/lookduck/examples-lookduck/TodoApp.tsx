@@ -1,10 +1,10 @@
 import React, { useCallback, useState } from 'react'
 import type { VFC, FormEvent } from 'react'
 import ReactDOM from 'react-dom'
-import { useLookable } from '../index-lookduck'
 import {
   actAddTodo, Todo,
-  obShowDone, coShownTodos, actToggleDone, actToggleShowDone
+  obShowDone, coShownTodos, actToggleDone, actToggleShowDone,
+  useLookable
 } from './todo-store'
 
 const Header: VFC = function () {

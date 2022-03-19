@@ -2,7 +2,7 @@ import {
   pubsubable,
   observable,
   computed,
-  useLookable
+  makeUseLookable
 } from './lookduck/index-lookduck'
 
 import {
@@ -21,19 +21,20 @@ export const quack = function (): string {
 
 // lookduck:
 export type {
-  AcceptorFn, Pubsubable, Lookable
+  AcceptorFn, Pubsubable, Lookable,
+  UseStateFn, UseEffectFn, UseLookableFn
 } from './lookduck/index-lookduck'
 export const lookduck = {
   pubsubable,
   observable,
   computed,
-  useLookable
+  makeUseLookable
 }
 export {
   pubsubable,
   observable,
   computed,
-  useLookable
+  makeUseLookable
 }
 
 // tapiduck:

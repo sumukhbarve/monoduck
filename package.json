@@ -1,6 +1,6 @@
 {
   "name": "monoduck",
-  "version": "0.0.4",
+  "version": "0.0.5-dev",
   "description": "",
   "source": "src/index-monoduck.ts",
   "main": "dist/main.js",

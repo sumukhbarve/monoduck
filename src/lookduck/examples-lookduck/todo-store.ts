@@ -1,4 +1,5 @@
-import { observable, computed } from '../index-lookduck'
+import { useState, useEffect } from 'react'
+import { observable, computed, makeUseLookable } from '../index-lookduck'
 
 export interface Todo {
   id: number
@@ -26,3 +27,5 @@ export const actToggleDone = function (todoId: number): void {
 export const actToggleShowDone = function (): void {
   obShowDone.set(!obShowDone.get())
 }
+
+export const useLookable = makeUseLookable(useState, useEffect)

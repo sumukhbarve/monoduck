@@ -7,4 +7,5 @@ export { observable } from './observable'
 
 export { computed } from './computed'
 
-export { useLookable } from './react-hook'
+export type { UseStateFn, UseEffectFn, UseLookableFn } from './react-hook'
+export { makeUseLookable } from './react-hook'
