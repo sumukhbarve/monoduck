@@ -7,5 +7,11 @@
 - To avoid bloat, it has no hard `dependencies`, and all `peerDependencies` are optional.
 
 ### What's included?
+
 - [**Lookduck**](/src/lookduck/README.md): React state manager with automatic dependency management for derived state.
 - [**Tapiduck**](/src/tapiduck/README.md): End-to-end type-safe APIs with fullstack intillisense. Simple and restful-ish.
+
+### Housekeeping:
+
+- Distribution Bundler: Parcel
+- Linter & Formatter: ts-standard
