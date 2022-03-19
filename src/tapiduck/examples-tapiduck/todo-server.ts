@@ -6,7 +6,7 @@ import { ept } from './todo-shared'
 
 const todos: Todo[] = [] // Temporary, in-memory todo store
 
-const router = tapiRouter()
+const router = tapiRouter(express.Router())
 
 router.addRoute(ept.addTodo, async function (reqData) {
   const todo = {
@@ -41,7 +41,6 @@ router.addRoute(ept.getTodos, async function () {
 })
 
 const app = express()
-app.use(cors())
-app.use(router.middleware())
+app.use(cors(), express.json(), router.middleware())
 app.get('/', (req, res) => { res.send('Hello World!') })
 app.listen(3000, () => console.log('Listening at port 3000 ...'))

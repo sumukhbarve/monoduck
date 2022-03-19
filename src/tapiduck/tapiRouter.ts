@@ -1,8 +1,5 @@
-import {
-  Router as XRouter,
-  Request as XReq,
-  Response as XRes,
-  json as xJson
+import type {
+  Router as XRouter, Request as XReq, Response as XRes
 } from 'express'
 import { TapiError } from './tapiEndpoint'
 import type { TapiEndpoint } from './tapiEndpoint'
@@ -48,11 +45,7 @@ interface TapiRouter {
   ) => void
   middleware: () => XRouter
 }
-const tapiRouter = function (skipJson = false): TapiRouter {
-  const xRouter = XRouter()
-  if (!skipJson) {
-    xRouter.use(xJson())
-  }
+const tapiRouter = function (xRouter: XRouter): TapiRouter {
   const addRoute = function<ZReq, ZRes> (
     endpoint: TapiEndpoint<ZReq, ZRes>,
     handler: (reqData: ZReq) => Promise<ZRes>

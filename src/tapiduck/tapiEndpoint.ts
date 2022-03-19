@@ -1,4 +1,4 @@
-import { z } from 'zod'
+import { ZodSchema } from 'zod'
 
 class TapiError extends Error {
   constructor (message: string) {
@@ -9,8 +9,8 @@ class TapiError extends Error {
 
 interface TapiEndpoint<ZReq, ZRes> {
   path: string
-  zReq: z.ZodSchema<ZReq>
-  zRes: z.ZodSchema<ZRes>
+  zReq: ZodSchema<ZReq>
+  zRes: ZodSchema<ZRes>
 }
 
 // Helper for building TapiEndpoints that implicitly infers ZReq & ZRes.

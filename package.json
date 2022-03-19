@@ -1,6 +1,6 @@
 {
   "name": "monoduck",
-  "version": "0.0.5-dev",
+  "version": "0.0.5",
   "description": "",
   "source": "src/index-monoduck.ts",
   "main": "dist/main.js",
@@ -10,11 +10,11 @@
     "dist/"
   ],
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
+    "test": "jest",
     "lint": "ts-standard --fix",
     "watch": "parcel watch",
     "build": "parcel build",
-    "prepack": "npm run build"
+    "prepack": "ts-standard && jest && parcel build"
   },
   "repository": {
     "type": "git",

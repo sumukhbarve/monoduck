@@ -1,5 +1,4 @@
-// import { useState, useEffect } from 'react'
-import { Lookable } from './lookable'
+import type { Lookable } from './lookable'
 
 type Bool = boolean
 type UseStateFn = (val: Bool) => [Bool, (cb: (val: Bool) => Bool) => void]
@@ -7,6 +6,7 @@ type UseEffectFn = (effect: () => void, deps?: unknown[]) => void
 
 type UseLookableFn = <T>(ob: Lookable<T>) => T
 
+// Creates useLookable from React's useState and useEffect
 const makeUseLookable = function (
   useState: UseStateFn,
   useEffect: UseEffectFn
