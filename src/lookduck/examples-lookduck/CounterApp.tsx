@@ -1,7 +1,7 @@
 import React from 'react'
 import type { VFC } from 'react'
 import ReactDOM from 'react-dom'
-import { useLookable } from '../lookduck-index'
+import { useLookable } from '../index-lookduck'
 import { obCount, actIncrementCount } from './counter-store'
 
 const ClickCounter: VFC = function () {

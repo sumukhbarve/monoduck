@@ -45,4 +45,5 @@ const tapiFetcher = function (baseUrl: string): TapiFetcher {
   return { hitRoute }
 }
 
+export type { TapiFetcher }
 export { hitTapiRoute, tapiFetcher }

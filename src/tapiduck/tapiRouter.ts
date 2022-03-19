@@ -65,4 +65,5 @@ const tapiRouter = function (skipJson = false): TapiRouter {
   return { addRoute, middleware }
 }
 
+export type { TapiRouter }
 export { addTapiRoute, tapiRouter }

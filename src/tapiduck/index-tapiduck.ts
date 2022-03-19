@@ -1,11 +1,8 @@
-import { tapiEndpoint, TapiError } from './tapiEndpoint'
-import type { TapiEndpoint } from './tapiEndpoint'
-import { addTapiRoute, tapiRouter } from './tapiRouter'
-import { hitTapiRoute, tapiFetcher } from './tapiFetcher'
+export type { TapiEndpoint } from './tapiEndpoint'
+export { tapiEndpoint, TapiError } from './tapiEndpoint'
 
-export type { TapiEndpoint }
-export {
-  tapiEndpoint, TapiError,
-  addTapiRoute, tapiRouter,
-  hitTapiRoute, tapiFetcher
-}
+export type { TapiRouter } from './tapiRouter'
+export { addTapiRoute, tapiRouter } from './tapiRouter'
+
+export type { TapiFetcher } from './tapiFetcher'
+export { hitTapiRoute, tapiFetcher } from './tapiFetcher'

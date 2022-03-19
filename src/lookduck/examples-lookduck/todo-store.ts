@@ -1,4 +1,4 @@
-import { observable, computed } from '../lookduck-index'
+import { observable, computed } from '../index-lookduck'
 
 export interface Todo {
   id: number

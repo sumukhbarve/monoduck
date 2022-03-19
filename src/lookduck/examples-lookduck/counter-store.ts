@@ -1,4 +1,4 @@
-import { observable } from '../lookduck-index'
+import { observable } from '../index-lookduck'
 
 // A piece of observable state, with the conventional `ob` prefix:
 export const obCount = observable(0)

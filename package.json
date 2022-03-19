@@ -1,8 +1,8 @@
 {
   "name": "monoduck",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "",
-  "source": "src/monoduck-index.ts",
+  "source": "src/index-monoduck.ts",
   "main": "dist/main.js",
   "module": "dist/module.js",
   "types": "dist/types.d.ts",
