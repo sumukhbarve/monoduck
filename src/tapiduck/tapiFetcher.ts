@@ -1,16 +1,17 @@
 import type { TapiEndpoint } from './tapiEndpoint'
 
-const fullUrl = function (baseUrl: string, path: string): string {
-  return (baseUrl + '/' + path).split('//').join('/')
-}
+const windowFetch = globalThis.fetch
 
-const hitTapiRoute = async function<ZReq, ZRes> (
-  baseUrl: string,
+const fetch = async function<ZReq, ZRes> (
   endpoint: TapiEndpoint<ZReq, ZRes>,
-  reqData: ZReq
+  reqData: ZReq,
+  baseUrl: string = ''
 ): Promise<ZRes> {
-  const url = fullUrl(baseUrl, endpoint.path)
-  const res = await fetch(url, {
+  if (baseUrl.endsWith('/')) {
+    throw new Error(`Error: Base URL '${baseUrl}' shouldn't end with '/'.`)
+  }
+  const url = `${baseUrl}${endpoint.path}`
+  const res = await windowFetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(reqData)
@@ -29,21 +30,20 @@ const hitTapiRoute = async function<ZReq, ZRes> (
   return parsedRes.data
 }
 
-interface TapiFetcher {
-  hitRoute: <ZReq, ZRes>(
+type BoundFetchFn = <ZReq, ZRes>(
     endpoint: TapiEndpoint<ZReq, ZRes>,
     reqData: ZReq
   ) => Promise<ZRes>
-}
-const tapiFetcher = function (baseUrl: string): TapiFetcher {
-  const hitRoute = async function<ZReq, ZRes> (
+
+const fetchUsing = function (baseUrl: string): BoundFetchFn {
+  const boundHit = async function<ZReq, ZRes> (
     endpoint: TapiEndpoint<ZReq, ZRes>,
     reqData: ZReq
   ): Promise<ZRes> {
-    return await hitTapiRoute(baseUrl, endpoint, reqData)
+    return await fetch(endpoint, reqData, baseUrl)
   }
-  return { hitRoute }
+  return boundHit
 }
 
-export type { TapiFetcher }
-export { hitTapiRoute, tapiFetcher }
+export type { BoundFetchFn }
+export { fetch, fetchUsing }

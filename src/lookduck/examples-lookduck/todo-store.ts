@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { observable, computed, makeUseLookable } from '../index-lookduck'
+import { lookduck } from '../index-lookduck'
 
 export interface Todo {
   id: number
@@ -7,9 +7,9 @@ export interface Todo {
   done: boolean
 }
 
-export const obAllTodos = observable<Todo[]>([])
-export const obShowDone = observable(true)
-export const coShownTodos = computed(function (): Todo[] {
+export const obAllTodos = lookduck.observable<Todo[]>([])
+export const obShowDone = lookduck.observable(true)
+export const coShownTodos = lookduck.computed(function (): Todo[] {
   if (obShowDone.get()) {
     return obAllTodos.get()
   }
@@ -28,4 +28,4 @@ export const actToggleShowDone = function (): void {
   obShowDone.set(!obShowDone.get())
 }
 
-export const useLookable = makeUseLookable(useState, useEffect)
+export const useLookable = lookduck.makeUseLookable(useState, useEffect)

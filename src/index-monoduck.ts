@@ -1,59 +1,13 @@
-import {
-  pubsubable,
-  observable,
-  computed,
-  makeUseLookable
-} from './lookduck/index-lookduck'
-
-import {
-  tapiEndpoint,
-  TapiError,
-  addTapiRoute,
-  tapiRouter,
-  hitTapiRoute,
-  tapiFetcher
-} from './tapiduck/index-tapiduck'
-
-// quack:
 export const quack = function (): string {
   return 'Quack!'
 }
 
-// lookduck:
 export type {
-  AcceptorFn, Pubsubable, Lookable,
-  UseStateFn, UseEffectFn, UseLookableFn
+  AcceptorFn, Pubsubable, Lookable, UseStateFn, UseEffectFn, UseLookableFn
 } from './lookduck/index-lookduck'
-export const lookduck = {
-  pubsubable,
-  observable,
-  computed,
-  makeUseLookable
-}
-export {
-  pubsubable,
-  observable,
-  computed,
-  makeUseLookable
-}
+export { lookduck } from './lookduck/index-lookduck'
 
-// tapiduck:
 export type {
-  TapiEndpoint, TapiRouter, TapiFetcher
+  TapiEndpoint, BoundRouteFn, BoundFetchFn
 } from './tapiduck/index-tapiduck'
-export const tapiduck = {
-  tapiEndpoint,
-  TapiError,
-  addTapiRoute,
-  tapiRouter,
-  hitTapiRoute,
-  tapiFetcher
-}
-export {
-  tapiEndpoint,
-  TapiError,
-  addTapiRoute,
-  tapiRouter,
-  hitTapiRoute,
-  tapiFetcher
-}
+export { tapiduck, TapiError } from './tapiduck/index-tapiduck'

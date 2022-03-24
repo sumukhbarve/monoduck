@@ -14,11 +14,14 @@ interface TapiEndpoint<ZReq, ZRes> {
 }
 
 // Helper for building TapiEndpoints that implicitly infers ZReq & ZRes.
-const tapiEndpoint = function<ZReq, ZRes> (
-  endpoint: TapiEndpoint<ZReq, ZRes>
+const endpoint = function<ZReq, ZRes> (
+  endpointObj: TapiEndpoint<ZReq, ZRes>
 ): TapiEndpoint<ZReq, ZRes> {
-  return endpoint
+  if (!endpointObj.path.startsWith('/')) {
+    throw new Error(`Error: Path '${endpointObj.path}' should begin with '/'.`)
+  }
+  return endpointObj
 }
 
 export type { TapiEndpoint }
-export { tapiEndpoint, TapiError }
+export { endpoint, TapiError }

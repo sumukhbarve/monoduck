@@ -13,5 +13,5 @@
 
 ### Housekeeping:
 
-- Distribution Bundler: Parcel
-- Linter & Formatter: ts-standard
+- Dist Bundler: Parcel
+- Code Style: ts-standard

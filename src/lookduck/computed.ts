@@ -1,4 +1,5 @@
-import { Lookable, internalLookableGetterWatcher } from './lookable'
+import { internalLookableGetterWatcher } from './lookable'
+import type { Lookable } from './lookable'
 import { observable } from './observable'
 
 const getSetDifference = function<T> (setA: Set<T>, setB: Set<T>): Set<T> {

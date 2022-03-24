@@ -1,5 +1,7 @@
-import { AcceptorFn, pubsubable } from './pubsubable'
-import { Lookable, internalLookableGetterWatcher } from './lookable'
+import { pubsubable } from './pubsubable'
+import type { AcceptorFn } from './pubsubable'
+import { internalLookableGetterWatcher } from './lookable'
+import type { Lookable } from './lookable'
 
 const observable = function<T> (val: T): Lookable<T> & { set: AcceptorFn<T> } {
   const pubsub = pubsubable<T>()

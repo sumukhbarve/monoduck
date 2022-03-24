@@ -9,18 +9,17 @@ interface XRes {
   status: (code: number) => unknown
   json: (data: unknown) => unknown
 }
-type XHandler = (req: XReq, res: XRes) => void
-interface XRtBase {
-  post: (path: string, xHandler: XHandler) => unknown
+type XHandlerFn = (req: XReq, res: XRes) => void
+interface XRtApp { // Compatible with eXpress apps & routers
+  post: (path: string, xHandler: XHandlerFn) => unknown
 }
 
-const addTapiRoute = function<ZReq, ZRes> (
-  xRouter: XRtBase,
+const route = function<ZReq, ZRes> (
+  xRtApp: XRtApp,
   endpoint: TapiEndpoint<ZReq, ZRes>,
   handler: (reqData: ZReq) => Promise<ZRes>
 ): void {
-  console.log(endpoint.path)
-  xRouter.post(endpoint.path, function (req: XReq, res: XRes) {
+  xRtApp.post(endpoint.path, function (req: XReq, res: XRes) {
     // Using async IIFE (with .catch()) to pacify ts-standard (linter), which
     // correctly points out that `void` and `Promise<void>` aren't the same.
     // (Keep simplified XHandler's o/p `void` to retain ts-standard's warning.)
@@ -51,27 +50,19 @@ const addTapiRoute = function<ZReq, ZRes> (
   })
 }
 
-interface TapiRouter<XRtFull extends XRtBase> {
-  addRoute: <ZReq, ZRes>(
+type BoundRouteFn = <ZReq, ZRes>(
     endpoint: TapiEndpoint<ZReq, ZRes>,
     handler: (reqData: ZReq) => Promise<ZRes>
   ) => void
-  middleware: () => XRtFull
-}
-const tapiRouter = function<XRtFull extends XRtBase> (
-  xRouter: XRtFull
-): TapiRouter<XRtFull> {
-  const addRoute = function<ZReq, ZRes> (
+
+const routeUsing = function (xRtApp: XRtApp): BoundRouteFn {
+  return function<ZReq, ZRes> (
     endpoint: TapiEndpoint<ZReq, ZRes>,
     handler: (reqData: ZReq) => Promise<ZRes>
   ): void {
-    addTapiRoute(xRouter, endpoint, handler)
+    route(xRtApp, endpoint, handler)
   }
-  const middleware = function (): XRtFull {
-    return xRouter
-  }
-  return { addRoute, middleware }
 }
 
-export type { XReq, XRes, XHandler, XRtBase, TapiRouter }
-export { addTapiRoute, tapiRouter }
+export type { XReq, XRes, XHandlerFn, XRtApp, BoundRouteFn }
+export { route, routeUsing }

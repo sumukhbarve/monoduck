@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { tapiEndpoint } from '../index-tapiduck'
+import { tapiduck } from '../index-tapiduck'
 
 const zTodo = z.object({
   id: z.number(),
@@ -8,25 +8,25 @@ const zTodo = z.object({
 })
 type Todo = z.infer<typeof zTodo>
 
-const addTodo = tapiEndpoint({
+const addTodo = tapiduck.endpoint({
   path: '/todo/add',
   zReq: zTodo.pick({ text: true }),
   zRes: zTodo
 })
 
-const toggleTodo = tapiEndpoint({
+const toggleTodo = tapiduck.endpoint({
   path: '/todo/toggle',
   zReq: zTodo.pick({ id: true }),
   zRes: zTodo
 })
 
-const updateText = tapiEndpoint({
+const updateText = tapiduck.endpoint({
   path: '/todo/updateText',
   zReq: zTodo.pick({ id: true, text: true }),
   zRes: zTodo
 })
 
-const getTodos = tapiEndpoint({
+const getTodos = tapiduck.endpoint({
   path: '/todo/getAll',
   zReq: z.unknown(),
   zRes: z.array(zTodo)
