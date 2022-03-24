@@ -8,8 +8,5 @@ export type { Lookable } from './lookable'
 export type { UseStateFn, UseEffectFn, UseLookableFn } from './react-hook'
 
 export const lookduck = {
-  pubsubable,
-  observable,
-  computed,
-  makeUseLookable
+  pubsubable, observable, computed, makeUseLookable
 }

@@ -1,10 +1,9 @@
 {
   "name": "monoduck",
-  "version": "0.0.6",
+  "version": "0.0.7",
   "description": "",
   "source": "src/index-monoduck.ts",
-  "main": "dist/main.js",
-  "module": "dist/module.js",
+  "main": "dist/index-monoduck.js",
   "types": "dist/types.d.ts",
   "files": [
     "dist/"
@@ -13,8 +12,8 @@
     "test": "jest",
     "lint": "ts-standard --fix",
     "watch": "parcel watch",
-    "build": "parcel build",
-    "prepack": "ts-standard && jest && parcel build"
+    "build": "tsc",
+    "prepack": "ts-standard && jest && tsc"
   },
   "repository": {
     "type": "git",
