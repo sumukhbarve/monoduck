@@ -1,6 +1,6 @@
 {
   "name": "monoduck",
-  "version": "0.0.8",
+  "version": "0.0.9-dev",
   "description": "",
   "source": "src/index-monoduck.ts",
   "main": "dist/index-monoduck.js",
@@ -9,11 +9,11 @@
     "dist/"
   ],
   "scripts": {
-    "test": "jest",
+    "test": "jest src/",
     "lint": "ts-standard --fix",
     "watch": "parcel watch",
     "build": "tsc",
-    "prepack": "ts-standard && jest && tsc"
+    "prepack": "npm run lint && npm run test && npm run build"
   },
   "repository": {
     "type": "git",
@@ -46,11 +46,21 @@
   "peerDependencies": {
     "express": "^4.17.3",
     "react": "^17.0.2",
+    "sequelize": "^6.17.0",
     "zod": "^3.14.1"
   },
   "peerDependenciesMeta": {
-    "express": { "optional": true },
-    "react": { "optional": true },
-    "zod": { "optional": true }
+    "express": {
+      "optional": true
+    },
+    "react": {
+      "optional": true
+    },
+    "sequelize": {
+      "optional": true
+    },
+    "zod": {
+      "optional": true
+    }
   }
 }

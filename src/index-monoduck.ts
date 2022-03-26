@@ -11,3 +11,5 @@ export type {
   TapiEndpoint, BoundRouteFn, BoundFetchFn
 } from './tapiduck/index-tapiduck'
 export { tapiduck, TapiError } from './tapiduck/index-tapiduck'
+
+export { _ } from './utilduck/index-utilduck'

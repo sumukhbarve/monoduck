@@ -69,12 +69,13 @@ export const DuckCounter: React.VFC = () => {
 
 ```ts
 const fisrtName = lookduck.observable('John')
-console.log(a.get()) // John
-a.set('Jane')
-console.log(a.get()) // Jane
+console.log(fisrtName.get()) // John
+
+fisrtName.set('Jane')
+console.log(fisrtName.get()) // Jane
 
 const lastName = lookduck.observable('Doe')
-console.log(`Full Name: ${fistName} ${lastName}`) // Full Name: Jane Doe
+console.log(`${fistName.get()} ${lastName.get()}`) // Jane Doe
 ```
 
 
@@ -85,9 +86,7 @@ console.log(`Full Name: ${fistName} ${lastName}`) // Full Name: Jane Doe
 - Continuing the above example, consider:
 
 ```ts
-const fullName = lookduck.computed(() => {
-  return `${firstName.get()} ${lastName.get()}`
-})
+const fullName = lookduck.computed(() => `${firstName.get()} ${lastName.get()}`
 console.log(fullName.get()) // Jane Doe
 
 firstName.set('Harry')
