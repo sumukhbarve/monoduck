@@ -43,13 +43,13 @@ test('_.filter', function () {
 test('_.reduce', function () {
   expect(_.reduce([1, 2, 3, 4], (acc, val) => acc + val, 0)).toBe(10)
   expect(_.reduce([1, 2, 3, 4], (acc, val) => acc * val, 1)).toBe(24)
-  const accObj: Record<string, unknown> = {}
+  const blankAcc: Record<string, unknown> = {}
   expect(_.reduce(
     [{ foo: 1 }, { bar: 2 }, { baz: 3 }],
     (acc, val) => ({ ...acc, ...val }),
-    accObj
+    blankAcc
   )).toEqual({ foo: 1, bar: 2, baz: 3 })
-  expect(accObj).toEqual({ foo: 1, bar: 2, baz: 3 })
+  expect(blankAcc).toEqual({})
 })
 
 test('_.all', function () {
@@ -70,12 +70,65 @@ test('_.any', function () {
   expect(_.any([0, 1, 0])).toBe(true)
 
   const runCounter = buildRunCounter(_.bool)
-  expect(_.any([0, false, null, '', 0, false, null], runCounter.fn)).toBe(false)
+  expect(_.any([0, false, null, '', 0, false, 0], runCounter.fn)).toBe(false)
   expect(runCounter.getCount()).toBe(7)
 
   runCounter.resetCount()
   expect(_.any([0, 0, 1, 0, 0], runCounter.fn)).toBe(true)
   expect(runCounter.getCount()).toBe(3)
+})
+
+test('_.deepFlatten', function () {
+  expect(_.deepFlatten([1, [2, [3, [4, [5]]]]])).toEqual([1, 2, 3, 4, 5])
+  expect(_.deepFlatten([1, [[[[[[[[2]]]]]]]], 3])).toEqual([1, 2, 3])
+})
+
+test('_.is* (mostly primitive trios)', function () {
+  type Trio = [(x: unknown) => boolean, unknown, boolean]
+  const trios: Trio[] = [
+    [_.isString, 'foo', true],
+    [_.isString, 123, false],
+
+    [_.isNumber, 123, true],
+    [_.isString, 'foo', false],
+
+    [_.isBoolean, true, true],
+    [_.isBoolean, 'foo', false],
+
+    [_.isNull, null, true],
+    [_.isNull, 'foo', false],
+
+    [_.isUndefined, undefined, true],
+    [_.isUndefined, 'foo', false]
+  ]
+  // _.each(trios, ([fn, inp, out]) => expect(fn(inp)).toBe(out))
+  _.each(trios, ([, inp]) => expect(_.isPrimitive(inp)).toBe(true))
+  _.each(trios, ([, inp]) => expect(_.isArray(inp)).toBe(false))
+  _.each(trios, ([, inp]) => expect(_.isPlainObject(inp)).toBe(false))
+  _.each(trios, ([fn]) => expect(fn(['array'])).toBe(false))
+  _.each(trios, ([fn]) => expect(fn({ ob: 'ject' })).toBe(false))
+})
+
+test('_.deepClone', function () {
+  const obj = { foo: 'foo', arr: [1, 2, 3], num: 123, inner: { foo: 'foo' } }
+  const alias = obj
+  const clone = _.deepClone(obj)
+
+  obj.foo = 'bar'
+  expect(alias.foo).toBe('bar')
+  expect(clone.foo).toBe('foo')
+
+  obj.arr.push(4)
+  expect(alias.arr).toEqual([1, 2, 3, 4])
+  expect(clone.arr).toEqual([1, 2, 3])
+
+  obj.num = 456
+  expect(alias.num).toBe(456)
+  expect(clone.num).toBe(123)
+
+  obj.inner.foo = 'bar'
+  expect(alias.inner.foo).toBe('bar')
+  expect(clone.inner.foo).toBe('foo')
 })
 
 test('_.mapObject', function () {

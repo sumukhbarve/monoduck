@@ -9,6 +9,9 @@ i (or j): index
 seq: sequence
 acc: accumulator
 el: element
+x (or y): unknown
+inp (or ip): input
+out (or op): output
 */
 
 type RecordKey = string | number | symbol
@@ -75,6 +78,45 @@ const deepFlatten = function <T>(arr: NestedArr<T>): T[] {
   return result
 }
 
+const isString = (x: unknown): x is string => typeof x === 'string'
+const isNumber = (x: unknown): x is number => typeof x === 'number'
+const isBoolean = (x: unknown): x is boolean => typeof x === 'boolean'
+const isNull = (x: unknown): x is null => x === null
+const isUndefined = (x: unknown): x is undefined => x === undefined
+
+type Primitive = string | number | boolean | null | undefined
+const isPrimitive = function (x: unknown): x is Primitive {
+  return any([isString, isNumber, isBoolean, isNull, isUndefined], fn => fn(x))
+}
+const isArray = (x: unknown): x is unknown[] => Array.isArray(x)
+
+// This is stricter than lodash.isPlainObject, as we don't travel up the
+// prototype chain. We need the prototype to be null or that of literals.
+const isPlainObject = function (x: unknown): x is Obj<unknown> {
+  if (not(x)) { return false }
+  const tag = Object.prototype.toString.call(x)
+  if (tag !== '[object Object]') { return false }
+  const proto = Object.getPrototypeOf(x)
+  return proto === null || proto === Object.getPrototypeOf({})
+}
+
+type Clonable = Primitive | ClonableArr | ClonableObj
+interface ClonableArr extends Array<Clonable> {}
+interface ClonableObj extends Obj<Clonable> {}
+const isClonable = function (x: unknown): x is Clonable {
+  if (isPrimitive(x)) { return true }
+  if (isArray(x)) { return all(x, isClonable) }
+  if (isPlainObject(x)) { return isClonable(Object.values(x)) }
+  return false
+}
+const deepClone = function<T> (x: T): T {
+  if (isPrimitive(x)) { return x }
+  if (isArray(x)) { return _.map(x, deepClone) as unknown as T }
+  if (isPlainObject(x)) { return _.mapObject(x, deepClone) as unknown as T }
+  console.error('Cannot clone: ', x)
+  throw new Error(`Cloning failed, as \`${String(x)}\` is not clonable.`)
+}
+
 // const keys = function <T>(obj: Obj<T>): string[] {
 //   return Object.keys(obj)
 // }
@@ -131,6 +173,16 @@ export const _ = {
   all,
   any,
   deepFlatten,
+  isString,
+  isNumber,
+  isBoolean,
+  isNull,
+  isUndefined,
+  isPrimitive,
+  isArray,
+  isPlainObject,
+  isClonable,
+  deepClone,
   pairs,
   mapObject,
   pick,
