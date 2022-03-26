@@ -91,7 +91,7 @@ const isPrimitive = function (x: unknown): x is Primitive {
 const isArray = (x: unknown): x is unknown[] => Array.isArray(x)
 
 // This is stricter than lodash.isPlainObject, as we don't travel up the
-// prototype chain. We need the prototype to be null or that of literals.
+// prototype chain. We just check if prototype is null or that of literals.
 const isPlainObject = function (x: unknown): x is Obj<unknown> {
   if (not(x)) { return false }
   const tag = Object.prototype.toString.call(x)
@@ -167,8 +167,8 @@ export const _ = {
   bool,
   not,
   each,
-  filter,
   map,
+  filter,
   reduce,
   all,
   any,

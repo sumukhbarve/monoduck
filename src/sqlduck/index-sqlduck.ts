@@ -117,4 +117,5 @@ const modelUsing = function (pluginParams: PluginParams): BoundModelFn {
   return boundModelFn
 }
 
-export { model, modelUsing }
+export type { DuckModel }
+export const sqlduck = { model, modelUsing }

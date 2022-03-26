@@ -13,3 +13,6 @@ export type {
 export { tapiduck, TapiError } from './tapiduck/index-tapiduck'
 
 export { _ } from './utilduck/index-utilduck'
+
+export type { DuckModel } from './sqlduck/index-sqlduck'
+export { sqlduck } from './sqlduck/index-sqlduck'
