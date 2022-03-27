@@ -37,7 +37,10 @@ test('_.map', function () {
 })
 
 test('_.filter', function () {
+  // With explicit filtering fn:
   expect(_.filter([1, 2, 3, 4], x => x % 2 === 0)).toEqual([2, 4])
+  // With default (bool) filtering:
+  expect(_.filter([0, 1, null, {}, false, 'foo'])).toEqual([1, {}, 'foo'])
 })
 
 test('_.reduce', function () {
@@ -129,6 +132,30 @@ test('_.deepClone', function () {
   obj.inner.foo = 'bar'
   expect(alias.inner.foo).toBe('bar')
   expect(clone.inner.foo).toBe('foo')
+})
+
+test('_.shallowClone', function () {
+  const obj = { foo: 'foo', arr: [1, 2, 3], num: 123, inner: { foo: 'foo' } }
+  const alias = obj
+  const clone = _.shallowClone(obj)
+
+  obj.foo = 'bar'
+  expect(alias.foo).toBe('bar')
+  expect(clone.foo).toBe('foo')
+
+  obj.arr.push(4)
+  expect(alias.arr).toEqual([1, 2, 3, 4])
+  expect(clone.arr).toEqual([1, 2, 3, 4])
+  expect(alias.arr).toBe(clone.arr)
+
+  obj.num = 456
+  expect(alias.num).toBe(456)
+  expect(clone.num).toBe(123)
+
+  obj.inner.foo = 'bar'
+  expect(alias.inner.foo).toBe('bar')
+  expect(clone.inner.foo).toBe('bar')
+  expect(alias.inner).toBe(clone.inner)
 })
 
 test('_.mapObject', function () {

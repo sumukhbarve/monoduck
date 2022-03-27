@@ -37,7 +37,7 @@ const map = function <X, Y>(arr: X[], fn: ItrFn<X, Y>): Y[] {
   return result
 }
 
-const filter = function <T>(arr: T[], fn: ItrFn<T>): T[] {
+const filter = function <T>(arr: T[], fn: ItrFn<T> = identity): T[] {
   const result: T[] = []
   each(arr, (val, i) => bool(fn(val, i)) && result.push(val))
   return result
@@ -45,7 +45,7 @@ const filter = function <T>(arr: T[], fn: ItrFn<T>): T[] {
 
 type ReduceItrFn<T, A> = (acc: A, val: T) => A
 const reduce = function <T, A>(arr: T[], fn: ReduceItrFn<T, A>, acc: A): A {
-  each(arr, (val, i) => { acc = fn(acc, val) })
+  each(arr, val => { acc = fn(acc, val) })
   return acc
 }
 
@@ -116,6 +116,13 @@ const deepClone = function<T> (x: T): T {
   console.error('Cannot clone: ', x)
   throw new Error(`Cloning failed, as \`${String(x)}\` is not clonable.`)
 }
+const shallowClone = function<T> (x: T): T {
+  if (isPrimitive(x)) { return x }
+  if (isArray(x)) { return _.map(x, identity) as unknown as T }
+  if (isPlainObject(x)) { return _.mapObject(x, identity) as unknown as T }
+  console.error('Cannot clone: ', x)
+  throw new Error(`Cloning failed, as \`${String(x)}\` is not clonable.`)
+}
 
 // const keys = function <T>(obj: Obj<T>): string[] {
 //   return Object.keys(obj)
@@ -183,6 +190,7 @@ export const _ = {
   isPlainObject,
   isClonable,
   deepClone,
+  shallowClone,
   pairs,
   mapObject,
   pick,
