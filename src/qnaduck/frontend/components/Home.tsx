@@ -20,7 +20,7 @@ const JoinAMeeting: VFC = function () {
           />
         </p>
         <p>
-          <button className='pure-button'>Go!</button> {JSON.stringify(meetingId)}
+          <button className='pure-button'>Go!</button>
         </p>
       </form>
       <p>Paste the Session ID above to join the session.</p>
@@ -29,8 +29,8 @@ const JoinAMeeting: VFC = function () {
 }
 
 const HostMeetings: VFC = function () {
-  const [username, setUsername] = React.useState('')
-  const [pw, setPw] = React.useState('')
+  const [, setUsername] = React.useState('') // TODO
+  const [, setPw] = React.useState('')
   return (
     <div>
       <h2>Host Your Own QnA Sessions</h2>
@@ -38,11 +38,9 @@ const HostMeetings: VFC = function () {
       <form className='pure-form'>
         <p>
           <input type='text' style={{ width: 320 }} placeholder='Username' onChange={evt => setUsername(evt.target.value)} />
-          {username}
         </p>
         <p>
           <input type='password' style={{ width: 320 }} placeholder='Password' onChange={evt => setPw(evt.target.value)} />
-          {pw}
         </p>
         <p>
           <button className='pure-button pure-button-primary'>Sign Up / Log In</button>
