@@ -1,12 +1,12 @@
-import type { TapiEndpoint } from './tapiEndpoint'
+import type { TapiEndpoint, NoInfer } from './tapiEndpoint'
 
 const windowFetch = globalThis.fetch
 
 const fetch = async function<ZReq, ZRes> (
   endpoint: TapiEndpoint<ZReq, ZRes>,
-  reqData: ZReq,
+  reqData: NoInfer<ZReq>,
   baseUrl: string = ''
-): Promise<ZRes> {
+): Promise<NoInfer<ZRes>> {
   if (baseUrl.endsWith('/')) {
     throw new Error(`Error: Base URL '${baseUrl}' shouldn't end with '/'.`)
   }
@@ -32,14 +32,14 @@ const fetch = async function<ZReq, ZRes> (
 
 type BoundFetchFn = <ZReq, ZRes>(
     endpoint: TapiEndpoint<ZReq, ZRes>,
-    reqData: ZReq
-  ) => Promise<ZRes>
+    reqData: NoInfer<ZReq>
+  ) => Promise<NoInfer<ZRes>>
 
 const fetchUsing = function (baseUrl: string): BoundFetchFn {
   const boundHit = async function<ZReq, ZRes> (
     endpoint: TapiEndpoint<ZReq, ZRes>,
-    reqData: ZReq
-  ): Promise<ZRes> {
+    reqData: NoInfer<ZReq>
+  ): Promise<NoInfer<ZRes>> {
     return await fetch(endpoint, reqData, baseUrl)
   }
   return boundHit

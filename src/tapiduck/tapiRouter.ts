@@ -1,28 +1,29 @@
 import { TapiError } from './tapiEndpoint'
-import type { TapiEndpoint } from './tapiEndpoint'
+import type { TapiEndpoint, NoInfer } from './tapiEndpoint'
 
 // Highly simplified, eXpress-compatible types:
 interface XReq {
   body?: unknown
 }
 interface XRes {
-  status: (code: number) => unknown
-  json: (data: unknown) => unknown
+  status: (code: number) => void
+  json: (data: unknown) => void
 }
 type XHandlerFn = (req: XReq, res: XRes) => void
 interface XRtApp { // Compatible with eXpress apps & routers
-  post: (path: string, xHandler: XHandlerFn) => unknown
+  post: (path: string, xHandler: XHandlerFn) => void
 }
+
+type TapiHandler<Inp, Out> = (inp: NoInfer<Inp>) => Promise<NoInfer<Out>>
 
 const route = function<ZReq, ZRes> (
   xRtApp: XRtApp,
   endpoint: TapiEndpoint<ZReq, ZRes>,
-  handler: (reqData: ZReq) => Promise<ZRes>
+  handler: TapiHandler<ZReq, ZRes>
 ): void {
   xRtApp.post(endpoint.path, function (req: XReq, res: XRes) {
     // Using async IIFE (with .catch()) to pacify ts-standard (linter), which
     // correctly points out that `void` and `Promise<void>` aren't the same.
-    // (Keep simplified XHandler's o/p `void` to retain ts-standard's warning.)
     const iife = async function (): Promise<void> {
       const parsedReq = endpoint.zReq.safeParse(req.body)
       if (!parsedReq.success) {
@@ -52,13 +53,13 @@ const route = function<ZReq, ZRes> (
 
 type BoundRouteFn = <ZReq, ZRes>(
     endpoint: TapiEndpoint<ZReq, ZRes>,
-    handler: (reqData: ZReq) => Promise<ZRes>
+    handler: TapiHandler<ZReq, ZRes>
   ) => void
 
 const routeUsing = function (xRtApp: XRtApp): BoundRouteFn {
   return function<ZReq, ZRes> (
     endpoint: TapiEndpoint<ZReq, ZRes>,
-    handler: (reqData: ZReq) => Promise<ZRes>
+    handler: TapiHandler<ZReq, ZRes>
   ): void {
     route(xRtApp, endpoint, handler)
   }

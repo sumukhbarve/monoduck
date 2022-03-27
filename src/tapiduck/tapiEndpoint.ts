@@ -23,5 +23,8 @@ const endpoint = function<ZReq, ZRes> (
   return endpointObj
 }
 
-export type { TapiEndpoint }
+// Util type, for avoiding lenient inference. Used for routing & fetching.
+type NoInfer<T> = [T][T extends any ? 0 : never]
+
+export type { TapiEndpoint, NoInfer }
 export { endpoint, TapiError }
