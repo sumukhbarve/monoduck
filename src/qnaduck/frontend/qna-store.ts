@@ -39,7 +39,7 @@ export const allQuestions = lookduck.observable<ZQuestion[]>([])
 export const theseQuestions = lookduck.computed(function () {
   const meeting = thisMeeting.get()
   const questions = allQuestions.get()
-  if (meeting == null) { return [] }
+  if (meeting === null) { return [] }
   return _.filter(questions, q => q.meeting_id === meeting.id)
 })
 

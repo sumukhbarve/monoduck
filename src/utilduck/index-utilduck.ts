@@ -20,7 +20,7 @@ type Obj<T, K extends RecordKey = string> = Record<K, T>
 type ItrFn<X, Y = unknown, I = number> = (val: X, i: I) => Y
 
 const BREAK = {} as const
-const identity = function <T>(x: T): T { return x }
+const identity = <T>(x: T): T => x
 const bool = (x: unknown): boolean => Boolean(x)
 const not = (x: unknown): boolean => !bool(x)
 const ifel = function <T>(condition: unknown, consequent: T, alternate: T): T {
@@ -82,21 +82,33 @@ const deepFlatten = function <T>(arr: NestedArr<T>): T[] {
   return result
 }
 
-const isString = (x: unknown): x is string => typeof x === 'string'
-const isNumber = (x: unknown): x is number => typeof x === 'number'
-const isBoolean = (x: unknown): x is boolean => typeof x === 'boolean'
-const isNull = (x: unknown): x is null => x === null
-const isUndefined = (x: unknown): x is undefined => x === undefined
+const stringIs = (x: unknown): x is string => typeof x === 'string'
+const numberIs = (x: unknown): x is number => typeof x === 'number'
+const booleanIs = (x: unknown): x is boolean => typeof x === 'boolean'
+const nullIs = (x: unknown): x is null => x === null
+const undefinedIs = (x: unknown): x is undefined => x === undefined
 
 type Primitive = string | number | boolean | null | undefined
-const isPrimitive = function (x: unknown): x is Primitive {
-  return any([isString, isNumber, isBoolean, isNull, isUndefined], fn => fn(x))
+const primitiveIs = function (x: unknown): x is Primitive {
+  return any([stringIs, numberIs, booleanIs, nullIs, undefinedIs], fn => fn(x))
 }
-const isArray = (x: unknown): x is unknown[] => Array.isArray(x)
+const arrayIs = (x: unknown): x is unknown[] => Array.isArray(x)
+
+// const keys = <T>(obj: Obj<T>): string[] => Object.keys(obj)
+// const values = <T>(obj: Obj<T>): T[] => Object.values(obj)
+const toPairs = <T>(obj: Obj<T>): Array<[string, T]> => Object.entries(obj)
+const fromPairs = function <T>(pairs: Array<[string, T]>): Obj<T> {
+  const result: Obj<T> = {}
+  each(pairs, ([key, val]) => { result[key] = val })
+  return result
+}
+const keyHas = function (obj: Obj<unknown>, key: string): boolean {
+  return Object.prototype.hasOwnProperty.call(obj, key)
+}
 
 // This is stricter than lodash.isPlainObject, as we don't travel up the
 // prototype chain. We just check if prototype is null or that of literals.
-const isPlainObject = function (x: unknown): x is Obj<unknown> {
+const plainObjectIs = function (x: unknown): x is Obj<unknown> {
   if (not(x)) { return false }
   const tag = Object.prototype.toString.call(x)
   if (tag !== '[object Object]') { return false }
@@ -107,43 +119,56 @@ const isPlainObject = function (x: unknown): x is Obj<unknown> {
 type Clonable = Primitive | ClonableArr | ClonableObj
 interface ClonableArr extends Array<Clonable> {}
 interface ClonableObj extends Obj<Clonable> {}
-const isClonable = function (x: unknown): x is Clonable {
-  if (isPrimitive(x)) { return true }
-  if (isArray(x)) { return all(x, isClonable) }
-  if (isPlainObject(x)) { return isClonable(Object.values(x)) }
+const clonableIs = function (x: unknown): x is Clonable {
+  if (primitiveIs(x)) { return true }
+  if (arrayIs(x)) { return all(x, clonableIs) }
+  if (plainObjectIs(x)) { return clonableIs(Object.values(x)) }
   return false
 }
-const deepClone = function<T> (x: T): T {
-  if (isPrimitive(x)) { return x }
-  if (isArray(x)) { return _.map(x, deepClone) as unknown as T }
-  if (isPlainObject(x)) { return _.mapObject(x, deepClone) as unknown as T }
+const clone = function<T> (x: T, depth: number): T {
+  if (primitiveIs(x)) {
+    return x
+  }
+  if (arrayIs(x)) {
+    if (depth === 0) { return x }
+    return _.map(x, el => clone(el, depth - 1)) as unknown as T
+  }
+  if (plainObjectIs(x)) {
+    if (depth === 0) { return x }
+    return _.mapObject(x, val => clone(val, depth - 1)) as unknown as T
+  }
   console.error('Cannot clone: ', x)
   throw new Error(`Cloning failed, as \`${String(x)}\` is not clonable.`)
 }
-const shallowClone = function<T> (x: T): T {
-  if (isPrimitive(x)) { return x }
-  if (isArray(x)) { return _.map(x, identity) as unknown as T }
-  if (isPlainObject(x)) { return _.mapObject(x, identity) as unknown as T }
-  console.error('Cannot clone: ', x)
-  throw new Error(`Cloning failed, as \`${String(x)}\` is not clonable.`)
-}
+const deepClone = <T> (x: T): T => clone(x, Infinity)
+const shallowClone = <T> (x: T): T => clone(x, 1)
 
-// const keys = function <T>(obj: Obj<T>): string[] {
-//   return Object.keys(obj)
-// }
-// const values = function <T>(obj: Obj<T>): T[] {
-//   return Object.values(obj)
-// }
-const pairs = function <T>(obj: Obj<T>): Array<[string, T]> {
-  return Object.entries(obj)
+const equals = function (x: unknown, y: unknown, depth: number): boolean {
+  const isSame = Object.is(x, y)
+  if (depth === 0 || primitiveIs(x) || primitiveIs(y) || isSame) {
+    return isSame
+  }
+  if (arrayIs(x) && arrayIs(y) && x.length === y.length) {
+    return all(x, (_xEl, i) => equals(x[i], y[i], depth - 1))
+  }
+  if (plainObjectIs(x) && plainObjectIs(y)) {
+    const xKeys = Object.keys(x)
+    const yKeys = Object.keys(y)
+    if (xKeys.length !== yKeys.length) { return false }
+    return all(xKeys, k => keyHas(y, k) && equals(x[k], y[k], depth - 1))
+  }
+  console.error(`Can't check equality of ${String(x)} against ${String(y)}.`)
+  throw new Error(`Can't check equality of ${String(x)} against ${String(y)}.`)
 }
+const deepEquals = (x: unknown, y: unknown): boolean => equals(x, y, Infinity)
+const shallowEquals = (x: unknown, y: unknown): boolean => equals(x, y, 1)
 
 const mapObject = function <X, Y>(
   obj: Obj<X>,
   fn: ItrFn<X, Y, string>
 ): Obj<Y> {
   const result: Obj<Y> = {}
-  each(pairs(obj), function ([key, val]) {
+  each(toPairs(obj), function ([key, val]) {
     result[key] = fn(val, key)
   })
   return result
@@ -164,7 +189,7 @@ const omit = function <T extends Obj<unknown>, K extends keyof T>(
 ): Omit<T, K> {
   const result: Partial<T> = {}
   const omitKeys = new Set(keys)
-  each(pairs(obj), function ([key, value]) {
+  each(toPairs(obj), function ([key, value]) {
     if (!omitKeys.has(key as K)) {
       result[key as K] = value as T[K]
     }
@@ -186,6 +211,11 @@ const partition = function <T>(arr: T[], fn: ItrFn<T, boolean>): [T[], T[]] {
   return [groupMap.true, groupMap.false]
 }
 
+const never = (never: never): never => never
+
+type NoInfer<T> = [T][T extends any ? 0 : never]
+export type { NoInfer }
+
 export const _ = {
   BREAK,
   identity,
@@ -199,21 +229,28 @@ export const _ = {
   all,
   any,
   deepFlatten,
-  isString,
-  isNumber,
-  isBoolean,
-  isNull,
-  isUndefined,
-  isPrimitive,
-  isArray,
-  isPlainObject,
-  isClonable,
+  stringIs,
+  numberIs,
+  booleanIs,
+  nullIs,
+  undefinedIs,
+  primitiveIs,
+  arrayIs,
+  plainObjectIs,
+  toPairs,
+  fromPairs,
+  keyHas,
+  clonableIs,
+  // clone,
   deepClone,
   shallowClone,
-  pairs,
+  // equals,
+  shallowEquals,
+  deepEquals,
   mapObject,
   pick,
   omit,
   groupBy,
-  partition
+  partition,
+  never
 }

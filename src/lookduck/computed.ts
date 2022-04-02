@@ -1,6 +1,7 @@
 import { internalLookableGetterWatcher } from './lookable'
 import type { Lookable } from './lookable'
 import { observable } from './observable'
+import type { EqualityMode } from './observable'
 
 const getSetDifference = function<T> (setA: Set<T>, setB: Set<T>): Set<T> {
   const onlyA = new Set(setA)
@@ -34,10 +35,15 @@ const runAndDetectDeps = function<T> (
   return { computedVal, freshDeps, carryDeps, staleDeps }
 }
 
-const computed = function<T> (compute: () => T): Lookable<T> {
+const computed = function<T> (
+  compute: () => T,
+  equality?: EqualityMode
+): Lookable<T> {
   const initResult = runAndDetectDeps(compute, new Set<Dep>())
   const currentDeps = initResult.freshDeps
-  const { set: setLookable, ...lookable } = observable(initResult.computedVal)
+  const { set: setLookable, ...lookable } = observable(
+    initResult.computedVal, equality
+  )
   const recompute = (): void => {
     const runResult = runAndDetectDeps(compute, currentDeps)
     setLookable(runResult.computedVal)
@@ -54,4 +60,8 @@ const computed = function<T> (compute: () => T): Lookable<T> {
   return lookable
 }
 
-export { computed }
+const shallowComputed = function<T> (compute: () => T): Lookable<T> {
+  return computed(compute, 'shallow')
+}
+
+export { computed, shallowComputed }

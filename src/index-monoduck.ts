@@ -12,6 +12,7 @@ export type {
 } from './tapiduck/index-tapiduck'
 export { tapiduck, TapiError } from './tapiduck/index-tapiduck'
 
+export type { NoInfer } from './utilduck/index-utilduck'
 export { _ } from './utilduck/index-utilduck'
 
 export type { DuckModel } from './sqlduck/index-sqlduck'

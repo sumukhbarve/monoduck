@@ -15,8 +15,8 @@
 ### Exported Utils
 
 - Most of the utils below should be familiar to most JS/TS users.
+- A few utils are monoduck specific, and their usage is documented below.
 - Also, you can always use IDE hints to view input & output shapes of any util.
-- The only odd man out is `_.BREAK`. An example of it's usage is included below.
 
 ```ts
 export const _ = {
@@ -24,6 +24,7 @@ export const _ = {
   identity,
   bool,
   not,
+  ifel,
   each,
   map,
   filter,
@@ -31,24 +32,34 @@ export const _ = {
   all,
   any,
   deepFlatten,
-  isString,
-  isNumber,
-  isBoolean,
-  isNull,
-  isUndefined,
-  isPrimitive,
-  isArray,
-  isPlainObject,
-  isClonable,
+  stringIs,
+  numberIs,
+  booleanIs,
+  nullIs,
+  undefinedIs,
+  primitiveIs,
+  arrayIs,
+  plainObjectIs,
+  toPairs,
+  fromPairs,
+  keyHas,
+  clonableIs,
   deepClone,
-  pairs,
+  shallowClone,
+  shallowEquals,
+  deepEquals,
   mapObject,
   pick,
-  omit
+  omit,
+  groupBy,
+  partition,
+  never,
 }
 ```
 
-**Breaking Out:**
+### Uncommon Utils
+
+**1. Breaking Out:**
 
 You can use `_.BREAK` to break out of `_.each()` loops. In the following example, elements `1` and `2` will be logged, but not `3` or `4`.
 ```ts
@@ -62,8 +73,17 @@ _.each([1, 2, 3, 4], val => {
 })
 ```
 
-Output:
-```
-1
-2
+**2. Exhaustiveness Checking**:
+
+You can use `_.never()` for explicit exhaustiveness checking. While TS doesn't often need this, it can improve readability. For example:
+
+```ts
+export const getPx = (size: 'sm' | 'md' | 'lg') => {
+  switch (size) {
+    case 'sm': return '200px'
+    case 'md': return '400px'
+    case 'lg': return '800px'
+    default: return _.never(size)
+  }
+}
 ```

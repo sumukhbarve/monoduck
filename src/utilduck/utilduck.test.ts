@@ -89,25 +89,25 @@ test('_.deepFlatten', function () {
 test('_.is* (mostly primitive trios)', function () {
   type Trio = [(x: unknown) => boolean, unknown, boolean]
   const trios: Trio[] = [
-    [_.isString, 'foo', true],
-    [_.isString, 123, false],
+    [_.stringIs, 'foo', true],
+    [_.stringIs, 123, false],
 
-    [_.isNumber, 123, true],
-    [_.isString, 'foo', false],
+    [_.numberIs, 123, true],
+    [_.stringIs, 'foo', false],
 
-    [_.isBoolean, true, true],
-    [_.isBoolean, 'foo', false],
+    [_.booleanIs, true, true],
+    [_.booleanIs, 'foo', false],
 
-    [_.isNull, null, true],
-    [_.isNull, 'foo', false],
+    [_.nullIs, null, true],
+    [_.nullIs, 'foo', false],
 
-    [_.isUndefined, undefined, true],
-    [_.isUndefined, 'foo', false]
+    [_.undefinedIs, undefined, true],
+    [_.undefinedIs, 'foo', false]
   ]
   // _.each(trios, ([fn, inp, out]) => expect(fn(inp)).toBe(out))
-  _.each(trios, ([, inp]) => expect(_.isPrimitive(inp)).toBe(true))
-  _.each(trios, ([, inp]) => expect(_.isArray(inp)).toBe(false))
-  _.each(trios, ([, inp]) => expect(_.isPlainObject(inp)).toBe(false))
+  _.each(trios, ([, inp]) => expect(_.primitiveIs(inp)).toBe(true))
+  _.each(trios, ([, inp]) => expect(_.arrayIs(inp)).toBe(false))
+  _.each(trios, ([, inp]) => expect(_.plainObjectIs(inp)).toBe(false))
   _.each(trios, ([fn]) => expect(fn(['array'])).toBe(false))
   _.each(trios, ([fn]) => expect(fn({ ob: 'ject' })).toBe(false))
 })
@@ -156,6 +156,36 @@ test('_.shallowClone', function () {
   expect(alias.inner.foo).toBe('bar')
   expect(clone.inner.foo).toBe('bar')
   expect(alias.inner).toBe(clone.inner)
+})
+
+test('_.deepEquals', function () {
+  const obj = { foo: 'foo', arr: [1, 2, 3], num: 123, inner: { foo: 'foo' } }
+  const dClone = _.deepClone(obj)
+  const sClone = _.shallowClone(obj)
+  expect(_.deepEquals(obj, dClone)).toBe(true)
+  expect(_.deepEquals(obj, sClone)).toBe(true)
+
+  sClone.inner.foo = 'foobar'
+  expect(obj.inner.foo).toBe('foobar')
+  expect(dClone.inner.foo).toBe('foo')
+
+  expect(_.deepEquals(obj, dClone)).toBe(false)
+  expect(_.deepEquals(obj, sClone)).toBe(true)
+})
+
+test('_.shallowEquals', function () {
+  const obj = { foo: 'foo', arr: [1, 2, 3], num: 123, inner: { foo: 'foo' } }
+  const sClone = _.shallowClone(obj)
+  const dClone = _.deepClone(obj)
+  expect(_.shallowEquals(obj, sClone)).toBe(true)
+  expect(_.shallowEquals(obj, dClone)).toBe(false) // as === fails @ high depth
+
+  sClone.inner.foo = 'foobar'
+  expect(obj.inner.foo).toBe('foobar')
+  expect(dClone.inner.foo).toBe('foo')
+
+  expect(_.shallowEquals(obj, sClone)).toBe(true)
+  expect(_.shallowEquals(obj, dClone)).toBe(false) // continues to remain false
 })
 
 test('_.mapObject', function () {
