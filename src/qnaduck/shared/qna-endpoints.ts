@@ -16,7 +16,7 @@ export const ping = tapiduck.endpoint({
 export const signup = tapiduck.endpoint({
   path: '/api/signup',
   zReq: z.object({
-    email: z.string(),
+    username: z.string(),
     pw: z.string()
   }),
   zRes: zUserTok.merge(z.object({

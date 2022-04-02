@@ -9,8 +9,8 @@ export const loading = lookduck.observable('')
 
 type Me =
   | null
-  | {type: 'presenter', that: ZUser, token: string}
-  | {type: 'participant', that: ZParticipant, token: string}
+  | {type: 'presenter', self: ZUser, token: string}
+  | {type: 'participant', self: ZParticipant, token: string}
 
 export const me = lookduck.observable<Me>(null)
 

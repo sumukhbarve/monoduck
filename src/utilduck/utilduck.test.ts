@@ -178,3 +178,33 @@ test('_.omit', function () {
   expect(bq.baz).toBe(3)
   expect(bq.quax).toBe(4)
 })
+
+test('_.groupBy', function () {
+  const arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+
+  expect(_.groupBy(arr, function (num) {
+    if (num % 15 === 0) { return 'fizzbuzz' }
+    if (num % 5 === 0) { return 'buzz' }
+    if (num % 3 === 0) { return 'fizz' }
+    return 'plain'
+  })).toEqual({
+    plain: [1, 2, 4, 7, 8, 11, 13, 14],
+    fizz: [3, 6, 9, 12],
+    buzz: [5, 10],
+    fizzbuzz: [15]
+  })
+
+  expect(_.groupBy(arr, num => num % 2 === 0 ? 'even' : 'odd')).toEqual({
+    even: [2, 4, 6, 8, 10, 12, 14],
+    odd: [1, 3, 5, 7, 9, 11, 13, 15]
+  })
+})
+
+test('_.partition', function () {
+  const arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
+  const oddIs = (n: number): boolean => n % 2 === 1
+  expect(_.partition(arr, oddIs)).toEqual([
+    [1, 3, 5, 7, 9, 11, 13, 15],
+    [2, 4, 6, 8, 10, 12, 14]
+  ])
+})

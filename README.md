@@ -3,14 +3,13 @@
 ### What is it?
 
 - Monoduck is a Typescript-first, monolithic repository of subpackages.
-- It's _not_ a monorepo, but instead a monolith with a single `package.json`.
 - To avoid bloat, it has no hard `dependencies`, and all `peerDependencies` are optional.
 - And to keep things tree-shakable, only named exports are used.
 
 ### Pre-Alpha Software
 
 - Monoduck is not currently suitable for production use.
-- Large sections of it are being (re-)written each weekend.
+- Large sections of it are being (re-)written every weekend.
 - Object/function shapes are likely to undergo rapid change.
 
 ### What's included?
@@ -22,12 +21,15 @@
 
 ### Code Style & Preferences
 
-Monoduck uses `ts-standard` for code-styling and linting. This way, one needn't manually configure lint rules. The codebase also has a few additional preferences:
+Monoduck uses `ts-standard` for code-styling and linting. This way, one needn't manually configure lint rules. The codebase also has a few additional conventions, listed below. While most of these conventions are not strict requirements, the codebase tries to follow all of them.
 
-- Functions are strongly preferred over classes. (Avoid OOP.)
+- Prefer functions over classes.
+- Mildly prefer interfaces over types, but prefer types for functions.
 - Avoid `this`. If unavoidable, go with `const self = this` and use `self`.
-- Prefer `function` over `=>`. (The latter is OK for one-liners like `x => x + 1`.)
-- Named exports are strongly preferred over default exports.
-- Avoid `*` imports. (Using `*` is OK for docs/examples.)
+- Prefer `function` over `=>`. (Latter is OK for one-liners like `x => x + 1`)
+- Prefer named exports over default exports, and avoid `*` imports.
 - Prefer `unknown` over `any`. For return types, prefer `void` over `unknown`.
-- Prefer `const` over `let`.
+- Prefer `const` over `let`, and don't use `var`.
+- Bool vars should begin with `is`, `has`, etc. (eg. `isAdmin`, `hasAccess`)
+- Functions that return bools should end with `is`, `has`, etc. (eg. `oddIs`)
+- Strictly prefer `===` over `==`. Never use `==`, not even `== null`.

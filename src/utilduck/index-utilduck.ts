@@ -12,6 +12,7 @@ el: element
 x (or y): unknown
 inp (or ip): input
 out (or op): output
+num(s): number(s)
 */
 
 type RecordKey = string | number | symbol
@@ -22,6 +23,9 @@ const BREAK = {} as const
 const identity = function <T>(x: T): T { return x }
 const bool = (x: unknown): boolean => Boolean(x)
 const not = (x: unknown): boolean => !bool(x)
+const ifel = function <T>(condition: unknown, consequent: T, alternate: T): T {
+  return _.bool(condition) ? consequent : alternate
+}
 
 const each = function <T>(arr: T[], fn: ItrFn<T>): void {
   for (let i = 0; i < arr.length; i += 1) {
@@ -168,11 +172,26 @@ const omit = function <T extends Obj<unknown>, K extends keyof T>(
   return result as Omit<T, K>
 }
 
+const groupBy = function <T>(arr: T[], fn: ItrFn<T, string>): Obj<T[]> {
+  const result: Obj<T[]> = {}
+  each(arr, function (val, i) {
+    const key = fn(val, i)
+    result[key] = (result[key] ?? [])
+    result[key].push(val)
+  })
+  return result
+}
+const partition = function <T>(arr: T[], fn: ItrFn<T, boolean>): [T[], T[]] {
+  const groupMap = groupBy(arr, (val, i) => String(bool(fn(val, i))))
+  return [groupMap.true, groupMap.false]
+}
+
 export const _ = {
   BREAK,
   identity,
   bool,
   not,
+  ifel,
   each,
   map,
   filter,
@@ -194,5 +213,7 @@ export const _ = {
   pairs,
   mapObject,
   pick,
-  omit
+  omit,
+  groupBy,
+  partition
 }

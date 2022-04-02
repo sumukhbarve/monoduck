@@ -50,7 +50,7 @@ export const _ = {
 
 **Breaking Out:**
 
-You can use `_.BREAK` to break out of `_.each()` loops. In the following example, elements `1` and `2` will be logged in, but not `3` or `4`.
+You can use `_.BREAK` to break out of `_.each()` loops. In the following example, elements `1` and `2` will be logged, but not `3` or `4`.
 ```ts
 import { _ } from 'monoduck'
 
