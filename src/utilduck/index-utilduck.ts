@@ -18,11 +18,19 @@ num(s): number(s)
 type RecordKey = string | number | symbol
 type Obj<T, K extends RecordKey = string> = Record<K, T>
 type ItrFn<X, Y = unknown, I = number> = (val: X, i: I) => Y
+type NotIsh = 0 | '' | 0n | null | undefined | false // EXCLUDES NaN
 
 const BREAK = {} as const
 const identity = <T>(x: T): T => x
-const bool = (x: unknown): boolean => Boolean(x)
-const not = (x: unknown): boolean => !bool(x)
+const not = function (x: unknown): x is NotIsh {
+  if (Number.isNaN(x)) {
+    throw new Error('_.bool() and _.not() do _not_ expect NaN')
+  }
+  const isTruthy = Boolean(x)
+  return !isTruthy // linter dislikes `!unknownVar`, but accepts `!booleanVar`
+}
+const bool = <T>(x: T | NotIsh): x is T => !not(x)
+const noop = (): void => {}
 const ifel = function <T>(condition: unknown, consequent: T, alternate: T): T {
   return _.bool(condition) ? consequent : alternate
 }
@@ -219,8 +227,9 @@ export type { NoInfer }
 export const _ = {
   BREAK,
   identity,
-  bool,
   not,
+  bool,
+  noop,
   ifel,
   each,
   map,

@@ -1,4 +1,5 @@
-import type { TapiEndpoint, NoInfer } from './tapiEndpoint'
+import type { TapiEndpoint } from './tapiEndpoint'
+import type { NoInfer } from './indeps-tapiduck'
 
 const windowFetch = globalThis.fetch
 

@@ -22,8 +22,9 @@
 export const _ = {
   BREAK,
   identity,
-  bool,
   not,
+  bool,
+  noop,
   ifel,
   each,
   map,
@@ -53,7 +54,7 @@ export const _ = {
   omit,
   groupBy,
   partition,
-  never,
+  never
 }
 ```
 
@@ -75,7 +76,7 @@ _.each([1, 2, 3, 4], val => {
 
 **2. Exhaustiveness Checking**:
 
-You can use `_.never()` for explicit exhaustiveness checking. While TS doesn't often need this, it can improve readability. For example:
+You can use `_.never()` for explicit (compile-time) exhaustiveness checking. While TS often doesn't need this, it can improve readability. For example:
 
 ```ts
 export const getPx = (size: 'sm' | 'md' | 'lg') => {
