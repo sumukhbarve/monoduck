@@ -1,6 +1,6 @@
 import React from 'react'
 import type { VFC } from 'react'
-import { _ } from '../../indeps-qnaduck'
+import { _ } from '../../indeps-liveqna'
 
 interface InputProps {
   isPw?: boolean

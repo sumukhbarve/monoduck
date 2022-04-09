@@ -1,5 +1,5 @@
 import express from 'express'
-import { tapiduck } from '../../indeps-qnaduck'
+import { tapiduck } from '../../indeps-liveqna'
 import { ping as api_ping } from '../../shared/qna-endpoints'
 
 export const expressRouter = express.Router()

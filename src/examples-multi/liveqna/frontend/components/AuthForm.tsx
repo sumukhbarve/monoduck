@@ -1,7 +1,7 @@
 import React from 'react'
 import type { VFC } from 'react'
 import * as store from '../qna-store'
-import { tapiduck } from '../../indeps-qnaduck'
+import { tapiduck } from '../../indeps-liveqna'
 import * as api from '../../shared/qna-endpoints'
 import { Input } from './Input'
 

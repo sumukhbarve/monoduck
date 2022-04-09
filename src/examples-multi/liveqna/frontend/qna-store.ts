@@ -1,5 +1,5 @@
 import React from 'react'
-import { lookduck, _ } from '../indeps-qnaduck'
+import { lookduck, _ } from '../indeps-liveqna'
 import type {
   ZUser, ZMeeting, ZParticipant, ZQuestion, ZVote
 } from '../shared/qna-z-models'

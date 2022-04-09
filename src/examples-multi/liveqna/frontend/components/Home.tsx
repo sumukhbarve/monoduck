@@ -3,7 +3,7 @@ import type { VFC } from 'react'
 import * as store from '../qna-store'
 import { AuthForm } from './AuthForm'
 import { Input } from './Input'
-import { _ } from '../../indeps-qnaduck'
+import { _ } from '../../indeps-liveqna'
 
 const JoinAMeeting: VFC = function () {
   const [meetingId, setMeetingId] = React.useState('')
@@ -55,7 +55,7 @@ const HostMeetings: VFC = function () {
 export const Home: VFC = function () {
   return (
     <div className='home'>
-      <h1>QnaDuck</h1>
+      <h1>LiveQnA</h1>
       <p>Live QnAs for online/hybrid meetings.</p>
       <hr />
       <JoinAMeeting />

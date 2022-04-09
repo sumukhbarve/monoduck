@@ -2,7 +2,7 @@ import { z } from 'zod'
 import {
   zBoolish, zUser, zMeeting, zParticipant, zQuestion, zVote
 } from './qna-z-models'
-import { tapiduck } from '../indeps-qnaduck'
+import { tapiduck } from '../indeps-liveqna'
 
 const zUserTok = z.object({ userTok: z.string() })
 const zParticipantTok = z.object({ participantTok: z.string() })

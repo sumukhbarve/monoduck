@@ -5,7 +5,7 @@ import * as store from './qna-store'
 
 import { Home } from './components/Home'
 import { Participate } from './components/Participate'
-import { _ } from '../indeps-qnaduck'
+import { _ } from '../indeps-liveqna'
 
 const QnaRoot: VFC = function () {
   const me = store.use(store.me)
