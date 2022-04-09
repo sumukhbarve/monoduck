@@ -24,7 +24,8 @@ const sockEmit = function <ZData>(
   sockpoint: TapiSockpoint<ZData>,
   data: NoInfer<ZData>
 ): void {
-  sockish.emit(sockpoint.name, data)
+  const parsed = sockpoint.zData.parse(data)
+  sockish.emit(sockpoint.name, parsed)
 }
 
 const sockOn = function <ZData>(
@@ -35,7 +36,11 @@ const sockOn = function <ZData>(
   if (_.not(sockish.on)) {
     throw new Error("Socket-like object lacks '.on()' method.")
   }
-  sockish.on(sockpoint.name, handler)
+  const wrappedHandler = function (data: NoInfer<ZData>): void {
+    const parsed = sockpoint.zData.parse(data)
+    handler(parsed)
+  }
+  sockish.on(sockpoint.name, wrappedHandler)
 }
 
 interface BoundTapiSock {

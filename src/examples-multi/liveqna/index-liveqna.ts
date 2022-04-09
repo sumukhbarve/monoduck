@@ -1,1 +1,1 @@
-export {}
+import './backend/qna-server'

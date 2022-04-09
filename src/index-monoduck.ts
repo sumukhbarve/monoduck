@@ -7,9 +7,7 @@ export type {
 } from './lookduck/index-lookduck'
 export { lookduck } from './lookduck/index-lookduck'
 
-export type {
-  TapiEndpoint, BoundRouteFn, BoundFetchFn
-} from './tapiduck/index-tapiduck'
+export type { TapiEndpoint, TapiSockpoint } from './tapiduck/index-tapiduck'
 export { tapiduck, TapiError } from './tapiduck/index-tapiduck'
 
 export type { NoInfer } from './utilduck/index-utilduck'

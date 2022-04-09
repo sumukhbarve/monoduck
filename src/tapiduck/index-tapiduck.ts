@@ -4,8 +4,6 @@ import { fetch, fetchUsing } from './tapiFetcher'
 import { sockpoint, sockEmit, sockOn, sockUse } from './tapiSockpoint'
 
 export type { TapiEndpoint } from './tapiEndpoint'
-export type { BoundRouteFn } from './tapiRouter'
-export type { BoundFetchFn } from './tapiFetcher'
 export type { TapiSockpoint } from './tapiSockpoint'
 
 export { TapiError }
