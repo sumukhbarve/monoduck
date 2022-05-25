@@ -54,6 +54,8 @@ export const _ = {
   omit,
   groupBy,
   partition,
+  once,
+  memoize,
   never
 }
 ```
