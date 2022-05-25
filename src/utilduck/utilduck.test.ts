@@ -238,3 +238,57 @@ test('_.partition', function () {
     [2, 4, 6, 8, 10, 12, 14]
   ])
 })
+
+test('_.once', function () {
+  let count = 0
+  const rawIncr = (delta: number): number => { count += delta; return count }
+  const onceIncr = _.once(rawIncr)
+
+  expect(count).toBe(0) // Initial state
+
+  // Only 1st call to onceIncr() should increment (and return) count.
+  // Furture calls should _not_ increment, and should return 1st returned count.
+
+  expect(onceIncr(1)).toBe(1) // First call
+  expect(count).toBe(1)
+
+  expect(onceIncr(100)).toBe(1) // Subsequent call, o/p should remain 1
+  expect(count).toBe(1) // And the count shouldn't be incremented either.
+
+  expect(onceIncr(1000)).toBe(1)
+  expect(count).toBe(1)
+
+  expect(rawIncr(200)).toBe(201) // Forcefully changes the `count`.
+  expect(count).toBe(201) // The var `count` now has a newer value.
+  expect(onceIncr(2000)).toBe(1) // But o/p of onceIncr() should remain same.
+  expect(count).toBe(201) // And running onceIncr shouldn't affect `count`.
+})
+
+test('_.memoize', function () {
+  let rawCallCount = 0
+  const rawFacto = function (n: number): number {
+    rawCallCount += 1
+    return n === 1 ? 1 : n * rawFacto(n - 1)
+  }
+  let memCallCount = 0
+  const memFacto = _.memoize(function (n: number): number {
+    memCallCount += 1
+    return n === 1 ? 1 : n * memFacto(n - 1)
+  })
+
+  expect(rawCallCount).toBe(0)
+  expect(memCallCount).toBe(0)
+
+  expect(rawFacto(5)).toBe(120)
+  expect(rawCallCount).toBe(5)
+  expect(memFacto(5)).toBe(120)
+  expect(rawCallCount).toBe(5)
+
+  rawCallCount = 0
+  memCallCount = 0
+
+  expect(rawFacto(10)).toBe(3628800)
+  expect(rawCallCount).toBe(10)
+  expect(memFacto(10)).toBe(3628800)
+  expect(memCallCount).toBe(5) // Not 10, as 1! to 5! should be memoized
+})

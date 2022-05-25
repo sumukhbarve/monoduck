@@ -19,6 +19,9 @@ type RecordKey = string | number | symbol
 type Obj<T, K extends RecordKey = string> = Record<K, T>
 type ItrFn<X, Y = unknown, I = number> = (val: X, i: I) => Y
 type NotIsh = 0 | '' | 0n | null | undefined | false // EXCLUDES NaN
+type AnyFn = (...args: any[]) => any // This is unrelated to `_.any()`
+// SameFn<F> produces a function with the same signature as F
+type SameFn<F extends AnyFn> = (...args: Parameters<F>) => ReturnType<F>
 
 const BREAK = {} as const
 const identity = <T>(x: T): T => x
@@ -219,6 +222,33 @@ const partition = function <T>(arr: T[], fn: ItrFn<T, boolean>): [T[], T[]] {
   return [groupMap.true, groupMap.false]
 }
 
+const once = function<F extends AnyFn> (fn: F): SameFn<F> {
+  type Cache<T> = {ran: false} | {ran: true, result: T}
+  let cache: Cache<ReturnType<F>> = { ran: false }
+  const newFn = function (...args: Parameters<F>): ReturnType<F> {
+    if (!cache.ran) {
+      cache = { ran: true, result: fn(...args) }
+    }
+    return cache.result
+  }
+  return newFn
+}
+
+const memoize = function<F extends AnyFn> (
+  fn: F, hasher?: (...args: Parameters<F>) => string
+): SameFn<F> {
+  const hashFn = hasher ?? ((...args: Parameters<F>) => JSON.stringify(args))
+  const cache: Record<string, ReturnType<F>> = {}
+  const newFn = function (...args: Parameters<F>): ReturnType<F> {
+    const key = hashFn(...args)
+    if (!keyHas(cache, key)) {
+      cache[key] = fn(...args)
+    }
+    return cache[key]
+  }
+  return newFn
+}
+
 const never = (never: never): never => never
 
 type NoInfer<T> = [T][T extends any ? 0 : never]
@@ -261,5 +291,7 @@ export const _ = {
   omit,
   groupBy,
   partition,
+  once,
+  memoize,
   never
 }
