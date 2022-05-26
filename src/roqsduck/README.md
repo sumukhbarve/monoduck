@@ -1,43 +1,24 @@
 # Roqsduck
 
 ### What is it?
-- Simple, TypeScript firt, routing helper for React apps; based on the query string.
-- Pronounced 'rocks duck'. (*'ro'* is short for *ro*uting, and *'qs'* for *q*uery *s*tring.)
+- TypeScript-first routing for React apps; based on the query string.
+- Intentionally simple; far simpler than React Router or React Location.
+- Ideal for client-rendered apps where most content is behind auth-walls.
 
-### How's it different?
-- Roqsduck is *intentionally* simple; far simpler than React Router or React Location.
-- It encourages a flat routing structure, but can support nested routing if needed.
-- As routing is based on query string, multiple SPAs can be deployed to the same domain.
-- It's ideal for apps where content is mostly behind an auth-wall. (Not suitable for SEO.)
-
-### Quick Overview
+### Query Strings & `RouteInfo`
 - For the query string `?id=home`, the corresponding route info is `{id: 'home'}`
 - And for `?id=pageEditor&pageId=abc'`, the info is `{id: 'pageEditor', pageId: 'abc'}`
 - The `RouteInfo` type is defined as: `{id: string} & Record<string, string>`
-- Use the below described `useRouteInfo()` hook to get the route info reactively.
-- Call `roqsduck.setRouteInfo({id: 'foo', page: '2'})` to navigate to `?id=foo&page=2`
-- Alternatively, for navigation, use the `Link` component described below.
 
-### Indirect React Dependency
-- Monoduck (and hence Roqsduck) can't have any hard dependencies. So Roqsduck can't import React.
-- But you can pass `React` to `roqsduck.reactIntegration`, thus making it (indirectly) available:
-    ```ts
-    const { useRouteInfo, Link } = roqsduck.injectReact(React)
-    ```
-- The `useRouteInfo()` hook reactively returns the latest route info.
-- And the `Link` component is for navigation. Eg. `<Link to={{id: 'home'}}>Go Home</Link>`
-
+### Injecting React (Dependency Injection)
+- Passing `React` to Roqsduck produces a hook and the link component:
+  - `const { useRouteInfo, Link } = roqsduck.injectReact(React)`
+- The `useRouteInfo` hook *reactively* returns the current route info.
+- The `Link` component is for navigation. Eg. `<Link to={id: 'home'}>Go Home</Link>`
+- Alternatively, you can call `roqsduck.setRouteInfo()` to navigate.
 
 ### Quickstart
-
-**0. Set up a new project via CRA:**
-0. `npx create-react-app my-app-roqs --template typescript`
-0. `cd my-app-roqs`
-0. `npm install monoduck`
-0. `npm start`
-0. Visit http://localhost:3000, and ensure that the app is running.
-
-**1. Edit (and save) `App.tsx`, and revisit http://localhost:3000**:
+[Create a new React app with TypeScript](https://create-react-app.dev/docs/adding-typescript/#installation), `npm install monoduck`, and edit the `App.tsx`:
 
 ```ts
 // Prelims:
@@ -78,3 +59,10 @@ export default function App() {
   )
 }
 ```
+
+### Quick Summary
+
+- Calling `roqsduck.injectReact(React)` returns `{ useRouteInfo, Link }`
+- The `useRouteInfo` hook tracks the route info corresponding to the current query string.
+- To navigate to `id=foo&bar=baz`, call `roqsduck.setRouteInfo({id: 'foo', bar: 'baz'})`
+- Alternatively, just use `<Link to={{id: 'foo', bar: 'baz'}}>Visit Foo!</Link>`
