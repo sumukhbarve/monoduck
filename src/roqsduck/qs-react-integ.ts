@@ -1,38 +1,74 @@
+import type { ReactyLooky } from './indeps-roqsduck'
 import { _, lookduck } from './indeps-roqsduck'
 import type { RouteInfo } from './qs-base-tracker'
 import {
-  computedRouteInfo,
+  currentRouteInfo,
   setRouteInfo,
   prefixQmark,
   stringifyQs
 } from './qs-base-tracker'
 
-type UseLookableFn = ReturnType<typeof lookduck.makeUseLookable>
-
-const makeUseRouteInfo = _.once(function (useLookable: UseLookableFn) {
-  return () => useLookable(computedRouteInfo)
+const makeUseRouteInfo = _.once(function (React: ReactyLooky) {
+  const useLookable = lookduck.makeUseLookable(React)
+  return () => useLookable(currentRouteInfo)
 })
 
-interface Eventy {
+const getLinkHref = function (to: RouteInfo): string {
+  return prefixQmark(stringifyQs(to))
+}
+
+interface ClickEventyRoqsy {
   preventDefault: () => void
 }
-interface HrefAndOnClick {
-  href: string
-  onClick: (event: Eventy) => void
-}
-
-const getHref = (to: RouteInfo): string => prefixQmark(stringifyQs(to))
-
-const makeOnClick = function (to: RouteInfo) {
-  return function (event: Eventy) {
+const makeLinkClickHandler = function (to: RouteInfo) {
+  return function (event: ClickEventyRoqsy) {
     event.preventDefault()
     setRouteInfo(to)
   }
 }
 
-const hrefAndOnClick = function (to: RouteInfo): HrefAndOnClick {
-  return { href: getHref(to), onClick: makeOnClick(to) }
-}
+// Note the signature of: React.createElement(component, props, ...children)
 
-export type { Eventy, HrefAndOnClick }
-export { makeUseRouteInfo, getHref, makeOnClick, hrefAndOnClick }
+type CreateElementyRoqsy =
+  (tag: string, props: Record<string, any>, ...children: any) => any
+type ReactyRoqsy = ReactyLooky & {
+  createElement: CreateElementyRoqsy
+}
+interface LinkFCPropsy<ChildrenType> {
+  to: RouteInfo
+  children?: ChildrenType
+  style?: {
+    textDecoration?: string
+    color?: string
+  }
+}
+const makeLinkFC = _.once(function<CE extends CreateElementyRoqsy> (
+  createElement: CE
+): (props: LinkFCPropsy<Parameters<CE>[300]>) => ReturnType<CE> {
+  const LinkFC = function (
+    props: LinkFCPropsy<Parameters<CE>[300]>
+  ): ReturnType<CE> {
+    const { to, children, style } = props
+    const anchorProps = {
+      href: getLinkHref(to),
+      onClick: makeLinkClickHandler(to),
+      style: { textDecoration: 'inherit', color: 'inherit', ...style }
+    }
+    return createElement('a', anchorProps, children)
+  }
+  return LinkFC
+})
+
+const injectReact = _.once(function (React: ReactyRoqsy) {
+  return {
+    useRouteInfo: makeUseRouteInfo(React),
+    Link: makeLinkFC(React.createElement)
+  }
+})
+
+export type { ClickEventyRoqsy, CreateElementyRoqsy, LinkFCPropsy, ReactyRoqsy }
+export {
+  makeUseRouteInfo,
+  getLinkHref, makeLinkClickHandler,
+  makeLinkFC, injectReact
+}

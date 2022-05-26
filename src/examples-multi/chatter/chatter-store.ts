@@ -30,4 +30,4 @@ export const addMsg = function (msg: shared.Msg): void {
 }
 export const addMsgs = (msgs: shared.Msg[]): void => _.each(msgs, m => addMsg(m))
 
-export const use = lookduck.makeUseLookable(React.useState, React.useEffect)
+export const use = lookduck.makeUseLookable(React)

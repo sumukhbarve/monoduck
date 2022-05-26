@@ -3,14 +3,14 @@ export const quack = function (): string {
 }
 
 export type {
-  AcceptorFn, Pubsubable, Lookable, UseStateFn, UseEffectFn, UseLookableFn
+  AcceptorFn, Pubsubable, Lookable, ReactyLooky, UseLookableFn
 } from './lookduck/index-lookduck'
 export { lookduck } from './lookduck/index-lookduck'
 
 export type { TapiEndpoint, TapiSockpoint } from './tapiduck/index-tapiduck'
 export { tapiduck, TapiError } from './tapiduck/index-tapiduck'
 
-export type { NoInfer } from './utilduck/index-utilduck'
+export type { NoInfer, AnyFn, SameFn } from './utilduck/index-utilduck'
 export { _ } from './utilduck/index-utilduck'
 
 export type { DuckModel } from './sqlduck/index-sqlduck'

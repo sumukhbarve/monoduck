@@ -19,6 +19,7 @@ type RecordKey = string | number | symbol
 type Obj<T, K extends RecordKey = string> = Record<K, T>
 type ItrFn<X, Y = unknown, I = number> = (val: X, i: I) => Y
 type NotIsh = 0 | '' | 0n | null | undefined | false // EXCLUDES NaN
+type NoInfer<T> = [T][T extends any ? 0 : never]
 type AnyFn = (...args: any[]) => any // This is unrelated to `_.any()`
 // SameFn<F> produces a function with the same signature as F
 type SameFn<F extends AnyFn> = (...args: Parameters<F>) => ReturnType<F>
@@ -251,8 +252,7 @@ const memoize = function<F extends AnyFn> (
 
 const never = (never: never): never => never
 
-type NoInfer<T> = [T][T extends any ? 0 : never]
-export type { NoInfer }
+export type { NoInfer, AnyFn, SameFn }
 
 export const _ = {
   BREAK,

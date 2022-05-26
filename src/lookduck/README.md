@@ -19,7 +19,7 @@ npm install monoduck
 
 **1. Create your `store.ts`:**
 ```ts
-import { useEffect, useState } from 'react'
+import React from 'react'
 import { lookduck } from 'monoduck'
 
 const LOW_DUCK_MARK = 10;
@@ -28,7 +28,7 @@ export const duckCount = lookduck.observable(5)
 export const belowMark = lookduck.computed(() => duckCount.get() < LOW_DUCK_MARK)
 export const incrDucks = (delta: number) => duckCount.set(duckCount.get() + delta)
 
-export const use = lookduck.makeUseLookable(useState, useEffect)
+export const use = lookduck.makeUseLookable(React)
 ```
 
 **2. Bind your components. Done!**
@@ -130,9 +130,9 @@ Lookduck doesn't internally import React. Instead, it includes a helper that ret
 
 ```ts
 import { lookduck } from 'monoduck'
-import { useState, useEffect } from 'react'
+import React from 'react'
 
-export const useLookable = lookduck.makeUseLookable(useState, useEffect)
+export const useLookable = lookduck.makeUseLookable(React)
 ```
 
 The decision to _not_ import react was taken with a view to:

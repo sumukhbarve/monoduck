@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react'
+import React from 'react'
 import { lookduck } from '../index-lookduck'
 
 export interface Todo {
@@ -28,4 +28,4 @@ export const actToggleShowDone = function (): void {
   obShowDone.set(!obShowDone.get())
 }
 
-export const useLookable = lookduck.makeUseLookable(useState, useEffect)
+export const useLookable = lookduck.makeUseLookable(React)

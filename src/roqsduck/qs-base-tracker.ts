@@ -4,7 +4,7 @@ import { _, lookduck } from './indeps-roqsduck'
 //  - When the page initially loads, data flows from URL --> App
 //  - As the user interacts with the app, data flows from App --> URL
 //  - As the user clicks back/forward, data flows from URL --> App
-//  - By `App`, we mean `observableQs` (and linked `computedRouteInfo`.)
+//  - By `App`, we mean `observableQs` (and linked `currentRouteInfo`.)
 
 type RouteInfo = {id: string} & Record<string, string>
 
@@ -48,20 +48,25 @@ windowAddEventListener('popstate', function () {
   qsPopInProgress = false
 })
 
-const computedRouteInfo = lookduck.computed(function (): RouteInfo {
+const currentRouteInfo = lookduck.computed(function (): RouteInfo {
   const qs = observableQs.get()
   return parseQs(unprefixQmark(qs))
 })
 const setRouteInfo = function (routeInfo: RouteInfo): void {
   observableQs.set(unprefixQmark(stringifyQs(routeInfo)))
 }
+const getRouteInfo = (): RouteInfo => currentRouteInfo.get() // For export only
 
-// Note: `observableQs` is _not_ exported, but `computedRouteInfo` is.
+// Note: `observableQs` is _not_ exported, but `currentRouteInfo` is.
 export type { RouteInfo }
 export {
-  computedRouteInfo,
+  // Lookability:
+  currentRouteInfo,
   setRouteInfo,
-  // Used by LinkFC.ts
+  getRouteInfo,
+  // Helpers:
   prefixQmark,
+  unprefixQmark,
+  parseQs,
   stringifyQs
 }

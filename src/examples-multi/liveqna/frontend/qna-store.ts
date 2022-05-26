@@ -95,4 +95,4 @@ export const topQuestions = lookduck.computed(function () {
   })
 })
 
-export const use = lookduck.makeUseLookable(React.useState, React.useEffect)
+export const use = lookduck.makeUseLookable(React)
