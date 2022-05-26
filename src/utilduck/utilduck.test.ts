@@ -20,6 +20,13 @@ test('_.identity', function () {
   expect(_.identity(tmpObjRef)).toBe(tmpObjRef)
 })
 
+test('_.noop', function () {
+  expect(_.noop()).toBe(undefined)
+  expect(_.noop('defined')).toBe(undefined)
+  expect(_.noop(true)).toBe(undefined)
+  expect(_.noop(1, 'two', [3], null, true, false, { x: 'y' })).toBe(undefined)
+})
+
 test('_.each without _.BREAK', function () {
   const runCounter = buildRunCounter()
   _.each([1, 2, 3, 4, 5], runCounter.fn)

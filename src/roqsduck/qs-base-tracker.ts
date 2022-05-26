@@ -8,9 +8,9 @@ import { _, lookduck } from './indeps-roqsduck'
 
 type RouteInfo = {id: string} & Record<string, string>
 
-const windowLocation = globalThis.location
-const windowHistory = globalThis.history
-const windowAddEventListener = globalThis.addEventListener
+const windowLocation = globalThis.location ?? { search: '' }
+const windowHistory = globalThis.history ?? { pushState: _.noop }
+const windowAddEventListener = globalThis.addEventListener ?? _.noop
 
 const prefixQmark = function (s: string): string {
   if (s.startsWith('?')) { return s }

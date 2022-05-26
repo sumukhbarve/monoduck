@@ -34,7 +34,7 @@ const not = function (x: unknown): x is NotIsh {
   return !isTruthy // linter dislikes `!unknownVar`, but accepts `!booleanVar`
 }
 const bool = <T>(x: T | NotIsh): x is T => !not(x)
-const noop = (): void => {}
+const noop = (...args: unknown[]): void => args && undefined
 const ifel = function <T>(condition: unknown, consequent: T, alternate: T): T {
   return _.bool(condition) ? consequent : alternate
 }
