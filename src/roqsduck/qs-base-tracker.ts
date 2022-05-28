@@ -21,6 +21,7 @@ const unprefixQmark = function (s: string): string {
   return s
 }
 
+// TODO: Improve parsing. For qs='', we're getting {id: '', '': undefined}
 const parseQs = function (qs: string): RouteInfo {
   const qsWoQmark = unprefixQmark(qs)
   const parts = qsWoQmark.split('&')

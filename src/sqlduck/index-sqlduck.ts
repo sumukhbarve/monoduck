@@ -8,7 +8,7 @@ import { _ } from './indeps-sqlduck'
 type BRow = Record<string, string | number> & { id: string } // BRow ~ Base Row
 
 // DuckModel: Model object created by sqlduck.model.
-// SequelizeModel: Model object created (intrenally) via sequelize.define.
+// SequelizeModel: Model object created (internally) via sequelize.define.
 interface DuckModel<ZRow extends BRow> {
   create: (row: ZRow) => Promise<boolean>
   count: (options?: FindOptions) => Promise<number>
@@ -21,7 +21,7 @@ interface DuckModel<ZRow extends BRow> {
   SequelizeModel: ModelStatic<Model<any, any>>
 }
 
-// Params related to Sequelize. Theese help sqlduck avoid importing sequelize.
+// Params related to Sequelize, i.e. sequelize injection
 interface PluginParams {
   sequelize: Sequelize
   DTypes: typeof DataTypes
@@ -34,7 +34,7 @@ interface TableParams<ZRow extends BRow> {
 }
 type ModelParams<ZRow extends BRow> = PluginParams & TableParams<ZRow>
 
-const model = function<ZRow extends BRow> (
+const defineModel = function<ZRow extends BRow> (
   params: ModelParams<ZRow>
 ): DuckModel<ZRow> {
   const { sequelize, DTypes, tableName, defaultRow, zRowSchema } = params
@@ -105,17 +105,36 @@ const model = function<ZRow extends BRow> (
   }
 }
 
-type BoundModelFn = <ZRow extends BRow>(p: TableParams<ZRow>) => DuckModel<ZRow>
+type BoundDefineFn =
+  <ZRow extends BRow>(p: TableParams<ZRow>) => DuckModel<ZRow>
 
-const modelUsing = function (pluginParams: PluginParams): BoundModelFn {
-  const boundModelFn = function <ZRow extends BRow>(
+const makeModelDefiner = function (pluginParams: PluginParams): BoundDefineFn {
+  const boundDefineFn = function <ZRow extends BRow>(
     tableParams: TableParams<ZRow>
   ): DuckModel<ZRow> {
     const params: ModelParams<ZRow> = { ...pluginParams, ...tableParams }
-    return model(params)
+    return defineModel(params)
   }
-  return boundModelFn
+  return boundDefineFn
 }
 
-export type { DuckModel }
-export const sqlduck = { model, modelUsing }
+interface ModelPond {
+  authenticate: () => Promise<void>
+  autoMigrate: () => Promise<void>
+  defineModel: BoundDefineFn
+}
+const modelPond = function (pluginParams: PluginParams): ModelPond {
+  const { sequelize } = pluginParams
+  const boundDefineFn = makeModelDefiner(pluginParams)
+  // Connection & Migration:
+  const authenticate = async function (): Promise<void> {
+    await sequelize.authenticate()
+  }
+  const autoMigrate = async function (): Promise<void> {
+    await sequelize.sync({ alter: { drop: false } })
+  }
+  return { authenticate, autoMigrate, defineModel: boundDefineFn }
+}
+
+export type { DuckModel, BoundDefineFn }
+export const sqlduck = { defineModel, makeModelDefiner, modelPond }

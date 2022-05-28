@@ -250,6 +250,11 @@ const memoize = function<F extends AnyFn> (
   return newFn
 }
 
+const sleep = async (waitMs: number): Promise<void> => {
+  return await new Promise(resolve => setTimeout(resolve, waitMs))
+}
+const now = (): number => Date.now()
+
 const never = (never: never): never => never
 
 export type { NoInfer, AnyFn, SameFn }
@@ -293,5 +298,7 @@ export const _ = {
   partition,
   once,
   memoize,
+  sleep,
+  now,
   never
 }

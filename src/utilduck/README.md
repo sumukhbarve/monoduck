@@ -56,11 +56,13 @@ export const _ = {
   partition,
   once,
   memoize,
+  sleep,
+  now,
   never
 }
 ```
 
-### Uncommon Utils
+### Offbeat Utils/Behaviour
 
 **1. Breaking Out:**
 
@@ -90,3 +92,7 @@ export const getPx = (size: 'sm' | 'md' | 'lg') => {
   }
 }
 ```
+
+**3. Async Sleep**:
+
+You can use `await _.sleep(wait_milliseconds)` to sleep asynchronously. Useful for local testing/debugging too.

@@ -299,3 +299,14 @@ test('_.memoize', function () {
   expect(memFacto(10)).toBe(3628800)
   expect(memCallCount).toBe(5) // Not 10, as 1! to 5! should be memoized
 })
+
+test('_.sleep', async function () {
+  const errorMargin = 5 // miliseconds
+  const periods = [100, 200, 300]
+  for (const period of periods) {
+    const t0 = _.now()
+    await _.sleep(period)
+    const diff = _.now() - t0
+    expect(Math.abs(diff - period)).toBeLessThanOrEqual(errorMargin)
+  }
+})
