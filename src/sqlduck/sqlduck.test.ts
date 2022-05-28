@@ -49,7 +49,7 @@ const buildContact = function (name: string): ZContact {
 // Setup: //////////////////////////////////////////////////////////////////////
 //
 const modelFactory = sqlduck.modelFactory({
-  sequelize: new Sequelize(DATABASE_URL),
+  sequelize: new Sequelize(DATABASE_URL, { logging: false }),
   DTypes: DataTypes
 })
 
@@ -60,9 +60,9 @@ const contactModel = modelFactory.defineModel({
 })
 
 beforeAll(async function () {
-  console.log('Starting auto-migration ...')
+  // console.log('Starting auto-migration ...')
   await modelFactory.autoMigrate()
-  console.log('Auto-migration complete.')
+  // console.log('Auto-migration complete.')
 })
 
 //

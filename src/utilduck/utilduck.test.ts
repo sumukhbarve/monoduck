@@ -301,8 +301,8 @@ test('_.memoize', function () {
 })
 
 test('_.sleep', async function () {
-  const errorMargin = 5 // miliseconds
-  const periods = [100, 200, 300]
+  const errorMargin = 10 // miliseconds
+  const periods = [800, 1200]
   for (const period of periods) {
     const t0 = _.now()
     await _.sleep(period)
