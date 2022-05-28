@@ -1,3 +1,2 @@
-export type { NoInfer } from '../index-monoduck'
-// export { _ } from '../index-monoduck' // <-- Jest doesn't like this.
+export type { NoInfer } from '../utilduck/index-utilduck'
 export { _ } from '../utilduck/index-utilduck'

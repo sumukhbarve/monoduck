@@ -22,6 +22,7 @@ const routeMap: Record<string, React.ReactElement> = {
 const FrontonlyRoot: React.VFC = function () {
   const routeInfo = useRouteInfo()
   const routeEl = routeMap[routeInfo.id] ?? <RouteDefault />
+  const [val, setVal] = React.useState('')
   return (
     <div>
       <h1>Frontonly</h1>
@@ -34,6 +35,11 @@ const FrontonlyRoot: React.VFC = function () {
       </nav>
       <hr />
       {routeEl}
+      <hr />
+      <textarea value={val} onChange={evt => setVal(evt.currentTarget.value)} />
+      <pre>{val}</pre>
+      <button onClick={() => roqsduck.setRouteInfo(JSON.parse(val))}>Set QS</button>
+      <pre>{JSON.stringify(routeInfo)}</pre>
     </div>
   )
 }

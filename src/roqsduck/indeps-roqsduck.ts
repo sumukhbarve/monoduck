@@ -1,2 +1,5 @@
-export type { AnyFn, ReactyLooky } from '../index-monoduck'
-export { _, lookduck } from '../index-monoduck'
+export type { AnyFn } from '../utilduck/index-utilduck'
+export { _ } from '../utilduck/index-utilduck'
+
+export type { ReactyLooky } from '../lookduck/index-lookduck'
+export { lookduck } from '../lookduck/index-lookduck'

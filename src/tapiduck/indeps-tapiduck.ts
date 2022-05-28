@@ -1,2 +1,2 @@
-export { _ } from '../index-monoduck'
-export type { NoInfer } from '../index-monoduck'
+export type { NoInfer } from '../utilduck/index-utilduck'
+export { _ } from '../utilduck/index-utilduck'

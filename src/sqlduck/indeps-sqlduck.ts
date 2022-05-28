@@ -4,4 +4,4 @@ not in sqlduck, should be imported here first, and only from here may they be
 used in sqlduck.
 */
 
-export { _ } from '../index-monoduck'
+export { _ } from '../utilduck/index-utilduck'
