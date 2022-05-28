@@ -48,12 +48,12 @@ const buildContact = function (name: string): ZContact {
 //
 // Setup: //////////////////////////////////////////////////////////////////////
 //
-const modelPond = sqlduck.modelPond({
+const modelFactory = sqlduck.modelFactory({
   sequelize: new Sequelize(DATABASE_URL),
   DTypes: DataTypes
 })
 
-const contactModel = modelPond.defineModel({
+const contactModel = modelFactory.defineModel({
   defaultRow: defaultContactRow,
   tableName: 'contact',
   zRowSchema: zContact
@@ -61,7 +61,7 @@ const contactModel = modelPond.defineModel({
 
 beforeAll(async function () {
   console.log('Starting auto-migration ...')
-  await modelPond.autoMigrate()
+  await modelFactory.autoMigrate()
   console.log('Auto-migration complete.')
 })
 

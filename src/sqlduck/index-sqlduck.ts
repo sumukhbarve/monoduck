@@ -21,7 +21,7 @@ interface DuckModel<ZRow extends BRow> {
   SequelizeModel: ModelStatic<Model<any, any>>
 }
 
-// Params related to Sequelize, i.e. sequelize injection
+// Params related to Sequelize, i.e. sequelize dependency injection
 interface PluginParams {
   sequelize: Sequelize
   DTypes: typeof DataTypes
@@ -118,12 +118,12 @@ const makeModelDefiner = function (pluginParams: PluginParams): BoundDefineFn {
   return boundDefineFn
 }
 
-interface ModelPond {
+interface ModelFactory {
   authenticate: () => Promise<void>
   autoMigrate: () => Promise<void>
   defineModel: BoundDefineFn
 }
-const modelPond = function (pluginParams: PluginParams): ModelPond {
+const modelFactory = function (pluginParams: PluginParams): ModelFactory {
   const { sequelize } = pluginParams
   const boundDefineFn = makeModelDefiner(pluginParams)
   // Connection & Migration:
@@ -137,4 +137,4 @@ const modelPond = function (pluginParams: PluginParams): ModelPond {
 }
 
 export type { DuckModel, BoundDefineFn }
-export const sqlduck = { defineModel, makeModelDefiner, modelPond }
+export const sqlduck = { defineModel, makeModelDefiner, modelFactory }
