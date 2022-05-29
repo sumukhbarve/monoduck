@@ -136,5 +136,5 @@ const modelFactory = function (pluginParams: PluginParams): ModelFactory {
   return { authenticate, autoMigrate, defineModel: boundDefineFn }
 }
 
-export type { DuckModel, BoundDefineFn }
+export type { DuckModel, BoundDefineFn, ModelFactory }
 export const sqlduck = { defineModel, makeModelDefiner, modelFactory }

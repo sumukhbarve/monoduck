@@ -13,7 +13,7 @@ export { tapiduck, TapiError } from './tapiduck/index-tapiduck'
 export type { NoInfer, AnyFn, SameFn } from './utilduck/index-utilduck'
 export { _ } from './utilduck/index-utilduck'
 
-export type { DuckModel } from './sqlduck/index-sqlduck'
+export type { DuckModel, ModelFactory } from './sqlduck/index-sqlduck'
 export { sqlduck } from './sqlduck/index-sqlduck'
 
 export type { RouteInfo } from './roqsduck/index-roqsduck'
