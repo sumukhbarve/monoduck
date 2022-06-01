@@ -21,10 +21,16 @@ const makeEqualityFn = function <T>(
   return _.never(equality)
 }
 
+type Observable<T> = Lookable<T> & {
+  set: AcceptorFn<T>
+  reset: () => void
+}
+
 const observable = function<T> (
   val: T,
   equality?: EqualityMode
-): Lookable<T> & { set: AcceptorFn<T> } {
+): Observable<T> {
+  const initVal = val
   const equalityFn = makeEqualityFn(val, equality)
   const pubsub = pubsubable<T>()
   const self = {
@@ -38,6 +44,7 @@ const observable = function<T> (
         pubsub.publish(newVal)
       }
     },
+    reset: () => self.set(initVal),
     subscribe: pubsub.subscribe,
     unsubscribe: pubsub.unsubscribe
   }
@@ -50,5 +57,5 @@ const shallowObservable = function<T> (
   return observable(val, 'shallow')
 }
 
-export type { EqualityMode }
+export type { EqualityMode, Observable }
 export { observable, shallowObservable }

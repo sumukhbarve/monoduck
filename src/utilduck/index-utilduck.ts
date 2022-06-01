@@ -222,6 +222,11 @@ const partition = function <T>(arr: T[], fn: ItrFn<T, boolean>): [T[], T[]] {
   const groupMap = groupBy(arr, (val, i) => String(bool(fn(val, i))))
   return [groupMap.true, groupMap.false]
 }
+const sortBy = function <T>(arr: T[], fn: ItrFn<T, number | string>): T[] {
+  const duos = map(arr, (val, i) => ({ val, sortv: fn(val, i) }))
+  duos.sort((a, b) => a.sortv === b.sortv ? 0 : a.sortv < b.sortv ? -1 : +1)
+  return map(duos, duo => duo.val)
+}
 
 const once = function<F extends AnyFn> (fn: F): SameFn<F> {
   type Cache<T> = {ran: false} | {ran: true, result: T}
@@ -296,6 +301,7 @@ export const _ = {
   omit,
   groupBy,
   partition,
+  sortBy,
   once,
   memoize,
   sleep,

@@ -106,7 +106,7 @@ test('CRUD multiple record', async function () {
     expect(didCreate).toBe(true)
   }
   // Read created:
-  const readContacts = await contactModel.findAll()
+  const readContacts = await contactModel.findAll({})
   expect(readContacts !== contacts).toBe(true) // Not the same array
   expect(readContacts).toStrictEqual(contacts) // But the same value
   // Update:
@@ -117,7 +117,7 @@ test('CRUD multiple record', async function () {
     await contactModel.replace(uContact)
   }
   // Read updated:
-  const ruContacts = await contactModel.findAll()
+  const ruContacts = await contactModel.findAll({})
   expect(ruContacts !== updatedContacts).toBe(true) // not same array
   expect(ruContacts).toStrictEqual(updatedContacts) // but same value
   // Delete:
@@ -125,7 +125,7 @@ test('CRUD multiple record', async function () {
     await contactModel.deleteById(uContact.id)
   }
   // Read deleted:
-  const deletedContacts = await contactModel.findAll()
+  const deletedContacts = await contactModel.findAll({})
   expect(deletedContacts).toStrictEqual([])
 })
 

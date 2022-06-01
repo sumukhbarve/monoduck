@@ -38,6 +38,15 @@ test('observable', function (): void {
   expect(str.get()).toBe('f')
 })
 
+test('observable.reset()', function () {
+  const name = observable('adam')
+  expect(name.get()).toBe('adam')
+  name.set('brad')
+  expect(name.get()).toBe('brad')
+  name.reset()
+  expect(name.get()).toBe('adam')
+})
+
 test('observable with deep equality only', function () {
   interface Foo {a: {b: string}}
   const foo = shallowObservable<Foo>({ a: { b: 'c' } })

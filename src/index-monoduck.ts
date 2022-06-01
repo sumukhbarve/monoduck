@@ -3,7 +3,7 @@ export const quack = function (): string {
 }
 
 export type {
-  AcceptorFn, Pubsubable, Lookable, ReactyLooky, UseLookableFn
+  AcceptorFn, Pubsubable, Lookable, Observable, ReactyLooky, UseLookableFn
 } from './lookduck/index-lookduck'
 export { lookduck } from './lookduck/index-lookduck'
 

@@ -246,6 +246,29 @@ test('_.partition', function () {
   ])
 })
 
+test('_.sortBy', function () {
+  const uNums = [2, 6, 8, 0, 9, 7, 5, 3, 4, 1] // unsorted
+  const sNums = _.sortBy(uNums, v => v) // sorted
+  expect(sNums).toStrictEqual([0, 1, 2, 3, 4, 5, 6, 7, 8, 9])
+
+  const uStrs = ['hh', 'gg', 'jj', 'ff', 'dd', 'cc', 'bb', 'aa', 'ii', 'ee']
+  const sStrs = _.sortBy(uStrs, v => v)
+  expect(sStrs).toStrictEqual('aa bb cc dd ee ff gg hh ii jj'.split(' '))
+
+  const buildPerson = function (name: string): { name: string, eman: string } {
+    return { name, eman: name.split('').reverse().join('') }
+  }
+  const namesSrc = 'amy brad carl dan elle fred greg hank igor jane'
+  const ascEmans = 'darb derf elle enaj gerg knah lrac nad rogi yma'.split(' ')
+  const ascNames = namesSrc.split(' ')
+  const descNames = namesSrc.split(' ').reverse()
+  const descPersonsByName = descNames.map(buildPerson)
+  const sPersonsByName = _.sortBy(descPersonsByName, p => p.name)
+  expect(sPersonsByName.map(p => p.name)).toStrictEqual(ascNames)
+  const sPersonsByEman = _.sortBy(descPersonsByName, p => p.eman)
+  expect(sPersonsByEman.map(p => p.eman)).toStrictEqual(ascEmans)
+})
+
 test('_.once', function () {
   let count = 0
   const rawIncr = (delta: number): number => { count += delta; return count }

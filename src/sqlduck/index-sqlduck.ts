@@ -11,9 +11,10 @@ type BRow = Record<string, string | number> & { id: string } // BRow ~ Base Row
 // SequelizeModel: Model object created (internally) via sequelize.define.
 interface DuckModel<ZRow extends BRow> {
   create: (row: ZRow) => Promise<boolean>
-  count: (options?: FindOptions) => Promise<number>
+  count: (options: FindOptions) => Promise<number>
   findOne: (options: FindOptions) => Promise<ZRow | null>
-  findAll: (options?: FindOptions) => Promise<ZRow[]>
+  findById: (id: string) => Promise<ZRow | null>
+  findAll: (options: FindOptions) => Promise<ZRow[]>
   replace: (updatedRow: ZRow) => Promise<void>
   deleteById: (id: string) => Promise<void>
   authenticate: () => Promise<void>
@@ -59,7 +60,7 @@ const defineModel = function<ZRow extends BRow> (
     return true
   }
 
-  const count = async function (options?: FindOptions): Promise<number> {
+  const count = async function (options: FindOptions): Promise<number> {
     return await SequelizeModel.count(options)
   }
 
@@ -69,7 +70,11 @@ const defineModel = function<ZRow extends BRow> (
     return _.bool(row) ? zRowSchema.parse(row) : null
   }
 
-  const findAll = async function (options?: FindOptions): Promise<ZRow[]> {
+  const findById = async function (id: string): Promise<ZRow | null> {
+    return await findOne({ where: { id } })
+  }
+
+  const findAll = async function (options: FindOptions): Promise<ZRow[]> {
     const rawOptions = { ...(options ?? {}), raw: true }
     const rows = await SequelizeModel.findAll(rawOptions)
     return _.map(rows, row => zRowSchema.parse(row))
@@ -96,6 +101,7 @@ const defineModel = function<ZRow extends BRow> (
     create,
     count,
     findOne,
+    findById,
     findAll,
     replace,
     deleteById,
