@@ -99,6 +99,8 @@ const numberIs = (x: unknown): x is number => typeof x === 'number'
 const booleanIs = (x: unknown): x is boolean => typeof x === 'boolean'
 const nullIs = (x: unknown): x is null => x === null
 const undefinedIs = (x: unknown): x is undefined => x === undefined
+// `nanIs` is _not_ a type guard, as `typeof NaN` -> 'number'
+const nanIs = (x: unknown): boolean => Number.isNaN(x)
 
 type Primitive = string | number | boolean | null | undefined
 const primitiveIs = function (x: unknown): x is Primitive {
@@ -213,7 +215,7 @@ const groupBy = function <T>(arr: T[], fn: ItrFn<T, string>): Obj<T[]> {
   const result: Obj<T[]> = {}
   each(arr, function (val, i) {
     const key = fn(val, i)
-    result[key] = (result[key] ?? [])
+    result[key] = result[key] ?? []
     result[key].push(val)
   })
   return result
@@ -283,6 +285,7 @@ export const _ = {
   booleanIs,
   nullIs,
   undefinedIs,
+  nanIs,
   primitiveIs,
   arrayIs,
   plainObjectIs,
