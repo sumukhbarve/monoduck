@@ -102,12 +102,23 @@ export const getPx = (size: 'sm' | 'md' | 'lg') => {
 
 You can use `await _.sleep(wait_milliseconds)` to sleep asynchronously. Useful for local testing/debugging too.
 
-**4. Asserting & Banging!**
+**4. Safe Bang!**
 
-You can use `_.assert(value, optionalErrorMessage?)` to assert that `value` is truthy. If the supplied `value` isn't truthy, an error will be thrown.
-
-To assert that `value` is _NOT_ undefined, you can use `_.bang(value)`. This is similar to TypeScript's postfix `!` (non-null assertion operator). But unlike `value!`, `_.bang(value)`:
-- only asserts `value` non-undefined, instead of also asserting non-null.
+To assert that a value is NOT undefined, you can use `_.bang(value)`. This is similar to TypeScript's postfix `!` (non-null assertion) operator. But unlike `value!`, `_.bang(value)`:
+- only asserts that `value` is non-undefined, does not assert non-null.
 - throws an error if `value` is undefined, instead of leading to silent failures.
 
-If you use TypeScript `noUncheckedIndexedAccess` enabled and `@typescript-eslint/no-non-null-assertion`, then `_.bang()`
+If you use TypeScript with `--noUncheckedIndexedAccess`, then `_.bang()` is handy for safely force-excluding `undefined`. If you also use `ts-standard` for linting (or `@typescript-eslint/no-non-null-assertion`), then `_.bang` is especially useful; as postfix `!` operator is disallowed.
+
+For example, here's a an implementation of a grouping utility (assuming `--noUncheckedIndexedAccess`):
+```ts
+const groupBy = function <T>(arr: T[], fn: (val: T) => string) {
+  const result: Record<string, T[]> = {}
+  _.each(arr, function (val) {
+    const key = fn(val)
+    result[key] = result[key] ?? []
+    _.bang(result[key]).push(val) // safe alternative to result[key]!.push(val)
+  })
+  return result
+}
+```
