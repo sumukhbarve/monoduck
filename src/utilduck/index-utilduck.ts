@@ -39,9 +39,24 @@ const ifel = function <T>(condition: unknown, consequent: T, alternate: T): T {
   return _.bool(condition) ? consequent : alternate
 }
 
+const assert = function <T>(val: T | undefined, msg?: string): T {
+  msg = msg ?? `value=${_.nanIs(val) ? 'NaN' : JSON.stringify(val)}`
+  // Check NaN first, as _.not (type guard) does not expect NaN.
+  if (_.nanIs(val) || _.not(val)) {
+    throw new Error(`Assertion Error:: ${msg}`)
+  }
+  return val
+}
+// Like TypeScript's postfix-bang. Throws if undefined, does NOT check null.
+// Useful when working with both `noUncheckedIndexedAccess` and ts-standard.
+const bang = function <T>(val: T | undefined): T {
+  if (!_.undefinedIs(val)) { return val }
+  throw new Error('Bang Error:: _.bang() was called with undefined.')
+}
+
 const each = function <T>(arr: T[], fn: ItrFn<T>): void {
   for (let i = 0; i < arr.length; i += 1) {
-    if (fn(arr[i], i) === BREAK) {
+    if (fn(_.bang(arr[i]), i) === BREAK) {
       break
     }
   }
@@ -63,6 +78,17 @@ type ReduceItrFn<T, A> = (acc: A, val: T) => A
 const reduce = function <T, A>(arr: T[], fn: ReduceItrFn<T, A>, acc: A): A {
   each(arr, val => { acc = fn(acc, val) })
   return acc
+}
+
+const find = function <T>(arr: T[], fn: ItrFn<T> = identity): T | undefined {
+  let foundVal: T | undefined
+  _.each(arr, function (val, i) {
+    if (_.bool(fn(val, i))) {
+      foundVal = val
+      return _.BREAK
+    }
+  })
+  return foundVal
 }
 
 const all = function <T>(arr: T[], fn: ItrFn<T> = identity): boolean {
@@ -216,13 +242,13 @@ const groupBy = function <T>(arr: T[], fn: ItrFn<T, string>): Obj<T[]> {
   each(arr, function (val, i) {
     const key = fn(val, i)
     result[key] = result[key] ?? []
-    result[key].push(val)
+    _.bang(result[key]).push(val)
   })
   return result
 }
 const partition = function <T>(arr: T[], fn: ItrFn<T, boolean>): [T[], T[]] {
   const groupMap = groupBy(arr, (val, i) => String(bool(fn(val, i))))
-  return [groupMap.true, groupMap.false]
+  return [_.bang(groupMap.true), _.bang(groupMap.false)]
 }
 const sortBy = function <T>(arr: T[], fn: ItrFn<T, number | string>): T[] {
   const duos = map(arr, (val, i) => ({ val, sortv: fn(val, i) }))
@@ -252,7 +278,7 @@ const memoize = function<F extends AnyFn> (
     if (!keyHas(cache, key)) {
       cache[key] = fn(...args)
     }
-    return cache[key]
+    return _.bang(cache[key])
   }
   return newFn
 }
@@ -273,10 +299,13 @@ export const _ = {
   bool,
   noop,
   ifel,
+  assert,
+  bang,
   each,
   map,
   filter,
   reduce,
+  find,
   all,
   any,
   deepFlatten,

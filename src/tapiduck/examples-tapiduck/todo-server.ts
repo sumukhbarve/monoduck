@@ -20,20 +20,22 @@ tapiduck.route(router, ept.addTodo, async function (reqData) {
 
 tapiduck.route(router, ept.toggleTodo, async function (reqData) {
   const todoIndex = todos.findIndex(todo => todo.id === reqData.id)
-  if (todoIndex === -1) {
+  const todo = todos[todoIndex]
+  if (todoIndex === -1 || todo === undefined) {
     throw new TapiError('No such todo.')
   }
-  todos[todoIndex].done = !todos[todoIndex].done
-  return todos[todoIndex]
+  todo.done = !todo.done
+  return todo
 })
 
 tapiduck.route(router, ept.updateText, async function (reqData) {
   const todoIndex = todos.findIndex(todo => todo.id === reqData.id)
-  if (todoIndex === -1) {
+  const todo = todos[todoIndex]
+  if (todoIndex === -1 || todo === undefined) {
     throw new TapiError('No such todo.')
   }
-  todos[todoIndex].text = reqData.text
-  return todos[todoIndex]
+  todo.text = reqData.text
+  return todo
 })
 
 tapiduck.route(router, ept.getTodos, async function () {

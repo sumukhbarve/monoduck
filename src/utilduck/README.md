@@ -26,10 +26,13 @@ export const _ = {
   bool,
   noop,
   ifel,
+  assert,
+  bang,
   each,
   map,
   filter,
   reduce,
+  find,
   all,
   any,
   deepFlatten,
@@ -38,6 +41,7 @@ export const _ = {
   booleanIs,
   nullIs,
   undefinedIs,
+  nanIs,
   primitiveIs,
   arrayIs,
   plainObjectIs,
@@ -54,6 +58,7 @@ export const _ = {
   omit,
   groupBy,
   partition,
+  sortBy,
   once,
   memoize,
   sleep,
@@ -96,3 +101,13 @@ export const getPx = (size: 'sm' | 'md' | 'lg') => {
 **3. Async Sleep**:
 
 You can use `await _.sleep(wait_milliseconds)` to sleep asynchronously. Useful for local testing/debugging too.
+
+**4. Asserting & Banging!**
+
+You can use `_.assert(value, optionalErrorMessage?)` to assert that `value` is truthy. If the supplied `value` isn't truthy, an error will be thrown.
+
+To assert that `value` is _NOT_ undefined, you can use `_.bang(value)`. This is similar to TypeScript's postfix `!` (non-null assertion operator). But unlike `value!`, `_.bang(value)`:
+- only asserts `value` non-undefined, instead of also asserting non-null.
+- throws an error if `value` is undefined, instead of leading to silent failures.
+
+If you use TypeScript `noUncheckedIndexedAccess` enabled and `@typescript-eslint/no-non-null-assertion`, then `_.bang()`

@@ -36,7 +36,7 @@ const splitQsSegment = function (segment: string): [string, string] {
     console.warn(`Failed to parse query string segment: ${segment}`)
     return ['invalid_segment', segment]
   }
-  return [seglets[0], seglets[1]]
+  return [_.bang(seglets[0]), _.bang(seglets[1])]
 }
 const decodePair = function (pair: [string, string]): [string, string] {
   const d = gWindow.decodeURIComponent

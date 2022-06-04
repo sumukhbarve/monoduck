@@ -27,6 +27,39 @@ test('_.noop', function () {
   expect(_.noop(1, 'two', [3], null, true, false, { x: 'y' })).toBe(undefined)
 })
 
+test('_.assert', function () {
+  expect(_.assert(true)).toBe(true)
+  expect(_.assert(123)).toBe(123)
+  expect(_.assert('foo')).toBe('foo')
+  expect(_.assert([])).toStrictEqual([])
+  expect(_.assert({})).toStrictEqual({})
+
+  expect(() => _.assert(false)).toThrow('Assertion Error:: value=false')
+  expect(() => _.assert(null)).toThrow('Assertion Error:: value=null')
+  expect(() => _.assert(undefined)).toThrow('Assertion Error:: value=undefined')
+  expect(() => _.assert('')).toThrow('Assertion Error:: value=""')
+  expect(() => _.assert(0)).toThrow('Assertion Error:: value=0')
+  expect(() => _.assert(NaN)).toThrow('Assertion Error:: value=NaN')
+
+  expect(() => _.assert(false, 'custom')).toThrow('Assertion Error:: custom')
+})
+
+test('_.bang', function () {
+  expect(_.bang(true)).toBe(true)
+  expect(_.bang(123)).toBe(123)
+  expect(_.bang('foo')).toBe('foo')
+  expect(_.bang([])).toStrictEqual([])
+  expect(_.bang({})).toStrictEqual({})
+
+  expect(_.bang(false)).toBe(false)
+  expect(_.bang(null)).toBe(null)
+  expect(_.bang(0)).toBe(0)
+  expect(_.bang(NaN)).toBe(NaN)
+
+  // _.bang() only throws on undefined. Not on false/null/other-falsey.
+  expect(() => _.bang(undefined)).toThrow('Bang Error')
+})
+
 test('_.each without _.BREAK', function () {
   const runCounter = buildRunCounter()
   _.each([1, 2, 3, 4, 5], runCounter.fn)
