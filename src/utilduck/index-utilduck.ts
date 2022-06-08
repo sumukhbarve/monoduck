@@ -134,15 +134,18 @@ const primitiveIs = function (x: unknown): x is Primitive {
 }
 const arrayIs = (x: unknown): x is unknown[] => Array.isArray(x)
 
-// const keys = <T>(obj: Obj<T>): string[] => Object.keys(obj)
-// const values = <T>(obj: Obj<T>): T[] => Object.values(obj)
+const keys = <T>(obj: Obj<T>): string[] => Object.keys(obj)
+const values = <T>(obj: Obj<T>): T[] => Object.values(obj)
 const toPairs = <T>(obj: Obj<T>): Array<[string, T]> => Object.entries(obj)
 const fromPairs = function <T>(pairs: Array<[string, T]>): Obj<T> {
   const result: Obj<T> = {}
   each(pairs, ([key, val]) => { result[key] = val })
   return result
 }
-const keyHas = function (obj: Obj<unknown>, key: string): boolean {
+const keyHas = function (
+  obj: Obj<unknown>,
+  key: string
+): key is keyof typeof obj {
   return Object.prototype.hasOwnProperty.call(obj, key)
 }
 
@@ -318,6 +321,8 @@ export const _ = {
   primitiveIs,
   arrayIs,
   plainObjectIs,
+  keys,
+  values,
   toPairs,
   fromPairs,
   keyHas,

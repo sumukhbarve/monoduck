@@ -9,10 +9,7 @@ type EqualityStr = 'is' | 'shallow' | 'deep'
 type EqualityFn = (x: unknown, y: unknown) => boolean
 type EqualityMode = EqualityStr | EqualityFn
 
-const makeEqualityFn = function <T>(
-  _val: T,
-  equality?: EqualityMode
-): EqualityFn {
+const makeEqualityFn = function (equality?: EqualityMode): EqualityFn {
   if (equality === undefined) { return Object.is }
   if (!_.stringIs(equality)) { return equality }
   if (equality === 'is') { return Object.is }
@@ -31,17 +28,19 @@ const observable = function<T> (
   equality?: EqualityMode
 ): Observable<T> {
   const initVal = val
-  const equalityFn = makeEqualityFn(val, equality)
+  const equalityFn = makeEqualityFn(equality)
   const pubsub = pubsubable<T>()
   const self = {
     get: function (): T {
       internalLookableGetterWatcher.publish(self)
       return val
     },
+    // TODO: Consider with caution::
+    // notify: () => pubsub.publish(val),
     set: function (newVal: T): void {
       if (!equalityFn(val, newVal)) {
         val = newVal
-        pubsub.publish(newVal)
+        pubsub.publish(val)
       }
     },
     reset: () => self.set(initVal),
@@ -58,4 +57,4 @@ const shallowObservable = function<T> (
 }
 
 export type { EqualityMode, Observable }
-export { observable, shallowObservable }
+export { observable, shallowObservable, makeEqualityFn }

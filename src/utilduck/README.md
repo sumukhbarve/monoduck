@@ -45,6 +45,8 @@ export const _ = {
   primitiveIs,
   arrayIs,
   plainObjectIs,
+  keys,
+  values,
   toPairs,
   fromPairs,
   keyHas,

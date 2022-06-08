@@ -41,7 +41,7 @@ const computed = function<T> (
 ): Lookable<T> {
   const initResult = runAndDetectDeps(compute, new Set<Dep>())
   const currentDeps = initResult.freshDeps
-  const { set: setLookable, ...lookable } = observable(
+  const { set: setLookable, reset: _reset, ...lookable } = observable(
     initResult.computedVal, equality
   )
   const recompute = (): void => {
