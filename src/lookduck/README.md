@@ -10,7 +10,7 @@
 - No hard dependency on React. Could be used on the server.
 - Intentionally simple, highly composable, and strictly typed.
 
-### Quickstart: Duck Counter
+## Quickstart: Duck Counter
 
 **0. Install monoduck:**
 ```shell
@@ -51,7 +51,7 @@ export const DuckCounter: React.VFC = () => {
 }
 ```
 
-### Lookables, Observables, and Computeds
+## Lookables, Observables, and Computeds
 
 **Lookables:**
 - A lookable is something you can look at.
@@ -96,7 +96,7 @@ lastName.set('Potter')
 console.log(fullName.get()) // Harry Potter
 ```
 
-### Type-Safety & Subscriptions
+## Type-Safety & Subscriptions
 Types and subscriptions work the way you'd expect. Consider:
 ```ts
 type User = { id: number, name: string }
@@ -125,7 +125,7 @@ Quick comments on the above:
  - If you use Lookduck with React, you shouldn't need to manually manage subscriptions.
 
 
-### Alternative Equality Modes:
+## Alternative Equality Modes:
 By defaults, observables (and computes), use `Object.is` for equality checking. But both `observable()` and `computed()` functions accept a second parameter, `equality`, which can be:
 - `"is"` (the default),
 - `"deep"`: (deep-equality),
@@ -149,7 +149,13 @@ ob2.set({...ob2.get(), status: 'Hi!'}) // logs "ob2 updated"
 ob2.set({...ob2.get(), status: 'Hi!'}) // doesn't log anything!
 ```
 
-### React Integration:
+**Why does the equality mode matter?**
+
+The equality mode is used to determine if the observable changed, and whenever it changes, all the computes that depend on it are recomputed. Those recomputeations can trigger additional recomputations, as computes can depend on computes.
+
+If an observable (or computed) impacts multiple downstream computes (or if it has multiple subscribers), it might make sense to an alternative equality mode. This way, noop-like updates won't trigger a recomputation cascade.
+
+## React Integration:
 
 Lookduck doesn't internally import React. Instead, it includes a helper that returns a React hook:
 
@@ -165,3 +171,7 @@ The decision to _not_ import react was taken with a view to:
 - keep Monoduck's overall footprint minimal.
 
 The `useLookable` hook accepts a lookable, and returns it's current value. Then, whenever the lookable changes, it triggers a rerender.
+
+<!--## Observable ID Maps-->
+
+<!--On the frontend, if your dealing with (database-linked) objects with an `id` property, it might make sense to have an observable of type `Record<IdType, ObjectType>`. And `lookduck.observableIdMap()` can build such an observable for you!-->
