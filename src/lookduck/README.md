@@ -126,7 +126,7 @@ Quick comments on the above:
 
 
 ## Alternative Equality Modes:
-By defaults, observables (and computes), use `Object.is` for equality checking. But both `observable()` and `computed()` functions accept a second parameter, `equality`, which can be:
+By defaults, observables (and computeds), use `Object.is` for equality checking. But both `observable()` and `computed()` functions accept a second parameter, `equality`, which can be:
 - `"is"` (the default),
 - `"deep"`: (deep-equality),
 - `"shallow"`: (shallow-equality), or
@@ -151,9 +151,9 @@ ob2.set({...ob2.get(), status: 'Hi!'}) // doesn't log anything!
 
 **Why does the equality mode matter?**
 
-The equality mode is used to determine if the observable changed, and whenever it changes, all the computes that depend on it are recomputed. Those recomputeations can trigger additional recomputations, as computes can depend on computes.
+The equality mode is used to determine if the observable changed, and whenever it changes, all the computeds that depend on it are recomputed. Those recomputeations can trigger additional recomputations, as computeds can depend on computeds.
 
-If an observable (or computed) impacts multiple downstream computes (or if it has multiple subscribers), it might make sense to an alternative equality mode. This way, noop-like updates won't trigger a recomputation cascade.
+If an observable (or computed) impacts multiple downstream computeds (or if it has multiple subscribers), it might make sense to an alternative equality mode. This way, noop-like updates won't trigger a recomputation cascade.
 
 ## React Integration:
 
