@@ -63,7 +63,7 @@ export const DuckCounter: React.VFC = () => {
 - An observable is a _settable_ lookable.
 - To set it's value, call `.set()` with the new value.
 - If the new value is different from the previous value, subscribers will be notified.
-- Equality is tested via `===`, so for objects, that's referential equality.
+- By default, equality is tested via `Object.is`, so for objects, that's referential equality.
 - Here's a quick example:
 
 
@@ -123,6 +123,31 @@ Quick comments on the above:
  - Just like observables, computeds can also be explicitly typed.
  - And like observables, you can subscribe to computeds too.
  - If you use Lookduck with React, you shouldn't need to manually manage subscriptions.
+
+
+### Alternative Equality Modes:
+By defaults, observables (and computes), use `Object.is` for equality checking. But both `observable()` and `computed()` functions accept a second parameter, `equality`, which can be:
+- `"is"` (the default),
+- `"deep"`: (deep-equality),
+- `"shallow"`: (shallow-equality), or
+- a custom function of type `(x: unknown, y: unknown) => boolean`
+
+To demonstrate this, consider:
+```ts
+// By default, observables use referential equaity:
+const ob1 = observable({name: 'Harry', status: 'Hello World!'})
+ob1.subscribe(() => console.log('ob1 updated'))
+ob1.set({...ob1.get()}) // logs: ob1 updated
+ob1.set({...ob1.get(), status: 'Hi!'}) // logs "ob1 updated"
+ob1.set({...ob1.get(), status: 'Hi!'}) // logs "ob1 updated"
+
+// Let's create an observable that uses deep-equality:
+const ob2 = observable({name: 'Larry', status: 'Hello World!'}, 'deep')
+ob2.subscribe(() => console.log('ob2 updated'))
+ob2.set({...ob2.get()}) // doesn't log anything!
+ob2.set({...ob2.get(), status: 'Hi!'}) // logs "ob2 updated"
+ob2.set({...ob2.get(), status: 'Hi!'}) // doesn't log anything!
+```
 
 ### React Integration:
 

@@ -15,6 +15,7 @@ const arrToIdMap = function <T extends Idful>(
 }
 
 interface ObservableIdMap<T extends Idful> extends Observable<IdMap<T>> {
+  listObjects: () => T[]
   getById: (id: T['id']) => T | undefined
   updateObjects: (objs: T[]) => void
   popByIds: (ids: Array<T['id']>) => void
@@ -24,6 +25,8 @@ const observableIdMap = function <T extends Idful>(
 ): ObservableIdMap<T> {
   const initObjMap: IdMap<T> = _.arrayIs(init) ? arrToIdMap(init) : init
   const liveObjMap = observable(initObjMap)
+
+  const listObjects = (): T[] => _.values(liveObjMap.get())
 
   const getById = function (id: T['id']): T | undefined {
     const objMap = liveObjMap.get()
@@ -64,7 +67,7 @@ const observableIdMap = function <T extends Idful>(
   }
 
   // Compose and return an ObservableIdMap<T>:
-  return { ...liveObjMap, getById, updateObjects, popByIds }
+  return { ...liveObjMap, listObjects, getById, updateObjects, popByIds }
 }
 
 export type { Idful, IdMap, ObservableIdMap }

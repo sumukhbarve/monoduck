@@ -40,7 +40,7 @@ const observable = function<T> (
     set: function (newVal: T): void {
       if (!equalityFn(val, newVal)) {
         val = newVal
-        pubsub.publish(val)
+        pubsub.publish(newVal)
       }
     },
     reset: () => self.set(initVal),
