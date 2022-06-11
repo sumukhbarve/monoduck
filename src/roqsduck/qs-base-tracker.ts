@@ -56,18 +56,18 @@ const stringifyQs = function (routeInfo: RouteInfo): string {
 
 // Handle initial data flow from URL --> App with proper initialization:
 const observableQs = lookduck.observable(unprefixQmark(gWindow.location.search))
-let qsPopInProgress: boolean = false
+let qsPopInProgressDepth: number = 0
 // Handle data flow from App --> URL as user interacts with the App:
 observableQs.subscribe(function () {
-  if (!qsPopInProgress) {
+  if (qsPopInProgressDepth === 0) {
     gWindow.history.pushState(null, '', prefixQmark(observableQs.get()))
   }
 })
 // Handle data flow from URL --> App as the users navigates back/forward:
 gWindow.addEventListener('popstate', function () {
-  qsPopInProgress = true
+  qsPopInProgressDepth += 1
   observableQs.set(unprefixQmark(gWindow.location.search))
-  qsPopInProgress = false
+  qsPopInProgressDepth -= 1
 })
 
 const currentRouteInfo = lookduck.computed(function (): RouteInfo {

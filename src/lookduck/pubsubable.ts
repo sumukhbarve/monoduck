@@ -11,7 +11,7 @@ const pubsubable = function<T> (): Pubsubable<T> {
   const self = {
     publish: (val: T) => subscribers.forEach(subscriber => subscriber(val)),
     unsubscribe: (fn: AcceptorFn<T>) => subscribers.delete(fn),
-    subscribe: (fn: AcceptorFn<T>) => {
+    subscribe: function (fn: AcceptorFn<T>) {
       subscribers.add(fn)
       return () => self.unsubscribe(fn)
     }
