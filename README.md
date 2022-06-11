@@ -34,3 +34,4 @@ Monoduck uses `ts-standard` for code-styling and linting. This way, one needn't 
 - Bool vars should begin with `is`, `has`, etc. (eg. `isAdmin`, `hasAccess`)
 - Functions that return bools should end with `is`, `has`, etc. (eg. `oddIs`)
 - Strictly prefer `===` over `==`. Never use `==`, not even `== null`.
+- Prefer `if`..`else` over `switch`. (Latter is OK if each `case` just returns.)

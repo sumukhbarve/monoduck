@@ -12,23 +12,21 @@ type UseLookableFn = <T>(ob: Lookable<T>) => T
 const makeUseLookable = _.once(function (React: ReactyLooky): UseLookableFn {
   const useLookable = function<T> (ob: Lookable<T>): T {
     let phase: 'premount' | 'mounted' | 'unmounted' = 'premount'
-    let premountChangeDetected = false
+    let didChangePremount = false
     const [, setBool] = React.useState(false)
     const rerender = (): void => setBool(bool => !bool)
     const unsubscribe = ob.subscribe(function () {
-      if (phase === 'premount') {
-        premountChangeDetected = true
-      } else if (phase === 'mounted') {
-        rerender()
-      } else if (phase === 'unmounted') {
-        setTimeout(() => unsubscribe(), 0) // don't sync-unsub amid pub-loop
-      } else {
-        _.never(phase)
+      switch (phase) {
+        case 'premount': return (function () { didChangePremount = true })()
+        case 'mounted': return rerender()
+        // async-unsub if unmounted, as we're amid pub-loop
+        case 'unmounted': return setTimeout(() => unsubscribe(), 0)
+        default: return _.never(phase)
       }
     })
     React.useEffect(function () {
       phase = 'mounted'
-      if (premountChangeDetected) { rerender() }
+      if (didChangePremount) { rerender() }
       // cleanup fn
       return function () {
         phase = 'unmounted'
