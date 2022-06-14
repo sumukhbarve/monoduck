@@ -25,7 +25,7 @@ const runAndDetectDeps = function<T> (
   const freshDeps = new Set<Dep>()
   const carryDeps = new Set<Dep>()
   const unsubscribeFromGetterWatcher = internalLookableGetterWatcher.subscribe(
-    lookable => {
+    function (lookable) {
       prevDeps.has(lookable) ? carryDeps.add(lookable) : freshDeps.add(lookable)
     }
   )
@@ -44,14 +44,14 @@ const computed = function<T> (
   const { set: setLookable, reset: _reset, ...lookable } = observable(
     initResult.computedVal, equality
   )
-  const recompute = (): void => {
+  const recompute = function (): void {
     const runResult = runAndDetectDeps(compute, currentDeps)
     setLookable(runResult.computedVal)
-    runResult.freshDeps.forEach(dep => {
+    runResult.freshDeps.forEach(function (dep) {
       currentDeps.add(dep)
       dep.subscribe(recompute)
     })
-    runResult.staleDeps.forEach(dep => {
+    runResult.staleDeps.forEach(function (dep) {
       currentDeps.delete(dep)
       dep.unsubscribe(recompute)
     })

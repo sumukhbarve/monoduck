@@ -1,6 +1,6 @@
 {
   "name": "monoduck",
-  "version": "0.1.6",
+  "version": "0.1.7-dev",
   "description": "",
   "source": "src/index-monoduck.ts",
   "main": "dist/index-monoduck.js",
@@ -15,7 +15,7 @@
     "test-lookduck": "jest src/lookduck/",
     "lint": "ts-standard --fix",
     "watch": "parcel watch",
-    "build": "tsc",
+    "build": "rm -rf dist && tsc",
     "prepack": "npm run lint && npm run test && npm run build"
   },
   "repository": {

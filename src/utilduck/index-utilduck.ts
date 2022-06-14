@@ -20,6 +20,7 @@ type Obj<T, K extends RecordKey = string> = Record<K, T>
 type ItrFn<X, Y = unknown, I = number> = (val: X, i: I) => Y
 type NotIsh = 0 | '' | 0n | null | undefined | false // EXCLUDES NaN
 type NoInfer<T> = [T][T extends any ? 0 : never]
+type VoidFn = () => void
 type AnyFn = (...args: any[]) => any // This is unrelated to `_.any()`
 // SameFn<F> produces a function with the same signature as F
 type SameFn<F extends AnyFn> = (...args: Parameters<F>) => ReturnType<F>
@@ -56,18 +57,16 @@ const bang = function <T>(val: T | undefined): T {
 
 const each = function <T>(arr: T[], fn: ItrFn<T>): void {
   for (let i = 0; i < arr.length; i += 1) {
-    if (fn(_.bang(arr[i]), i) === BREAK) {
+    if (fn(arr[i] as T, i) === BREAK) {
       break
     }
   }
 }
-
 const map = function <X, Y>(arr: X[], fn: ItrFn<X, Y>): Y[] {
   const result: Y[] = []
   each(arr, (val, i) => result.push(fn(val, i)))
   return result
 }
-
 const filter = function <T>(arr: T[], fn: ItrFn<T> = identity): T[] {
   const result: T[] = []
   each(arr, (val, i) => bool(fn(val, i)) && result.push(val))
@@ -79,7 +78,6 @@ const reduce = function <T, A>(arr: T[], fn: ReduceItrFn<T, A>, acc: A): A {
   each(arr, val => { acc = fn(acc, val) })
   return acc
 }
-
 const find = function <T>(arr: T[], fn: ItrFn<T> = identity): T | undefined {
   let foundVal: T | undefined
   _.each(arr, function (val, i) {
@@ -225,7 +223,6 @@ const pick = function <T extends Obj<unknown>, K extends keyof T>(
   each(keys, key => { result[key] = obj[key] })
   return result as Pick<T, K>
 }
-
 const omit = function <T extends Obj<unknown>, K extends keyof T>(
   obj: T,
   keys: K[]
@@ -270,7 +267,6 @@ const once = function<F extends AnyFn> (fn: F): SameFn<F> {
   }
   return newFn
 }
-
 const memoize = function<F extends AnyFn> (
   fn: F, hasher?: (...args: Parameters<F>) => string
 ): SameFn<F> {
@@ -285,15 +281,42 @@ const memoize = function<F extends AnyFn> (
   }
   return newFn
 }
+const debounce = function (fn: VoidFn, waitMs: number): VoidFn {
+  let prevCallAt = 0
+  let prevTimeoutId: ReturnType<typeof setTimeout> | null = null
+  const cancelPrevTimeout = function (): void {
+    if (prevTimeoutId !== null) {
+      clearTimeout(prevTimeoutId)
+      prevTimeoutId = null
+    }
+  }
+  const debouncedFn = function (): void {
+    const currentCallAt = Date.now()
+    const waitedMs = currentCallAt - prevCallAt
+    const isLeadingCall = prevTimeoutId === null
+    if (!isLeadingCall && waitedMs >= waitMs) {
+      cancelPrevTimeout()
+      return fn()
+    }
+    // Otherwise
+    prevCallAt = currentCallAt
+    cancelPrevTimeout()
+    prevTimeoutId = setTimeout(debouncedFn, waitMs)
+  }
+  return debouncedFn
+}
 
-const sleep = async (waitMs: number): Promise<void> => {
+const delay = (fn: VoidFn, waitMs: number): void => { setTimeout(fn, waitMs) }
+const defer = (fn: VoidFn, waitMs = 0): void => { setTimeout(fn, waitMs) }
+const sleep = async function (waitMs: number): Promise<void> {
   return await new Promise(resolve => setTimeout(resolve, waitMs))
 }
 const now = (): number => Date.now()
 
+const pretty = (x: unknown, space = 4): string => JSON.stringify(x, null, space)
 const never = (never: never): never => never
 
-export type { NoInfer, AnyFn, SameFn }
+export type { NoInfer, VoidFn, AnyFn, SameFn }
 
 export const _ = {
   BREAK,
@@ -341,7 +364,11 @@ export const _ = {
   sortBy,
   once,
   memoize,
+  debounce,
+  delay,
+  defer,
   sleep,
   now,
+  pretty,
   never
 }

@@ -1,8 +1,10 @@
+import type { VoidFn } from './indeps-lookduck'
+
 type AcceptorFn<T> = (someVal: T) => void
 
 interface Pubsubable<T> {
   publish: AcceptorFn<T>
-  subscribe: (fn: AcceptorFn<T>) => (() => void)
+  subscribe: (fn: AcceptorFn<T>) => VoidFn
   unsubscribe: (fn: AcceptorFn<T>) => void
 }
 

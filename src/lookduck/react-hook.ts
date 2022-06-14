@@ -1,9 +1,10 @@
+import type { VoidFn } from './indeps-lookduck'
 import type { Lookable } from './lookable'
 import { _ } from './indeps-lookduck'
 
 interface ReactyLooky {
   useState: (val: boolean) => [boolean, (cb: (val: boolean) => boolean) => void]
-  useEffect: (effect: () => void, deps?: unknown[]) => void
+  useEffect: (effect: () => VoidFn, deps?: unknown[]) => void
 }
 
 type UseLookableFn = <T>(ob: Lookable<T>) => T

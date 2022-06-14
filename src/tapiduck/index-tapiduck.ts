@@ -4,7 +4,7 @@ import { fetch, fetchUsing } from './tapiFetcher'
 import { sockpoint, sockEmit, sockOn, sockUse } from './tapiSockpoint'
 
 export type { TapiEndpoint } from './tapiEndpoint'
-export type { TapiSockpoint } from './tapiSockpoint'
+export type { TapiSockpoint, TapiSocky } from './tapiSockpoint'
 
 export { TapiError }
 

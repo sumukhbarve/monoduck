@@ -14,13 +14,13 @@ const sockpoint = function<ZData> (
 }
 
 // Highly simplified Socket.IO interface, with 'emit' and optional 'on' props.
-interface Sockish {
+interface TapiSocky {
   emit: (evtName: string, eventData: unknown) => void
   on?: (evtName: string, handler: (...args: any[]) => void) => void
 }
 
 const sockEmit = function <ZData>(
-  sockish: Sockish,
+  sockish: TapiSocky,
   sockpoint: TapiSockpoint<ZData>,
   data: NoInfer<ZData>
 ): void {
@@ -29,7 +29,7 @@ const sockEmit = function <ZData>(
 }
 
 const sockOn = function <ZData>(
-  sockish: Required<Sockish>,
+  sockish: Required<TapiSocky>,
   sockpoint: TapiSockpoint<ZData>,
   handler: (data: NoInfer<ZData>) => void
 ): void {
@@ -54,7 +54,7 @@ interface BoundTapiSock {
   ) => void
 }
 
-const sockUse = function (sockish: Required<Sockish>): BoundTapiSock {
+const sockUse = function (sockish: Required<TapiSocky>): BoundTapiSock {
   const emit = function <ZData>(
     sockpoint: TapiSockpoint<ZData>,
     data: NoInfer<ZData>
@@ -70,5 +70,5 @@ const sockUse = function (sockish: Required<Sockish>): BoundTapiSock {
   return { emit, on }
 }
 
-export type { TapiSockpoint, Sockish, BoundTapiSock }
+export type { TapiSockpoint, TapiSocky, BoundTapiSock }
 export { sockpoint, sockEmit, sockOn, sockUse }

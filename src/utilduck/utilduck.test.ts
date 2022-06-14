@@ -345,7 +345,7 @@ test('_.memoize', function () {
   expect(rawFacto(5)).toBe(120)
   expect(rawCallCount).toBe(5)
   expect(memFacto(5)).toBe(120)
-  expect(rawCallCount).toBe(5)
+  expect(memCallCount).toBe(5)
 
   rawCallCount = 0
   memCallCount = 0
@@ -354,6 +354,31 @@ test('_.memoize', function () {
   expect(rawCallCount).toBe(10)
   expect(memFacto(10)).toBe(3628800)
   expect(memCallCount).toBe(5) // Not 10, as 1! to 5! should be memoized
+})
+
+test('_.debounce', async function () {
+  let count = 0
+  const originalFn = (): void => { count += 1 }
+  _.each([1, 2, 3, 4, 5], originalFn)
+  expect(count).toBe(5)
+
+  count = 0 // reset count
+  expect(count).toBe(0)
+  const shortWaitMs = 10
+  const shortDebouncedFn = _.debounce(originalFn, shortWaitMs)
+  _.each([1, 2, 3, 4, 5], shortDebouncedFn)
+  expect(count).toBe(0) // no immediate diff, as no sync-exec
+  await _.sleep(shortWaitMs + 1) // +1 margin
+  expect(count).toBe(1)
+
+  count = 0 // reset count
+  expect(count).toBe(0)
+  const longerWaitMs = 200
+  const longerDebouncedFn = _.debounce(originalFn, longerWaitMs)
+  _.each([10, 20, 30, 40, 45, 50], (n) => setTimeout(longerDebouncedFn, n))
+  expect(count).toBe(0) // no immediate diff, as no sync-exec
+  await _.sleep(longerWaitMs + 50 + 5) // +50 as max(n) -> 50, +5 margin
+  expect(count).toBe(1)
 })
 
 test('_.sleep', async function () {

@@ -3,7 +3,7 @@ import type { AcceptorFn } from './pubsubable'
 import { internalLookableGetterWatcher } from './lookable'
 import type { Lookable } from './lookable'
 import { _ } from './indeps-lookduck'
-// import type { NoInfer} from './indeps-lookduck'
+import type { VoidFn } from './indeps-lookduck'
 
 type EqualityStr = 'is' | 'shallow' | 'deep'
 type EqualityFn = (x: unknown, y: unknown) => boolean
@@ -20,7 +20,7 @@ const makeEqualityFn = function (equality?: EqualityMode): EqualityFn {
 
 type Observable<T> = Lookable<T> & {
   set: AcceptorFn<T>
-  reset: () => void
+  reset: VoidFn
 }
 
 const observable = function<T> (

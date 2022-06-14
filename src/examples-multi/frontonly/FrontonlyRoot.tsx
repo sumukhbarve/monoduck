@@ -1,7 +1,10 @@
 // Prelims:
 import React from 'react'
 import ReactDOM from 'react-dom'
-import { roqsduck, lookduck } from './indeps-frontonly'
+import { roqsduck, lookduck, _ } from './indeps-frontonly'
+import { io } from 'socket.io-client'
+
+_.noop()
 
 const { Link, useRouteInfo } = roqsduck.injectReact(React)
 const useLookable = lookduck.makeUseLookable(React)
@@ -30,10 +33,36 @@ const CounterRoute: React.VFC = function () {
   )
 }
 
+const lkX = lookduck.observable(1)
+const lkY = lookduck.computed(() => lkX.get() * 2)
+const lkZ = lookduck.computed(() => lkY.get() / 2)
+const XyzRoute: React.VFC = function () {
+  const xyz = {
+    x: useLookable(lkX),
+    y: useLookable(lkY),
+    z: useLookable(lkZ)
+  }
+  return (
+    <div>
+      <pre>{_.pretty(xyz)}</pre>
+      <button onClick={() => lkX.set(lkX.get() + 1)}>x += 1</button>
+    </div>
+  )
+}
+
 export const BrokenCounter: React.VFC = () => {
   const [count, setCount] = React.useState(0)
   setCount(100)
   return <div>Count = {count}</div>
+}
+
+const socket = io('http://localhost:3000', { transports: ['websocket'] })
+const obSockObjs = lookduck.observable<unknown[]>([])
+socket.on('flagNotifFromServer', function (data: unknown) {
+  obSockObjs.set([data, ...obSockObjs.get()])
+})
+const SockViewer: React.VFC = function () {
+  return <pre>{_.pretty(useLookable(obSockObjs))}</pre>
 }
 
 // Set up a routing map based on query-string id.
@@ -42,7 +71,9 @@ const routeMap: Record<string, React.VFC> = {
   bbb: RouteBBB,
   ccc: RouteCCC,
   '': EmptyRoute,
-  counter: CounterRoute
+  counter: CounterRoute,
+  sock: SockViewer,
+  xyz: XyzRoute
 }
 
 const ActiveRoute: React.VFC = function () {
@@ -64,6 +95,7 @@ const FrontonlyRoot: React.VFC = function () {
         <Link to={{ id: 'bbb' }}>Bbb</Link> |{' '}
         <Link to={{ id: 'ccc' }}>Ccc</Link> |{' '}
         <Link to={{ id: 'counter' }}>Counter</Link> |{' '}
+        <Link to={{ id: 'sock' }}>Sock</Link> |{' '}
         <Link to={{ id: 'other' }}>Other</Link>
       </nav>
       <hr />

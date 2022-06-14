@@ -1,9 +1,8 @@
-import { AcceptorFn, pubsubable } from './pubsubable'
+import type { Pubsubable } from './pubsubable'
+import { pubsubable } from './pubsubable'
 
-interface Lookable<T> {
+type Lookable<T> = Omit<Pubsubable<T>, 'publish'> & {
   get: () => T
-  subscribe: (fn: AcceptorFn<T>) => (() => void)
-  unsubscribe: (fn: AcceptorFn<T>) => void
 }
 
 const internalLookableGetterWatcher = pubsubable<Lookable<unknown>>()

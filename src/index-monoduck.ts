@@ -7,10 +7,12 @@ export type {
 } from './lookduck/index-lookduck'
 export { lookduck } from './lookduck/index-lookduck'
 
-export type { TapiEndpoint, TapiSockpoint } from './tapiduck/index-tapiduck'
+export type {
+  TapiEndpoint, TapiSockpoint, TapiSocky
+} from './tapiduck/index-tapiduck'
 export { tapiduck, TapiError } from './tapiduck/index-tapiduck'
 
-export type { NoInfer, AnyFn, SameFn } from './utilduck/index-utilduck'
+export type { NoInfer, VoidFn, AnyFn, SameFn } from './utilduck/index-utilduck'
 export { _ } from './utilduck/index-utilduck'
 
 export type { DuckModel, ModelFactory } from './sqlduck/index-sqlduck'
