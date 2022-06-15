@@ -283,35 +283,46 @@ const memoize = function<F extends AnyFn> (
 }
 const debounce = function (fn: VoidFn, waitMs: number): VoidFn {
   let prevCallAt = 0
-  let prevTimeoutId: ReturnType<typeof setTimeout> | null = null
-  const cancelPrevTimeout = function (): void {
-    if (prevTimeoutId !== null) {
-      clearTimeout(prevTimeoutId)
-      prevTimeoutId = null
+  let timeoutId: ReturnType<typeof setTimeout> | null = null
+  const cancelTimeout = function (): void {
+    if (timeoutId !== null) {
+      clearTimeout(timeoutId)
+      timeoutId = null
     }
   }
   const debouncedFn = function (): void {
     const currentCallAt = Date.now()
     const waitedMs = currentCallAt - prevCallAt
-    const isLeadingCall = prevTimeoutId === null
+    prevCallAt = currentCallAt // for next call
+    const isLeadingCall = timeoutId === null
     if (!isLeadingCall && waitedMs >= waitMs) {
-      cancelPrevTimeout()
+      cancelTimeout()
       return fn()
     }
     // Otherwise
-    prevCallAt = currentCallAt
-    cancelPrevTimeout()
-    prevTimeoutId = setTimeout(debouncedFn, waitMs)
+    cancelTimeout()
+    timeoutId = setTimeout(debouncedFn, waitMs)
   }
   return debouncedFn
 }
 
 const delay = (fn: VoidFn, waitMs: number): void => { setTimeout(fn, waitMs) }
 const defer = (fn: VoidFn, waitMs = 0): void => { setTimeout(fn, waitMs) }
+// const makeDeferred = (fn: VoidFn, ms = 0): VoidFn => () => defer(fn, ms)
 const sleep = async function (waitMs: number): Promise<void> {
   return await new Promise(resolve => setTimeout(resolve, waitMs))
 }
+const sleepSync = function (waitMs: number): void {
+  const START = Date.now()
+  while (Date.now() - START < waitMs) { _.noop() }
+}
 const now = (): number => Date.now()
+
+const prefixCountMap: Record<string, number> = {} // NOT to be exported
+const uniqueId = function (prefix = ''): string {
+  prefixCountMap[prefix] = (prefixCountMap[prefix] ?? 0) + 1
+  return `${prefix}${_.bang(prefixCountMap[prefix])}`
+}
 
 const pretty = (x: unknown, space = 4): string => JSON.stringify(x, null, space)
 const never = (never: never): never => never
@@ -367,8 +378,11 @@ export const _ = {
   debounce,
   delay,
   defer,
+  // makeDeferred,
   sleep,
+  sleepSync,
   now,
+  uniqueId,
   pretty,
   never
 }

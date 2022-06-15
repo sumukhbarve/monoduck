@@ -126,7 +126,7 @@ test('_.deepFlatten', function () {
   expect(_.deepFlatten([1, [[[[[[[[2]]]]]]]], 3])).toEqual([1, 2, 3])
 })
 
-test('_.is* (mostly primitive trios)', function () {
+test('_.stringIs, etc. (mostly primitives)', function () {
   type Trio = [(x: unknown) => boolean, unknown, boolean]
   const trios: Trio[] = [
     [_.stringIs, 'foo', true],
@@ -383,11 +383,30 @@ test('_.debounce', async function () {
 
 test('_.sleep', async function () {
   const errorMargin = 10 // miliseconds
-  const periods = [800, 1200]
+  const periods = [400, 600]
   for (const period of periods) {
     const t0 = _.now()
     await _.sleep(period)
     const diff = _.now() - t0
     expect(Math.abs(diff - period)).toBeLessThanOrEqual(errorMargin)
   }
+})
+
+test('_.sleepSync', function () {
+  const errorMargin = 5 // miliseconds
+  const periods = [400, 600]
+  for (const period of periods) {
+    const t0 = _.now()
+    _.sleepSync(period)
+    const diff = _.now() - t0
+    expect(Math.abs(diff - period)).toBeLessThanOrEqual(errorMargin)
+  }
+})
+
+test('_.uniqueId', function () {
+  _.each('apple banana cat donkey'.split(' '), function (prefix) {
+    _.each([1, 2, 3, 4, 5], function (n) {
+      expect(_.uniqueId(prefix)).toBe(`${prefix}${n}`)
+    })
+  })
 })

@@ -7,7 +7,7 @@ import { io } from 'socket.io-client'
 _.noop()
 
 const { Link, useRouteInfo } = roqsduck.injectReact(React)
-const useLookable = lookduck.makeUseLookable(React)
+const { useLookable, useLookables } = lookduck.injectReact(React)
 
 // Create (or import) route-specific components:
 const RouteAAA: React.VFC = () => <h2>Hello AAA</h2>
@@ -16,7 +16,7 @@ const RouteCCC: React.VFC = () => <h2>Hello CCC</h2>
 const NoSuchRoute: React.VFC = () => <h2>No Such Route</h2>
 
 const EmptyRoute: React.VFC = function () {
-  roqsduck.setRouteInfo({ id: 'aaa', from: 'EmptyRoute' })
+  roqsduck.setRouteInfo({ id: 'aaa', from: 'empty' })
   return null
 }
 
@@ -36,12 +36,21 @@ const CounterRoute: React.VFC = function () {
 const lkX = lookduck.observable(1)
 const lkY = lookduck.computed(() => lkX.get() * 2)
 const lkZ = lookduck.computed(() => lkY.get() / 2)
-const XyzRoute: React.VFC = function () {
+const OldXyzRoute: React.VFC = function () {
   const xyz = {
-    x: useLookable(lkX),
-    y: useLookable(lkY),
-    z: useLookable(lkZ)
+    x: useLookable(lkX, { debounce: false }),
+    y: useLookable(lkY, { debounce: false }),
+    z: useLookable(lkZ, { debounce: false })
   }
+  return (
+    <div>
+      <pre>{_.pretty(xyz)}</pre>
+      <button onClick={() => lkX.set(lkX.get() + 1)}>x += 1</button>
+    </div>
+  )
+}
+const NewXyzRoute: React.VFC = function () {
+  const xyz = useLookables({ x: lkX, y: lkY, z: lkZ }, { debounce: 1 })
   return (
     <div>
       <pre>{_.pretty(xyz)}</pre>
@@ -73,7 +82,8 @@ const routeMap: Record<string, React.VFC> = {
   '': EmptyRoute,
   counter: CounterRoute,
   sock: SockViewer,
-  xyz: XyzRoute
+  oldXyz: OldXyzRoute,
+  newXyz: NewXyzRoute
 }
 
 const ActiveRoute: React.VFC = function () {
@@ -96,6 +106,8 @@ const FrontonlyRoot: React.VFC = function () {
         <Link to={{ id: 'ccc' }}>Ccc</Link> |{' '}
         <Link to={{ id: 'counter' }}>Counter</Link> |{' '}
         <Link to={{ id: 'sock' }}>Sock</Link> |{' '}
+        <Link to={{ id: 'oldXyz' }}>oldXyz</Link> |{' '}
+        <Link to={{ id: 'newXyz' }}>newXyz</Link> |{' '}
         <Link to={{ id: 'other' }}>Other</Link>
       </nav>
       <hr />
