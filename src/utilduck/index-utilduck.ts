@@ -103,6 +103,33 @@ const any: (typeof all) = function (arr, fn = identity) {
   return not(all(arr, (val, i) => not(fn(val, i))))
 }
 
+const rangeOpt = function (
+  ...args: [number] | [number, number] | [number, number, number]
+): {start: number, end: number, step: number} {
+  const length = args.length
+  const sign = (n: number): number => n / Math.abs(n)
+  switch (length) {
+    case 1: return { start: 0, end: args[0], step: sign(args[0] - 0) }
+    case 2: return { start: args[0], end: args[1], step: sign(args[1] - args[0]) }
+    case 3: return { start: args[0], end: args[1], step: args[2] }
+    default: return _.never(length)
+  }
+}
+const range = function (
+  ...args: [number] | [number, number] | [number, number, number]
+): number[] {
+  const { start, end, step } = rangeOpt(...args)
+  const sign = (n: number): number => n / Math.abs(n)
+  if (step === 0 || Number.isNaN(step) || sign(end - start) !== sign(step)) {
+    throw new Error(`Invalid Range:: start=${start}, end=${end}, step=${step}`)
+  }
+  const result: number[] = []
+  for (let i = start; step > 0 ? i < end : i > end; i += step) {
+    result.push(i)
+  }
+  return result
+}
+
 type NestedArr<T> = Array<T | NestedArr<T>>
 const deepFlatten = function <T>(arr: NestedArr<T>): T[] {
   const result: T[] = []
@@ -321,7 +348,8 @@ const now = (): number => Date.now()
 const prefixCountMap: Record<string, number> = {} // NOT to be exported
 const uniqueId = function (prefix = ''): string {
   prefixCountMap[prefix] = (prefixCountMap[prefix] ?? 0) + 1
-  return `${prefix}${_.bang(prefixCountMap[prefix])}`
+  const sep = prefix === '' ? '' : '_'
+  return `${prefix}${sep}${_.bang(prefixCountMap[prefix])}`
 }
 
 const pretty = (x: unknown, space = 4): string => JSON.stringify(x, null, space)
@@ -345,6 +373,8 @@ export const _ = {
   find,
   all,
   any,
+  rangeOpt,
+  range,
   deepFlatten,
   stringIs,
   numberIs,

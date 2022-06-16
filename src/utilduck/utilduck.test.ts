@@ -121,6 +121,38 @@ test('_.any', function () {
   expect(runCounter.getCount()).toBe(3)
 })
 
+test('_.rangeOpt', function () {
+  expect(_.rangeOpt(8)).toStrictEqual({ start: 0, end: 8, step: 1 })
+  expect(_.rangeOpt(8, 16)).toStrictEqual({ start: 8, end: 16, step: 1 })
+  expect(_.rangeOpt(8, 16, 2)).toStrictEqual({ start: 8, end: 16, step: 2 })
+
+  expect(_.rangeOpt(20, 10)).toStrictEqual({ start: 20, end: 10, step: -1 })
+  expect(_.rangeOpt(20, 0)).toStrictEqual({ start: 20, end: 0, step: -1 })
+  expect(_.rangeOpt(20, -1)).toStrictEqual({ start: 20, end: -1, step: -1 })
+  expect(_.rangeOpt(20, -1, -2)).toStrictEqual({ start: 20, end: -1, step: -2 })
+
+  expect(_.rangeOpt(-4)).toStrictEqual({ start: 0, end: -4, step: -1 })
+  expect(_.rangeOpt(-4, -8)).toStrictEqual({ start: -4, end: -8, step: -1 })
+  expect(_.rangeOpt(-4, -8, -2)).toStrictEqual({ start: -4, end: -8, step: -2 })
+})
+
+test('_.range', function () {
+  expect(_.range(4)).toStrictEqual([0, 1, 2, 3])
+  expect(_.range(4, 8)).toStrictEqual([4, 5, 6, 7])
+  expect(_.range(4, 8, 2)).toStrictEqual([4, 6])
+  expect(_.range(4, 8, 3)).toStrictEqual([4, 7])
+
+  expect(_.range(8, 4)).toStrictEqual([8, 7, 6, 5])
+  expect(_.range(8, 4, -2)).toStrictEqual([8, 6])
+  expect(_.range(8, 4, -3)).toStrictEqual([8, 5])
+  expect(_.range(-4)).toStrictEqual([0, -1, -2, -3])
+
+  expect(() => _.range(1, 10, -1)).toThrow('Invalid Range::')
+  expect(() => _.range(10, 1, +1)).toThrow('Invalid Range::')
+  expect(() => _.range(-1, -10, +1)).toThrow('Invalid Range::')
+  expect(() => _.range(-10, -1, -1)).toThrow('Invalid Range::')
+})
+
 test('_.deepFlatten', function () {
   expect(_.deepFlatten([1, [2, [3, [4, [5]]]]])).toEqual([1, 2, 3, 4, 5])
   expect(_.deepFlatten([1, [[[[[[[[2]]]]]]]], 3])).toEqual([1, 2, 3])
@@ -368,6 +400,8 @@ test('_.debounce', async function () {
   const shortDebouncedFn = _.debounce(originalFn, shortWaitMs)
   _.each([1, 2, 3, 4, 5], shortDebouncedFn)
   expect(count).toBe(0) // no immediate diff, as no sync-exec
+  _.sleepSync(100)
+  expect(count).toBe(0) // still no immediate diff, as no sync-exec
   await _.sleep(shortWaitMs + 1) // +1 margin
   expect(count).toBe(1)
 
@@ -377,7 +411,9 @@ test('_.debounce', async function () {
   const longerDebouncedFn = _.debounce(originalFn, longerWaitMs)
   _.each([10, 20, 30, 40, 45, 50], (n) => setTimeout(longerDebouncedFn, n))
   expect(count).toBe(0) // no immediate diff, as no sync-exec
-  await _.sleep(longerWaitMs + 50 + 5) // +50 as max(n) -> 50, +5 margin
+  _.sleepSync(100)
+  expect(count).toBe(0) // still no immediate diff, as no sync-exec
+  await _.sleep(longerWaitMs + 50 + 10) // +50 as max(n) -> 50, +10 margin
   expect(count).toBe(1)
 })
 
@@ -406,7 +442,12 @@ test('_.sleepSync', function () {
 test('_.uniqueId', function () {
   _.each('apple banana cat donkey'.split(' '), function (prefix) {
     _.each([1, 2, 3, 4, 5], function (n) {
-      expect(_.uniqueId(prefix)).toBe(`${prefix}${n}`)
+      expect(_.uniqueId(prefix)).toBe(`${prefix}_${n}`)
+    })
+    _.each([1, 2, 3, 4, 5], function (n) {
+      expect(_.uniqueId(prefix)).toBe(`${prefix}_${n + 5}`)
     })
   })
+  _.each([1, 2, 3, 4, 5], (n) => expect(_.uniqueId()).toBe(String(n)))
+  _.each([1, 2, 3, 4, 5], (n) => expect(_.uniqueId()).toBe(String(n + 5)))
 })
