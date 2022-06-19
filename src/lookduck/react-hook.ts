@@ -4,6 +4,8 @@ import type {
 } from './lookable'
 import { getLookables } from './lookable'
 import { _ } from './indeps-lookduck'
+import type { EqualityMode } from './observable'
+import { makeEqualityFn } from './observable'
 
 interface ReactyLooky {
   useState: <T>(initVal: T) => [T, (cb: (val: T) => T) => void]
@@ -18,12 +20,14 @@ interface ReactyLooky {
 interface UseLookablezOpt {
   debounce: number | false // no. of miliseconds, or false
   logRerender: string | false // msg to log on rerender, or false
+  equality: EqualityMode
 }
 const getDefaultLookablezOpt = _.once(
-  function (React: ReactyLooky): UseLookablezOpt {
+  function (_React: ReactyLooky): UseLookablezOpt {
     return {
-      debounce: _.bool(React.createRoot) ? false : 10, // 10 ms => 100 fps
-      logRerender: false
+      debounce: false,
+      logRerender: false,
+      equality: 'shallow'
     }
   }
 )
@@ -36,29 +40,40 @@ type UseLookablesFn = <LMap extends AnyLookableMap>(
 // Creates useLookables from React's useState and useEffect
 const makeUseLookables = _.once(function (React: ReactyLooky): UseLookablesFn {
   //
-  // Debounce Hook:
-  const useDebounceAwareRerender = function (opt: UseLookablezOpt): VoidFn {
+  // Rerendering Hook:
+  const useMinimalRerender = function (
+    lkArr: Array<Lookable<unknown>>, opt: UseLookablezOpt
+  ): VoidFn {
+    const valArrRef = React.useRef(_.map(lkArr, lk => lk.get()))
     const [, setNum] = React.useState(0)
-    const rerender = function (): void {
+    const equalityFn = makeEqualityFn(opt.equality)
+    const forceUpdate = function (): void {
       if (_.stringIs(opt.logRerender)) {
         console.log(`Rerendering ${opt.logRerender} ...`)
       }
-      setNum(n => (n + 1) % 2e9) // 2e9 is just some big number (32 bit signed)
+      setNum(n => (n + 1) % 2e9) // 2e9 is some big number (32 bit signed)
     }
-    if (opt.debounce === false) { return rerender }
-    return _.debounce(rerender, opt.debounce)
+    const forceUpdateIfChanged = function (): void {
+      const newValArr = _.map(lkArr, lk => lk.get())
+      if (!equalityFn(valArrRef.current, newValArr)) {
+        valArrRef.current = newValArr
+        forceUpdate()
+      }
+    }
+    if (opt.debounce === false) { return forceUpdateIfChanged }
+    return _.debounce(forceUpdateIfChanged, opt.debounce)
   }
   //
   // Subscription Hook:
   const useSubscription = function (
-    lkArr: Array<Lookable<unknown>>, daRerender: VoidFn
+    lkArr: Array<Lookable<unknown>>, minRerender: VoidFn
   ): void {
     const phase = React.useRef<'premount' | 'mounted' | 'unmounted'>('premount')
     const didChangePremount = React.useRef(false)
     const didSubscribe = React.useRef(false)
     const phasewiseListenerMap = {
       premount: () => { didChangePremount.current = true },
-      mounted: daRerender,
+      mounted: minRerender,
       unmounted: () => _.defer(unsubAll) // async-unsub, as we're amid pub-loop
     }
     const rootListener = (): void => phasewiseListenerMap[phase.current]()
@@ -66,7 +81,7 @@ const makeUseLookables = _.once(function (React: ReactyLooky): UseLookablesFn {
     const unsubAll = (): void => lkArr.forEach(o => o.unsubscribe(rootListener))
     React.useEffect(function () {
       phase.current = 'mounted'
-      if (didChangePremount.current) { daRerender() }
+      if (didChangePremount.current) { minRerender() }
       return function () {
         phase.current = 'unmounted'
         unsubAll()
@@ -83,8 +98,9 @@ const makeUseLookables = _.once(function (React: ReactyLooky): UseLookablesFn {
     lkMap: LMap, opts?: Partial<UseLookablezOpt>
   ): GottenLookableValueMap<LMap> {
     const opt: UseLookablezOpt = { ...getDefaultLookablezOpt(React), ...opts }
-    const daRerender = useDebounceAwareRerender(opt)
-    useSubscription(Object.values(lkMap), daRerender)
+    const lkArr = Object.values(lkMap)
+    const minRerender = useMinimalRerender(lkArr, opt)
+    useSubscription(lkArr, minRerender)
     return getLookables(lkMap)
   }
   //

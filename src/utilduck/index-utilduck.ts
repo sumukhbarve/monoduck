@@ -120,6 +120,7 @@ const range = function (
 ): number[] {
   const { start, end, step } = rangeOpt(...args)
   const sign = (n: number): number => n / Math.abs(n)
+  if ((end - start) === 0) { return [] }
   if (step === 0 || Number.isNaN(step) || sign(end - start) !== sign(step)) {
     throw new Error(`Invalid Range:: start=${start}, end=${end}, step=${step}`)
   }
@@ -212,19 +213,22 @@ const deepClone = <T> (x: T): T => clone(x, Infinity)
 const shallowClone = <T> (x: T): T => clone(x, 1)
 
 const equals = function (x: unknown, y: unknown, depth: number): boolean {
-  const isSame = Object.is(x, y)
-  if (depth === 0 || primitiveIs(x) || primitiveIs(y) || isSame) {
-    return isSame
-  }
-  if (arrayIs(x) && arrayIs(y) && x.length === y.length) {
+  const isEq = Object.is(x, y)
+  if (depth === 0 || primitiveIs(x) || primitiveIs(y) || isEq) { return isEq }
+  if (arrayIs(x)) {
+    if (!arrayIs(y)) { return false }
+    if (x.length !== y.length) { return false }
     return all(x, (_xEl, i) => equals(x[i], y[i], depth - 1))
   }
-  if (plainObjectIs(x) && plainObjectIs(y)) {
+  if (arrayIs(y)) { return false }
+  if (plainObjectIs(x)) {
+    if (!plainObjectIs(y)) { return false }
     const xKeys = Object.keys(x)
     const yKeys = Object.keys(y)
     if (xKeys.length !== yKeys.length) { return false }
     return all(xKeys, k => keyHas(y, k) && equals(x[k], y[k], depth - 1))
   }
+  if (plainObjectIs(y)) { return false }
   console.error(`Can't check equality of ${String(x)} against ${String(y)}.`)
   throw new Error(`Can't check equality of ${String(x)} against ${String(y)}.`)
 }

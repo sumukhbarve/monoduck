@@ -50,7 +50,7 @@ const OldXyzRoute: React.VFC = function () {
   )
 }
 const NewXyzRoute: React.VFC = function () {
-  const xyz = useLookables({ x: lkX, y: lkY, z: lkZ }, { debounce: 1 })
+  const xyz = useLookables({ x: lkX, y: lkY, z: lkZ })
   return (
     <div>
       <pre>{_.pretty(xyz)}</pre>

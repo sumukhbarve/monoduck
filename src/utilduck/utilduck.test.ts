@@ -151,6 +151,9 @@ test('_.range', function () {
   expect(() => _.range(10, 1, +1)).toThrow('Invalid Range::')
   expect(() => _.range(-1, -10, +1)).toThrow('Invalid Range::')
   expect(() => _.range(-10, -1, -1)).toThrow('Invalid Range::')
+
+  expect(_.range(0, 0)).toStrictEqual([])
+  expect(_.range(10, 10)).toStrictEqual([])
 })
 
 test('_.deepFlatten', function () {
@@ -243,6 +246,13 @@ test('_.deepEquals', function () {
 
   expect(_.deepEquals(obj, dClone)).toBe(false)
   expect(_.deepEquals(obj, sClone)).toBe(true)
+
+  expect(_.deepEquals([], {})).toBe(false)
+  expect(_.deepEquals({}, [])).toBe(false)
+  expect(_.deepEquals([], new Date())).toBe(false)
+  expect(_.deepEquals(new Date(), {})).toBe(false)
+  expect(_.deepEquals({}, /regexp/)).toBe(false)
+  expect(_.deepEquals(/regexp/, [])).toBe(false)
 })
 
 test('_.shallowEquals', function () {
@@ -258,6 +268,13 @@ test('_.shallowEquals', function () {
 
   expect(_.shallowEquals(obj, sClone)).toBe(true)
   expect(_.shallowEquals(obj, dClone)).toBe(false) // continues to remain false
+
+  expect(_.shallowEquals([], {})).toBe(false)
+  expect(_.shallowEquals({}, [])).toBe(false)
+  expect(_.shallowEquals([], new Date())).toBe(false)
+  expect(_.shallowEquals(new Date(), {})).toBe(false)
+  expect(_.shallowEquals({}, /regexp/)).toBe(false)
+  expect(_.shallowEquals(/regexp/, [])).toBe(false)
 })
 
 test('_.mapObject', function () {
