@@ -1,112 +1,100 @@
-import type { VoidFn, AnyFn } from './indeps-lookduck'
+import type { VoidFn, Reacty } from './indeps-lookduck'
+import { _, getReact, injectReact } from './indeps-lookduck'
 import type {
-  Lookable, AnyLookableMap, GottenLookableValueMap
+  Lookable, AnyLookableMap, GottenLookableMapValues
 } from './lookable'
-import { getLookables } from './lookable'
-import { _ } from './indeps-lookduck'
+import { getEachInLookableMap } from './lookable'
 import type { EqualityMode } from './observable'
 import { makeEqualityFn } from './observable'
 
-interface ReactyLooky {
-  useState: <T>(initVal: T) => [T, (cb: (val: T) => T) => void]
-  useEffect: (effect: () => VoidFn, deps?: unknown[]) => void
-  useRef: <T>(initVal: T) => {current: T}
-  useCallback: (callback: VoidFn, deps: unknown[]) => VoidFn
-  // Optionals:
-  unstable_batchedUpdates?: (fn: VoidFn) => void
-  createRoot?: AnyFn
-}
-
-interface UseLookablezOpt {
-  debounce: number | false // no. of miliseconds, or false
-  logRerender: string | false // msg to log on rerender, or false
+interface HookOpt {
+  debounce: number | null // no. of ms, or null to disable
+  logRerender: string | null // msg to log on rerender, or null to disable
   equality: EqualityMode
 }
-const getDefaultLookablezOpt = _.once(
-  function (_React: ReactyLooky): UseLookablezOpt {
-    return {
-      debounce: false,
-      logRerender: false,
-      equality: 'shallow'
-    }
-  }
-)
+const defaultHookOpt: HookOpt = {
+  debounce: null,
+  logRerender: null,
+  equality: 'is'
+}
 
-type UseLookablesFn = <LMap extends AnyLookableMap>(
-  lkMap: LMap,
-  options?: Partial<UseLookablezOpt>
-) => GottenLookableValueMap<LMap>
+const useMinimalRerender = function (
+  lkArr: Array<Lookable<unknown>>, opt: HookOpt
+): VoidFn {
+  const React = getReact()
+  const valArrRef = React.useRef(_.map(lkArr, lk => lk.get()))
+  const [, setNum] = React.useState(0)
+  const equalityFn = makeEqualityFn(opt.equality)
+  const forceUpdate = function (): void {
+    if (_.stringIs(opt.logRerender)) {
+      console.log(`Rerendering ${opt.logRerender} ...`)
+    }
+    setNum(n => (n + 1) % 2e9) // 2e9 is some big number (32 bit signed)
+  }
+  const forceUpdateIfChanged = function (): void {
+    const newValArr = _.map(lkArr, lk => lk.get())
+    // Check equlityFn pairwise, to properly support custom equality functions
+    if (!_.all(valArrRef.current, (val, i) => equalityFn(val, newValArr[i]))) {
+      valArrRef.current = newValArr
+      forceUpdate()
+    }
+  }
+  if (opt.debounce === null) { return forceUpdateIfChanged }
+  return _.debounce(forceUpdateIfChanged, opt.debounce)
+}
 
-// Creates useLookables from React's useState and useEffect
-const makeUseLookables = _.once(function (React: ReactyLooky): UseLookablesFn {
-  //
-  // Rerendering Hook:
-  const useMinimalRerender = function (
-    lkArr: Array<Lookable<unknown>>, opt: UseLookablezOpt
-  ): VoidFn {
-    const valArrRef = React.useRef(_.map(lkArr, lk => lk.get()))
-    const [, setNum] = React.useState(0)
-    const equalityFn = makeEqualityFn(opt.equality)
-    const forceUpdate = function (): void {
-      if (_.stringIs(opt.logRerender)) {
-        console.log(`Rerendering ${opt.logRerender} ...`)
-      }
-      setNum(n => (n + 1) % 2e9) // 2e9 is some big number (32 bit signed)
-    }
-    const forceUpdateIfChanged = function (): void {
-      const newValArr = _.map(lkArr, lk => lk.get())
-      if (!equalityFn(valArrRef.current, newValArr)) {
-        valArrRef.current = newValArr
-        forceUpdate()
-      }
-    }
-    if (opt.debounce === false) { return forceUpdateIfChanged }
-    return _.debounce(forceUpdateIfChanged, opt.debounce)
+const useSubscription = function (
+  lkArr: Array<Lookable<unknown>>, minRerender: VoidFn
+): void {
+  const React = getReact()
+  const phase = React.useRef<'premount' | 'mounted' | 'unmounted'>('premount')
+  const didChangePremount = React.useRef(false)
+  const didSubscribe = React.useRef(false)
+  const phasewiseListenerMap = {
+    premount: () => { didChangePremount.current = true },
+    mounted: minRerender,
+    unmounted: () => _.defer(unsubAll) // async-unsub, as we're amid pub-loop
   }
-  //
-  // Subscription Hook:
-  const useSubscription = function (
-    lkArr: Array<Lookable<unknown>>, minRerender: VoidFn
-  ): void {
-    const phase = React.useRef<'premount' | 'mounted' | 'unmounted'>('premount')
-    const didChangePremount = React.useRef(false)
-    const didSubscribe = React.useRef(false)
-    const phasewiseListenerMap = {
-      premount: () => { didChangePremount.current = true },
-      mounted: minRerender,
-      unmounted: () => _.defer(unsubAll) // async-unsub, as we're amid pub-loop
+  const rootListener = (): void => phasewiseListenerMap[phase.current]()
+  const subAll = (): void => lkArr.forEach(o => o.subscribe(rootListener))
+  const unsubAll = (): void => lkArr.forEach(o => o.unsubscribe(rootListener))
+  React.useEffect(function () {
+    phase.current = 'mounted'
+    if (didChangePremount.current) { minRerender() }
+    return function () {
+      phase.current = 'unmounted'
+      unsubAll()
     }
-    const rootListener = (): void => phasewiseListenerMap[phase.current]()
-    const subAll = (): void => lkArr.forEach(o => o.subscribe(rootListener))
-    const unsubAll = (): void => lkArr.forEach(o => o.unsubscribe(rootListener))
-    React.useEffect(function () {
-      phase.current = 'mounted'
-      if (didChangePremount.current) { minRerender() }
-      return function () {
-        phase.current = 'unmounted'
-        unsubAll()
-      }
-    }, [])
-    if (!didSubscribe.current) {
-      didSubscribe.current = true
-      subAll() // sync-sub, as we aren't amid pub-loop
-    }
+  }, [])
+  if (!didSubscribe.current) {
+    didSubscribe.current = true
+    subAll() // sync-sub, as we aren't amid pub-loop
   }
-  //
-  // Main Hook:
-  const useLookables = function <LMap extends AnyLookableMap>(
-    lkMap: LMap, opts?: Partial<UseLookablezOpt>
-  ): GottenLookableValueMap<LMap> {
-    const opt: UseLookablezOpt = { ...getDefaultLookablezOpt(React), ...opts }
-    const lkArr = Object.values(lkMap)
-    const minRerender = useMinimalRerender(lkArr, opt)
-    useSubscription(lkArr, minRerender)
-    return getLookables(lkMap)
-  }
-  //
-  // Return Hook:
-  return useLookables
-})
+}
+
+const useLookableArray = function <T extends Array<Lookable<unknown>>>(
+  lkArr: T, opts?: Partial<HookOpt>
+): undefined {
+  const opt: HookOpt = { ...defaultHookOpt, ...opts }
+  const minRerender = useMinimalRerender(lkArr, opt)
+  useSubscription(lkArr, minRerender)
+  return undefined
+}
+
+const useLookableMap = function <LMap extends AnyLookableMap>(
+  lkMap: LMap, opt?: Partial<HookOpt>
+): GottenLookableMapValues<LMap> {
+  useLookableArray(_.values(lkMap), opt)
+  return getEachInLookableMap(lkMap)
+}
+const usePickLookables = function <
+  LMap extends AnyLookableMap,
+  K extends keyof LMap
+>(
+  lkMap: LMap, keys: K[], opt?: Partial<HookOpt>
+): GottenLookableMapValues<Pick<LMap, K>> {
+  return useLookableMap(_.pick(lkMap, keys), opt)
+}
 
 // Note: useRef vs useCallback (in makeUseLookables)
 // --- --- --- --- --- --- --- --- --- --- --- ---
@@ -120,31 +108,62 @@ const makeUseLookables = _.once(function (React: ReactyLooky): UseLookablesFn {
 // alone isn't sufficient. Since we'll need useRef anyway, and since the
 // callbacks aren't being passed as props, useCallback is unnecessary.
 
-type UseLookableFn = <T>(lk: Lookable<T>, opt?: Partial<UseLookablezOpt>) => T
-
-// Creates useLookable from React's useState and useEffect
-const makeUseLookable = _.once(function (React: ReactyLooky): UseLookableFn {
-  const useLookables = makeUseLookables(React)
-  const useLookable = function <T>(
-    lk: Lookable<T>, opt?: Partial<UseLookablezOpt>
-  ): T {
-    return useLookables({ lk }, opt).lk
+type AnyLookables =
+  | Array<Lookable<any>>
+  | AnyLookableMap
+type UseLookablesOutput<T extends AnyLookables> =
+  T extends Array<Lookable<any>>
+    ? undefined
+    : T extends AnyLookableMap
+      ? GottenLookableMapValues<T>
+      : never
+const useLookables = function <T extends AnyLookables>(
+  lookables: T, opt?: Partial<HookOpt>
+): UseLookablesOutput<T> {
+  if (_.arrayIs(lookables)) {
+    useLookableArray(lookables, opt)
+    return undefined as UseLookablesOutput<T>
+  } else if (_.plainObjectIs(lookables)) {
+    return useLookableMap(lookables, opt) as UseLookablesOutput<T>
+  } else {
+    return _.never(lookables)
   }
+}
+
+const useSingleLookable = function <T>(
+  lk: Lookable<T>, opt?: Partial<HookOpt>
+): T {
+  return useLookableMap({ lk }, opt).lk
+}
+const useLookable = function <T>(
+  lk: Lookable<T>, opt?: Partial<HookOpt>
+): T {
+  console.warn(_.singleSpaced(`
+    Lookduck: useLookable() is deprecated.
+    Please switch to usePickLookables() or useSingleLookable() instead.
+  `))
+  return useSingleLookable(lk, opt)
+}
+const makeUseLookable = function (React: Reacty): (typeof useLookable) {
+  console.warn(_.singleSpaced(`
+    Lookduck: makeUseLookable() is deprecated.
+    Please call lookduck.injectReact() and then lookduck.useLookables() instead.
+  `))
+  injectReact(React)
   return useLookable
-})
+}
 
-const makeBatch = _.once(function (React: ReactyLooky) {
-  const mockUnstableBatchedUpdates = (fn: VoidFn): void => fn()
-  return React.unstable_batchedUpdates ?? mockUnstableBatchedUpdates
-})
-
-const injectReact = _.once(function (React: ReactyLooky) {
-  return {
-    useLookables: makeUseLookables(React),
-    useLookable: makeUseLookable(React),
-    batch: makeBatch(React)
+const batch = function (fn: VoidFn): void {
+  const React = getReact()
+  if (_.bool(React.unstable_batchedUpdates)) {
+    React.unstable_batchedUpdates(fn)
+  } else {
+    fn()
   }
-})
+}
 
-export type { ReactyLooky, UseLookableFn, UseLookablezOpt }
-export { makeUseLookable, injectReact }
+export type { HookOpt }
+export {
+  useSingleLookable, usePickLookables, useLookables, batch,
+  useLookable, makeUseLookable
+}

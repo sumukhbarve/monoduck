@@ -1,1 +1,1 @@
-npx parcel serve frontonly-client.html
+rm -rf dist && npx parcel serve frontonly-client.html

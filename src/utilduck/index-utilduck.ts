@@ -159,6 +159,7 @@ const primitiveIs = function (x: unknown): x is Primitive {
   return any([stringIs, numberIs, booleanIs, nullIs, undefinedIs], fn => fn(x))
 }
 const arrayIs = (x: unknown): x is unknown[] => Array.isArray(x)
+const functionIs = (x: unknown): x is Function => typeof x === 'function'
 
 const keys = <T>(obj: Obj<T>): string[] => Object.keys(obj)
 const values = <T>(obj: Obj<T>): T[] => Object.values(obj)
@@ -357,9 +358,18 @@ const uniqueId = function (prefix = ''): string {
 }
 
 const pretty = (x: unknown, space = 4): string => JSON.stringify(x, null, space)
+const singleSpaced = (s: string): string => s.trim().split(/\s+/).join(' ')
 const never = (never: never): never => never
 
-export type { NoInfer, VoidFn, AnyFn, SameFn }
+type JsonPrimitive = string | number | boolean | null
+interface JsonArray extends Array<JsonValue> {}
+interface JsonObject extends Record<string, JsonValue> {}
+type JsonValue = JsonPrimitive | JsonArray | JsonObject
+
+export type {
+  NoInfer, VoidFn, AnyFn, SameFn,
+  JsonPrimitive, JsonArray, JsonObject, JsonValue
+}
 
 export const _ = {
   BREAK,
@@ -388,6 +398,7 @@ export const _ = {
   nanIs,
   primitiveIs,
   arrayIs,
+  functionIs,
   plainObjectIs,
   keys,
   values,
@@ -418,5 +429,6 @@ export const _ = {
   now,
   uniqueId,
   pretty,
+  singleSpaced,
   never
 }

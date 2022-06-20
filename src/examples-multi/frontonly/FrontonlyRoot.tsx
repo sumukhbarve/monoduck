@@ -1,13 +1,17 @@
 // Prelims:
 import React from 'react'
 import ReactDOM from 'react-dom'
-import { roqsduck, lookduck, _ } from './indeps-frontonly'
+import { roqsduck, lookduck, _, injectReact } from './indeps-frontonly'
 import { io } from 'socket.io-client'
+import * as nameStore from './nameStore'
+import { useLookables, useLookable } from '../../lookduck/react-hook'
 
 _.noop()
 
-const { Link, useRouteInfo } = roqsduck.injectReact(React)
-const { useLookable, useLookables } = lookduck.injectReact(React)
+injectReact(React)
+roqsduck.injectReact(React)
+const { LinkFC: Link, useRouteInfo } = roqsduck
+lookduck.injectReact(React)
 
 // Create (or import) route-specific components:
 const RouteAAA: React.VFC = () => <h2>Hello AAA</h2>
@@ -38,9 +42,9 @@ const lkY = lookduck.computed(() => lkX.get() * 2)
 const lkZ = lookduck.computed(() => lkY.get() / 2)
 const OldXyzRoute: React.VFC = function () {
   const xyz = {
-    x: useLookable(lkX, { debounce: false }),
-    y: useLookable(lkY, { debounce: false }),
-    z: useLookable(lkZ, { debounce: false })
+    x: useLookable(lkX, { debounce: null }),
+    y: useLookable(lkY, { debounce: null }),
+    z: useLookable(lkZ, { debounce: null })
   }
   return (
     <div>
@@ -59,7 +63,26 @@ const NewXyzRoute: React.VFC = function () {
   )
 }
 
-export const BrokenCounter: React.VFC = () => {
+const NamesEtc: React.VFC = function () {
+  const { f, l, fl, lf, fllf } = lookduck.usePickLookables(nameStore, [
+    'f', 'l', 'fl', 'lf', 'fllf'
+  ])
+  return (
+    <div>
+      F: <input value={f} onChange={e => nameStore.f.set(e.target.value)} />
+      <br />
+      L: <input value={l} onChange={e => nameStore.l.set(e.target.value)} />
+      <br />
+      FL: {fl}
+      <br />
+      LF: {lf}
+      <br />
+      FLLF: {fllf}
+    </div>
+  )
+}
+
+export const BrokenCounter: React.VFC = function () {
   const [count, setCount] = React.useState(0)
   setCount(100)
   return <div>Count = {count}</div>
@@ -83,7 +106,8 @@ const routeMap: Record<string, React.VFC> = {
   counter: CounterRoute,
   sock: SockViewer,
   oldXyz: OldXyzRoute,
-  newXyz: NewXyzRoute
+  newXyz: NewXyzRoute,
+  nameEtc: NamesEtc
 }
 
 const ActiveRoute: React.VFC = function () {
@@ -108,6 +132,7 @@ const FrontonlyRoot: React.VFC = function () {
         <Link to={{ id: 'sock' }}>Sock</Link> |{' '}
         <Link to={{ id: 'oldXyz' }}>oldXyz</Link> |{' '}
         <Link to={{ id: 'newXyz' }}>newXyz</Link> |{' '}
+        <Link to={{ id: 'nameEtc' }}>NameEtc</Link> |{' '}
         <Link to={{ id: 'other' }}>Other</Link>
       </nav>
       <hr />

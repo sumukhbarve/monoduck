@@ -12,23 +12,22 @@ const internalLookableGetterWatcher = pubsubable<Lookable<unknown>>()
 type InferLookable<L extends Lookable<any>> = ReturnType<L['get']>
 
 // A string-to-lookable mapping, loosely typed
-interface AnyLookableMap {
-  [k: string]: Lookable<any>
-}
+type AnyLookableMap = Record<string, Lookable<any>>
+
 // Given a str-to-lookable map, produces _typed_ str-to-val map
-type GottenLookableValueMap<LMap extends AnyLookableMap> = {
+type GottenLookableMapValues<LMap extends AnyLookableMap> = {
   [K in keyof LMap]: InferLookable<LMap[K]>
 }
 
-const getLookables = function <LMap extends AnyLookableMap>(
+const getEachInLookableMap = function <LMap extends AnyLookableMap>(
   lMap: LMap
-): GottenLookableValueMap<LMap> {
-  const vMap: Partial<GottenLookableValueMap<LMap>> = {}
+): GottenLookableMapValues<LMap> {
+  const vMap: Partial<GottenLookableMapValues<LMap>> = {}
   _.keys(lMap).forEach(function (key) {
     vMap[key as keyof LMap] = _.bang(lMap[key]).get()
   })
-  return vMap as GottenLookableValueMap<LMap>
+  return vMap as GottenLookableMapValues<LMap>
 }
 
-export type { Lookable, InferLookable, AnyLookableMap, GottenLookableValueMap }
-export { internalLookableGetterWatcher, getLookables }
+export type { Lookable, InferLookable, AnyLookableMap, GottenLookableMapValues }
+export { internalLookableGetterWatcher, getEachInLookableMap }

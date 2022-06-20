@@ -3,15 +3,14 @@ import {
   prefixQmark, unprefixQmark, parseQs, stringifyQs
 } from './qs-base-tracker'
 import {
-  makeUseRouteInfo,
+  useRouteInfo,
   getLinkHref,
   makeLinkClickHandler,
-  makeLinkFC,
+  LinkFC,
   injectReact
 } from './qs-react-integ'
 
 export type { RouteInfo } from './qs-base-tracker'
-export type { ReactyRoqsy } from './qs-react-integ'
 
 export const roqsduck = {
   // Lookability:
@@ -24,9 +23,9 @@ export const roqsduck = {
   parseQs,
   stringifyQs,
   // React Integ:
-  makeUseRouteInfo,
+  useRouteInfo,
   getLinkHref,
   makeLinkClickHandler,
-  makeLinkFC,
+  LinkFC,
   injectReact
 }

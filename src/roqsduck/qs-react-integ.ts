@@ -1,5 +1,5 @@
-import type { ReactyLooky } from './indeps-roqsduck'
-import { _, lookduck } from './indeps-roqsduck'
+import type { Reacty } from './indeps-roqsduck'
+import { lookduck, injectReact as _injReact, getReact } from './indeps-roqsduck'
 import type { RouteInfo } from './qs-base-tracker'
 import {
   currentRouteInfo,
@@ -8,10 +8,10 @@ import {
   stringifyQs
 } from './qs-base-tracker'
 
-const makeUseRouteInfo = _.once(function (React: ReactyLooky) {
-  const useLookable = lookduck.makeUseLookable(React)
-  return () => useLookable(currentRouteInfo)
-})
+const useRouteInfo = function (): RouteInfo {
+  // TODO: Accept options and pass them to useLookable
+  return lookduck.useLookable(currentRouteInfo)
+}
 
 const getLinkHref = function (to: RouteInfo): string {
   return prefixQmark(stringifyQs(to))
@@ -28,12 +28,7 @@ const makeLinkClickHandler = function (to: RouteInfo) {
 }
 
 // Note the signature of: React.createElement(component, props, ...children)
-
-type CreateElementyRoqsy =
-  (tag: string, props: Record<string, any>, ...children: any) => any
-type ReactyRoqsy = ReactyLooky & {
-  createElement: CreateElementyRoqsy
-}
+type CE = Reacty['createElement'] // Local alias
 interface LinkFCPropsy<ChildrenType> {
   to: RouteInfo
   children?: ChildrenType
@@ -42,33 +37,35 @@ interface LinkFCPropsy<ChildrenType> {
     color?: string
   }
 }
-const makeLinkFC = _.once(function<CE extends CreateElementyRoqsy> (
-  createElement: CE
-): (props: LinkFCPropsy<Parameters<CE>[300]>) => ReturnType<CE> {
-  const LinkFC = function (
-    props: LinkFCPropsy<Parameters<CE>[300]>
-  ): ReturnType<CE> {
-    const { to, children, style } = props
-    const anchorProps = {
-      href: getLinkHref(to),
-      onClick: makeLinkClickHandler(to),
-      style: { textDecoration: 'inherit', color: 'inherit', ...style }
-    }
-    return createElement('a', anchorProps, children)
+const defaultLinkStyle = {
+  textDecoration: 'inherit', color: 'inherit'
+}
+const LinkFC = function (
+  props: LinkFCPropsy<Parameters<CE>[300]>
+): ReturnType<CE> {
+  const React = getReact()
+  const { to, children, style } = props
+  const anchorProps = {
+    href: getLinkHref(to),
+    onClick: makeLinkClickHandler(to),
+    style: { ...defaultLinkStyle, ...style }
   }
-  return LinkFC
-})
+  return React.createElement('a', anchorProps, children)
+}
 
-const injectReact = _.once(function (React: ReactyRoqsy) {
-  return {
-    useRouteInfo: makeUseRouteInfo(React),
-    Link: makeLinkFC(React.createElement)
-  }
-})
+// Backward compatible roqsduck.injectReact:
+interface InjectReactOutput {
+  useRouteInfo: typeof useRouteInfo
+  Link: typeof LinkFC
+}
+const injectReact = function (React: Reacty): InjectReactOutput {
+  _injReact(React)
+  return { useRouteInfo, Link: LinkFC }
+}
 
-export type { ClickEventyRoqsy, CreateElementyRoqsy, LinkFCPropsy, ReactyRoqsy }
+export type { ClickEventyRoqsy, LinkFCPropsy, InjectReactOutput }
 export {
-  makeUseRouteInfo,
+  useRouteInfo,
   getLinkHref, makeLinkClickHandler,
-  makeLinkFC, injectReact
+  LinkFC, injectReact
 }
