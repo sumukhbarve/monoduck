@@ -72,6 +72,9 @@ const filter = function <T>(arr: T[], fn: ItrFn<T> = identity): T[] {
   each(arr, (val, i) => bool(fn(val, i)) && result.push(val))
   return result
 }
+const reject = function <T>(arr: T[], fn: ItrFn<T>): T[] {
+  return filter(arr, (val, i) => not(fn(val, i)))
+}
 
 type ReduceItrFn<T, A> = (acc: A, val: T) => A
 const reduce = function <T, A>(arr: T[], fn: ReduceItrFn<T, A>, acc: A): A {
@@ -383,6 +386,7 @@ export const _ = {
   each,
   map,
   filter,
+  reject,
   reduce,
   find,
   all,

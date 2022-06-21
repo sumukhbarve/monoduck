@@ -73,14 +73,20 @@ test('_.each with _.BREAK', function () {
 })
 
 test('_.map', function () {
-  expect(_.map([1, 2, 3], x => 2 * x)).toEqual([2, 4, 6])
+  expect(_.map([1, 2, 3], x => 2 * x)).toStrictEqual([2, 4, 6])
+  expect(_.map([1, 2, 3], x => x * x)).toStrictEqual([1, 4, 9])
 })
 
 test('_.filter', function () {
   // With explicit filtering fn:
-  expect(_.filter([1, 2, 3, 4], x => x % 2 === 0)).toEqual([2, 4])
+  expect(_.filter([1, 2, 3, 4], x => x % 2 === 0)).toStrictEqual([2, 4])
   // With default (bool) filtering:
-  expect(_.filter([0, 1, null, {}, false, 'foo'])).toEqual([1, {}, 'foo'])
+  expect(_.filter([0, 1, null, {}, false, 'foo'])).toStrictEqual([1, {}, 'foo'])
+})
+
+test('_.reject', function () {
+  expect(_.reject([1, 2, 3, 4], n => n % 2 === 0)).toStrictEqual([1, 3])
+  expect(_.reject([1, 2, 3, 4], n => n % 3 === 0)).toStrictEqual([1, 2, 4])
 })
 
 test('_.reduce', function () {
@@ -91,8 +97,8 @@ test('_.reduce', function () {
     [{ foo: 1 }, { bar: 2 }, { baz: 3 }],
     (acc, val) => ({ ...acc, ...val }),
     blankAcc
-  )).toEqual({ foo: 1, bar: 2, baz: 3 })
-  expect(blankAcc).toEqual({})
+  )).toStrictEqual({ foo: 1, bar: 2, baz: 3 })
+  expect(blankAcc).toStrictEqual({})
 })
 
 test('_.all', function () {
@@ -157,8 +163,8 @@ test('_.range', function () {
 })
 
 test('_.deepFlatten', function () {
-  expect(_.deepFlatten([1, [2, [3, [4, [5]]]]])).toEqual([1, 2, 3, 4, 5])
-  expect(_.deepFlatten([1, [[[[[[[[2]]]]]]]], 3])).toEqual([1, 2, 3])
+  expect(_.deepFlatten([1, [2, [3, [4, [5]]]]])).toStrictEqual([1, 2, 3, 4, 5])
+  expect(_.deepFlatten([1, [[[[[[[[2]]]]]]]], 3])).toStrictEqual([1, 2, 3])
 })
 
 test('_.stringIs, etc. (mostly primitives)', function () {
@@ -197,8 +203,8 @@ test('_.deepClone', function () {
   expect(clone.foo).toBe('foo')
 
   obj.arr.push(4)
-  expect(alias.arr).toEqual([1, 2, 3, 4])
-  expect(clone.arr).toEqual([1, 2, 3])
+  expect(alias.arr).toStrictEqual([1, 2, 3, 4])
+  expect(clone.arr).toStrictEqual([1, 2, 3])
 
   obj.num = 456
   expect(alias.num).toBe(456)
@@ -219,8 +225,8 @@ test('_.shallowClone', function () {
   expect(clone.foo).toBe('foo')
 
   obj.arr.push(4)
-  expect(alias.arr).toEqual([1, 2, 3, 4])
-  expect(clone.arr).toEqual([1, 2, 3, 4])
+  expect(alias.arr).toStrictEqual([1, 2, 3, 4])
+  expect(clone.arr).toStrictEqual([1, 2, 3, 4])
   expect(alias.arr).toBe(clone.arr)
 
   obj.num = 456
@@ -278,14 +284,14 @@ test('_.shallowEquals', function () {
 })
 
 test('_.mapObject', function () {
-  expect(_.mapObject({ a: 1 }, v => 2 * v)).toEqual({ a: 2 })
-  expect(_.mapObject({ a: 1, b: 2 }, v => 2 * v)).toEqual({ a: 2, b: 4 })
+  expect(_.mapObject({ a: 1 }, v => 2 * v)).toStrictEqual({ a: 2 })
+  expect(_.mapObject({ a: 1, b: 2 }, v => 2 * v)).toStrictEqual({ a: 2, b: 4 })
 })
 
 test('_.pick', function () {
   const fbb = { foo: 1, bar: 2, baz: 3, quax: 4 }
   const fb = _.pick(fbb, ['foo', 'bar'])
-  expect(Object.keys(fb)).toEqual(['foo', 'bar'])
+  expect(Object.keys(fb)).toStrictEqual(['foo', 'bar'])
   expect(fb.foo).toBe(1)
   expect(fb.bar).toBe(2)
 })
@@ -293,7 +299,7 @@ test('_.pick', function () {
 test('_.omit', function () {
   const fbb = { foo: 1, bar: 2, baz: 3, quax: 4 }
   const bq = _.omit(fbb, ['foo', 'bar'])
-  expect(Object.keys(bq)).toEqual(['baz', 'quax'])
+  expect(Object.keys(bq)).toStrictEqual(['baz', 'quax'])
   expect(bq.baz).toBe(3)
   expect(bq.quax).toBe(4)
 })
@@ -306,14 +312,14 @@ test('_.groupBy', function () {
     if (num % 5 === 0) { return 'buzz' }
     if (num % 3 === 0) { return 'fizz' }
     return 'plain'
-  })).toEqual({
+  })).toStrictEqual({
     plain: [1, 2, 4, 7, 8, 11, 13, 14],
     fizz: [3, 6, 9, 12],
     buzz: [5, 10],
     fizzbuzz: [15]
   })
 
-  expect(_.groupBy(arr, num => num % 2 === 0 ? 'even' : 'odd')).toEqual({
+  expect(_.groupBy(arr, num => num % 2 === 0 ? 'even' : 'odd')).toStrictEqual({
     even: [2, 4, 6, 8, 10, 12, 14],
     odd: [1, 3, 5, 7, 9, 11, 13, 15]
   })
@@ -322,7 +328,7 @@ test('_.groupBy', function () {
 test('_.partition', function () {
   const arr = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]
   const oddIs = (n: number): boolean => n % 2 === 1
-  expect(_.partition(arr, oddIs)).toEqual([
+  expect(_.partition(arr, oddIs)).toStrictEqual([
     [1, 3, 5, 7, 9, 11, 13, 15],
     [2, 4, 6, 8, 10, 12, 14]
   ])
