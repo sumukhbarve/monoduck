@@ -1,5 +1,5 @@
 import { _ } from './indeps-lookduck'
-import { observable, shallowObservable } from './observable'
+import { observable, observableIs, shallowObservable } from './observable'
 
 test('observable', function (): void {
   const str = observable('foo')
@@ -9,8 +9,8 @@ test('observable', function (): void {
   expect(str.get()).toBe('bar')
 
   const vals: string[] = []
-  const pushVal = function (something: string): void {
-    vals.push(something)
+  const pushVal = function (): void {
+    vals.push(str.get())
   }
   const unsub = str.subscribe(pushVal)
 
@@ -51,8 +51,8 @@ test('observable with deep equality only', function () {
   interface Foo {a: {b: string}}
   const foo = shallowObservable<Foo>({ a: { b: 'c' } })
   let vals: Foo[] = []
-  const pushVal = function (something: Foo): void {
-    vals.push(something)
+  const pushVal = function (): void {
+    vals.push(foo.get())
   }
   const unsub = foo.subscribe(pushVal)
 
@@ -68,4 +68,11 @@ test('observable with deep equality only', function () {
   expect(vals.length).toBe(0)
 
   unsub()
+})
+
+test('observableIs', function () {
+  const foo = observable('foo')
+  expect(observableIs(foo)).toBe(true)
+  foo.set('bar')
+  expect(observableIs(foo)).toBe(true)
 })

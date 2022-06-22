@@ -1,7 +1,7 @@
 import { pubsubable } from './pubsubable'
 import type { AcceptorFn } from './pubsubable'
-import { internalLookableGetterWatcher } from './lookable'
-import type { Lookable } from './lookable'
+import type { LookableDunderMonoduck, Lookable } from './lookable'
+import { internalLookableGetterWatcher, lookableIs } from './lookable'
 import { _ } from './indeps-lookduck'
 import type { VoidFn } from './indeps-lookduck'
 
@@ -18,9 +18,21 @@ const makeEqualityFn = function (equality?: EqualityMode): EqualityFn {
   return _.never(equality)
 }
 
-type Observable<T> = Lookable<T> & {
+interface ObservableDunderMonoduck extends LookableDunderMonoduck {
+  isSettable: true
+}
+interface Observable<T> extends Lookable<T> {
   set: AcceptorFn<T>
   reset: VoidFn
+  __monoduck__: ObservableDunderMonoduck
+}
+const observableIs = function (x: unknown): x is Observable<unknown> {
+  return lookableIs(x) && _.plainObjectIs(x) && _.all([
+    _.functionIs(x.set) && x.set.length === 1,
+    _.functionIs(x.reset) && x.reset.length === 0,
+    x.__monoduck__.isSettable,
+    x.__monoduck__.getDepCount() === 0 // observables have no dependencies
+  ])
 }
 
 const observable = function<T> (
@@ -30,7 +42,7 @@ const observable = function<T> (
   const initVal = val
   const equalityFn = makeEqualityFn(equality)
   const pubsub = pubsubable<T>()
-  const self = {
+  const self: Observable<T> = {
     get: function (): T {
       internalLookableGetterWatcher.publish(self)
       return val
@@ -45,7 +57,15 @@ const observable = function<T> (
     },
     reset: () => self.set(initVal),
     subscribe: pubsub.subscribe,
-    unsubscribe: pubsub.unsubscribe
+    unsubscribe: pubsub.unsubscribe,
+    __monoduck__: {
+      isLookable: true,
+      isSettable: true,
+      getSubCount: pubsub.__monoduck__.getSubCount,
+      subIs: pubsub.__monoduck__.subIs,
+      getDepCount: () => 0,
+      depIs: (_x: Lookable<unknown>) => false
+    }
   }
   return self
 }
@@ -56,5 +76,5 @@ const shallowObservable = function<T> (
   return observable(val, 'shallow')
 }
 
-export type { EqualityMode, Observable }
-export { observable, shallowObservable, makeEqualityFn }
+export type { EqualityMode, ObservableDunderMonoduck, Observable }
+export { observable, observableIs, shallowObservable, makeEqualityFn }

@@ -1,5 +1,5 @@
 import { observable } from './observable'
-import { computed } from './computed'
+import { computed, computedIs } from './computed'
 import { _ } from './indeps-lookduck'
 
 test('compute y = 2x', function (): void {
@@ -13,8 +13,8 @@ test('compute y = 2x', function (): void {
   expect(y.get()).toBe(6)
 
   const vals: number[] = []
-  const push = function (val: number): void {
-    vals.push(val)
+  const push = function (): void {
+    vals.push(y.get())
   }
   const unsub = y.subscribe(push)
 
@@ -43,8 +43,8 @@ test('compute z = 2y, where y = 2x', function (): void {
   expect(z.get()).toBe(12)
 
   const vals: number[] = []
-  const push = function (val: number): void {
-    vals.push(val)
+  const push = function (): void {
+    vals.push(z.get())
   }
   const unsub = z.subscribe(push)
 
@@ -105,7 +105,7 @@ test('compute bio = {name}, {gender}, {age} y/o', function (): void {
   const age = observable(25)
   const bio = computed(() => `${name.get()}, ${gender.get()}, ${age.get()} y/o`)
   const vals: string[] = []
-  const unsub = bio.subscribe((val) => vals.push(val))
+  const unsub = bio.subscribe(() => vals.push(bio.get()))
 
   expect(bio.get()).toBe('John, male, 25 y/o')
 
@@ -140,7 +140,7 @@ test('compute z = x && y ? random() : 1000', function (): void {
   const y = observable<boolean | number>(true)
   const z = computed(() => x.get() > 0 && y.get() > 0 ? Math.random() : 1000)
   const vals: number[] = []
-  const pushval = (val: number): void => { vals.push(val) }
+  const pushval = (): void => { vals.push(z.get()) }
   const unsub = z.subscribe(pushval)
 
   expect(z.get()).toBe(1000)
@@ -215,7 +215,7 @@ test('comuted() with custom equalityFn', function () {
 
   o.set({ foo: 'baz' })
   expect(customEqCheckCount).toBe(2)
-  expect(subNotifCount).toBe(1) // Same state as prev => shouldn't notify
+  expect(subNotifCount).toBe(1) // Same state as prev, thus shouldn't notify
 
   o.set({ foo: 'quax' })
   expect(customEqCheckCount).toBe(3)
@@ -232,14 +232,56 @@ test('multi-level computeds (f, l -> fl, lf -> fllf -> revfllf)', function () {
   const fllf = computed(() => `${fl.get()} ${lf.get()}`)
   const revfllf = computed(() => fllf.get().split('').reverse().join(''))
 
+  // Before 1st computation, no deps.
+  expect(fl.__monoduck__.getDepCount()).toBe(0)
+  expect(lf.__monoduck__.getDepCount()).toBe(0)
+  expect(fllf.__monoduck__.getDepCount()).toBe(0)
+  expect(revfllf.__monoduck__.getDepCount()).toBe(0)
+
+  // 1st computation will cause aggressive (upward) dep search.
   expect(fllf.get()).toBe('jon doe doe jon')
   expect(revfllf.get()).toBe('noj eod eod noj')
+  //
+  expect(fl.__monoduck__.getDepCount()).toBe(2)
+  expect(lf.__monoduck__.getDepCount()).toBe(2)
+  expect(fllf.__monoduck__.getDepCount()).toBe(4) // f, l, fl, and lf (aggressive)
+  // As 1st fllf.get() preceeded 1st revfllf.get(), revfllf only has fllf as dep
+  expect(revfllf.__monoduck__.getDepCount()).toBe(1)
 
+  // Observable cascades will cause recomputations and dep-shedding
   f.set('jane')
+  expect(fl.__monoduck__.getDepCount()).toBe(2)
+  expect(lf.__monoduck__.getDepCount()).toBe(2)
+  expect(fllf.__monoduck__.getDepCount()).toBe(2) // just fl & lf (having shed f & l)
+  expect(revfllf.__monoduck__.getDepCount()).toBe(1)
+  //
   expect(fllf.get()).toBe('jane doe doe jane')
   expect(revfllf.get()).toBe('enaj eod eod enaj')
+  //
+  expect(fl.__monoduck__.getDepCount()).toBe(2)
+  expect(lf.__monoduck__.getDepCount()).toBe(2)
+  expect(fllf.__monoduck__.getDepCount()).toBe(2)
+  expect(revfllf.__monoduck__.getDepCount()).toBe(1) // just fllf
 
   l.set('smith')
   expect(fllf.get()).toBe('jane smith smith jane')
   expect(revfllf.get()).toBe('enaj htims htims enaj')
+
+  expect(fl.__monoduck__.getDepCount()).toBe(2)
+  expect(lf.__monoduck__.getDepCount()).toBe(2)
+  expect(fllf.__monoduck__.getDepCount()).toBe(2)
+  expect(revfllf.__monoduck__.getDepCount()).toBe(1)
+})
+
+test('computedIs on level-3 derived computed', function () {
+  const l0 = observable(1)
+  const l1 = computed(() => l0.get() * 2)
+  const l2 = computed(() => l1.get() * 2)
+  const l3 = computed(() => l2.get() * 2)
+  expect(l3.__monoduck__.getDepCount()).toBe(0) // no deps until first .get()
+  expect(computedIs(l3)).toBe(true) // Internally calls .get() & .subscribe()
+  expect(l3.__monoduck__.getSubCount()).toBe(0) // subscription shouldn't leak
+  expect(l3.__monoduck__.getDepCount()).toBe(3) // aggressive: l1 & l2 & l3
+  l0.set(l0.get() + 1) // triggers recompute and dep cleanup
+  expect(l3.__monoduck__.getDepCount()).toBe(1) // just l3 after cleanup
 })

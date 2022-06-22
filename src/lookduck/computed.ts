@@ -1,7 +1,17 @@
-import { internalLookableGetterWatcher } from './lookable'
-import type { Lookable } from './lookable'
+import { internalLookableGetterWatcher, lookableIs } from './lookable'
+import type { Lookable, LookableDunderMonoduck } from './lookable'
 import { makeEqualityFn, observable } from './observable'
 import type { EqualityMode } from './observable'
+
+interface ComputedDunderMonoduck extends LookableDunderMonoduck {
+  isSettable: false
+}
+interface Computed<T> extends Lookable<T> {
+  __monoduck__: ComputedDunderMonoduck
+}
+const computedIs = function (x: unknown): x is Computed<unknown> {
+  return lookableIs(x) && !x.__monoduck__.isSettable
+}
 
 const getSetDifference = function<T> (setA: Set<T>, setB: Set<T>): Set<T> {
   const onlyA = new Set(setA)
@@ -70,7 +80,13 @@ const computed = function<T> (
   return {
     get: function () { firstCompute(); return rawLookable.get() },
     subscribe: function (f) { firstCompute(); return rawLookable.subscribe(f) },
-    unsubscribe: rawLookable.unsubscribe
+    unsubscribe: rawLookable.unsubscribe,
+    __monoduck__: {
+      ...rawLookable.__monoduck__,
+      isSettable: false,
+      getDepCount: () => currentDeps.size,
+      depIs: (dep: Dep) => currentDeps.has(dep)
+    }
   }
 }
 
@@ -78,4 +94,5 @@ const shallowComputed = function<T> (compute: () => T): Lookable<T> {
   return computed(compute, 'shallow')
 }
 
-export { computed, shallowComputed }
+export type { ComputedDunderMonoduck, Computed }
+export { computedIs, computed, shallowComputed }

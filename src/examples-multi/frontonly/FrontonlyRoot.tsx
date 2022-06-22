@@ -3,7 +3,7 @@ import React from 'react'
 import ReactDOM from 'react-dom'
 import { roqsduck, lookduck, _, injectReact } from './indeps-frontonly'
 import { io } from 'socket.io-client'
-import * as nameStore from './nameStore'
+import { nameStore } from './nameStore'
 import { useLookables, useLookable } from '../../lookduck/react-hook'
 
 _.noop()

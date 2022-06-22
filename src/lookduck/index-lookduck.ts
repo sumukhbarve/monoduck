@@ -1,7 +1,8 @@
 import { injectReact } from './indeps-lookduck'
 import { pubsubable } from './pubsubable'
-import { observable } from './observable'
-import { computed } from './computed'
+import { lookableIs } from './lookable'
+import { observable, observableIs } from './observable'
+import { computed, computedIs } from './computed'
 import {
   useSingleLookable, usePickLookables, useLookables,
   useLookable, makeUseLookable // <-- deprecated
@@ -16,8 +17,11 @@ export type { Idful, IdMap, ObservableIdMap } from './observableIdMap'
 export const lookduck = {
   injectReact,
   pubsubable,
+  lookableIs,
   observable,
+  observableIs,
   computed,
+  computedIs,
   useSingleLookable,
   usePickLookables,
   useLookables,
