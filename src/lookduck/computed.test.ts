@@ -1,5 +1,6 @@
 import { observable } from './observable'
 import { computed } from './computed'
+import { _ } from './indeps-lookduck'
 
 test('compute y = 2x', function (): void {
   const x = observable(1)
@@ -185,4 +186,60 @@ test('compute z = x && y ? random() : 1000', function (): void {
   expect(vals).toEqual([a, b, c, 1000])
 
   unsub()
+})
+
+test('comuted() with custom equalityFn', function () {
+  const o = observable<Record<string, string>>({ foo: 'bar' })
+  let customEqCheckCount = 0
+  const c = computed(
+    () => o.get(),
+    function (x: unknown, y: unknown) {
+      customEqCheckCount += 1
+      expect(typeof x).toBe('object') // not undefined
+      expect(typeof y).toBe('object')
+      return _.deepEquals(x, y)
+    }
+  )
+  let subNotifCount = 0
+  const unsub = c.subscribe(function () {
+    subNotifCount += 1
+  })
+
+  expect(c.get()).toStrictEqual({ foo: 'bar' })
+  expect(customEqCheckCount).toBe(0) // First .get() shouldn't trigger eq check
+  expect(subNotifCount).toBe(0) // First .get() shouldn't notify subscribers
+
+  o.set({ foo: 'baz' })
+  expect(customEqCheckCount).toBe(1)
+  expect(subNotifCount).toBe(1)
+
+  o.set({ foo: 'baz' })
+  expect(customEqCheckCount).toBe(2)
+  expect(subNotifCount).toBe(1) // Same state as prev => shouldn't notify
+
+  o.set({ foo: 'quax' })
+  expect(customEqCheckCount).toBe(3)
+  expect(subNotifCount).toBe(2)
+
+  unsub()
+})
+
+test('multi-level computeds (f, l -> fl, lf -> fllf -> revfllf)', function () {
+  const f = observable('jon')
+  const l = observable('doe')
+  const fl = computed(() => `${f.get()} ${l.get()}`)
+  const lf = computed(() => `${l.get()} ${f.get()}`)
+  const fllf = computed(() => `${fl.get()} ${lf.get()}`)
+  const revfllf = computed(() => fllf.get().split('').reverse().join(''))
+
+  expect(fllf.get()).toBe('jon doe doe jon')
+  expect(revfllf.get()).toBe('noj eod eod noj')
+
+  f.set('jane')
+  expect(fllf.get()).toBe('jane doe doe jane')
+  expect(revfllf.get()).toBe('enaj eod eod enaj')
+
+  l.set('smith')
+  expect(fllf.get()).toBe('jane smith smith jane')
+  expect(revfllf.get()).toBe('enaj htims htims enaj')
 })

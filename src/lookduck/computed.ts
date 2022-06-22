@@ -1,6 +1,6 @@
 import { internalLookableGetterWatcher } from './lookable'
 import type { Lookable } from './lookable'
-import { observable } from './observable'
+import { makeEqualityFn, observable } from './observable'
 import type { EqualityMode } from './observable'
 
 const getSetDifference = function<T> (setA: Set<T>, setB: Set<T>): Set<T> {
@@ -39,10 +39,15 @@ const computed = function<T> (
   compute: () => T,
   equality?: EqualityMode
 ): Lookable<T> {
-  const initResult = runAndDetectDeps(compute, new Set<Dep>())
-  const currentDeps = initResult.freshDeps
-  const { set: setLookable, reset: _reset, ...lookable } = observable(
-    initResult.computedVal, equality
+  let firstComputeDone = false
+  const rawEqualityFn = makeEqualityFn(equality)
+  const equalityFn = function (x: unknown, y: unknown): boolean {
+    if (!firstComputeDone) { return x === undefined && y === undefined }
+    return rawEqualityFn(x, y)
+  }
+  const currentDeps = new Set<Dep>()
+  const { set: setLookable, reset: _reset, ...rawLookable } = observable(
+    undefined as unknown as T, equalityFn
   )
   const recompute = function (): void {
     const runResult = runAndDetectDeps(compute, currentDeps)
@@ -56,8 +61,17 @@ const computed = function<T> (
       dep.unsubscribe(recompute)
     })
   }
-  currentDeps.forEach(dep => dep.subscribe(recompute))
-  return lookable
+  const firstCompute = function (): void {
+    if (!firstComputeDone) {
+      recompute() // -> compute -> setLookable -> equalityFn; -> refresh deps
+      firstComputeDone = true // _after_ 1st recompute(), for equalityFn
+    }
+  }
+  return {
+    get: function () { firstCompute(); return rawLookable.get() },
+    subscribe: function (f) { firstCompute(); return rawLookable.subscribe(f) },
+    unsubscribe: rawLookable.unsubscribe
+  }
 }
 
 const shallowComputed = function<T> (compute: () => T): Lookable<T> {
