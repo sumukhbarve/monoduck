@@ -75,4 +75,5 @@ test('observableIs', function () {
   expect(observableIs(foo)).toBe(true)
   foo.set('bar')
   expect(observableIs(foo)).toBe(true)
+  expect(foo.__monoduck__.getSubCount()).toBe(0)
 })

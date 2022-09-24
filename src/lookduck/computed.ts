@@ -48,7 +48,7 @@ const runAndDetectDeps = function<T> (
 const computed = function<T> (
   compute: () => T,
   equality?: EqualityMode
-): Lookable<T> {
+): Computed<T> {
   let firstComputeDone = false
   const rawEqualityFn = makeEqualityFn(equality)
   const equalityFn = function (x: unknown, y: unknown): boolean {

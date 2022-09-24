@@ -12,6 +12,7 @@ import { observableIdMap } from './observableIdMap'
 export type { AcceptorFn, Pubsubable } from './pubsubable'
 export type { Lookable, InferLookable } from './lookable'
 export type { Observable } from './observable'
+export type { Computed } from './computed'
 export type { Idful, IdMap, ObservableIdMap } from './observableIdMap'
 
 export const lookduck = {
