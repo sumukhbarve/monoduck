@@ -1,5 +1,7 @@
 import type { Reacty } from './indeps-roqsduck'
-import { lookduck, injectReact as _injReact, getReact } from './indeps-roqsduck'
+import {
+  lookduck, injectReact as _injReact, getInjectedReact
+} from './indeps-roqsduck'
 import type { RouteInfo } from './qs-base-tracker'
 import {
   currentRouteInfo,
@@ -43,7 +45,7 @@ const defaultLinkStyle = {
 const LinkFC = function (
   props: LinkFCPropsy<Parameters<CE>[300]>
 ): ReturnType<CE> {
-  const React = getReact()
+  const React = getInjectedReact()
   const { to, children, style } = props
   const anchorProps = {
     href: getLinkHref(to),

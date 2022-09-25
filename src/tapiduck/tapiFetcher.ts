@@ -1,7 +1,8 @@
 import type { TapiEndpoint } from './tapiEndpoint'
 import type { NoInfer } from './indeps-tapiduck'
-
-const windowFetch = globalThis.fetch
+import {
+  injectFetch as injectIsomorphicFetch, getInjectedFetch
+} from './indeps-tapiduck'
 
 const fetch = async function<ZReq, ZRes> (
   endpoint: TapiEndpoint<ZReq, ZRes>,
@@ -11,8 +12,9 @@ const fetch = async function<ZReq, ZRes> (
   if (baseUrl.endsWith('/')) {
     throw new Error(`Error: Base URL '${baseUrl}' shouldn't end with '/'.`)
   }
+  const windowyFetch = getInjectedFetch()
   const url = `${baseUrl}${endpoint.path}`
-  const res = await windowFetch(url, {
+  const res = await windowyFetch(url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(reqData)
@@ -47,4 +49,4 @@ const fetchUsing = function (baseUrl: string): BoundFetchFn {
 }
 
 export type { BoundFetchFn }
-export { fetch, fetchUsing }
+export { fetch, fetchUsing, injectIsomorphicFetch }

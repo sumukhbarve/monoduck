@@ -1,5 +1,27 @@
 import type { VoidFn } from './indeps-ringduck'
-// import { _ } from './indeps-ringduck'
+
+// A 2-tuple: [injectFoo, getInjectedFoo]
+type DepInjectionTup<T> = [(dep: T) => void, () => T]
+
+const buildInjectionTup = function <T>(depName: string): DepInjectionTup<T> {
+  let _dep: T | null = null
+  let didInject = false
+  const injectDep = function (dep: T): void {
+    if (!didInject) {
+      _dep = dep
+      didInject = true
+    } else if (_dep !== dep) {
+      throw new Error(`Monoduck: Another ${depName} was previously injected.`)
+    }
+  }
+  const retrieveDep = function (): T {
+    if (!didInject) {
+      throw new Error(`Monoduck: ${depName} not injected. Please inject it.`)
+    }
+    return _dep as T
+  }
+  return [injectDep, retrieveDep]
+}
 
 interface Reacty {
   useState: <T>(initVal: T) => [T, (cb: (val: T) => T) => void]
@@ -13,21 +35,17 @@ interface Reacty {
   // useCallback: (callback: VoidFn, deps: unknown[]) => VoidFn
   // createRoot?: AnyFn
 }
+const [injectReact, getInjectedReact] = buildInjectionTup<Reacty>('React')
 
-let _React: Reacty | null = null
+type FetchyFn = typeof window.fetch
+const [injectFetch, getInjectedFetch] = buildInjectionTup<FetchyFn>('fetch')
 
-const injectReact = function (React: Reacty): void {
-  if (_React === null) {
-    _React = React
-  } else if (_React !== React) {
-    throw new Error('Monoduck: A different `React` was previously injected.')
-  }
+// On the browser, we auto-inject window.fetch:
+if (globalThis.fetch !== undefined) {
+  injectFetch(globalThis.fetch)
 }
 
-const getReact = function (): Reacty {
-  if (_React !== null) { return _React }
-  throw new Error('Monoduck: React not injected. Please call injectReact().')
+export type { Reacty, FetchyFn }
+export {
+  injectReact, getInjectedReact, injectFetch, getInjectedFetch
 }
-
-export type { Reacty }
-export { injectReact, getReact }

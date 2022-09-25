@@ -38,11 +38,8 @@ tapiduck.route(router, ept.updateText, async function (reqData) {
   return todo
 })
 
-tapiduck.route(router, ept.getTodos, async function () {
-  return todos
-})
-
 const app = express()
 app.use(cors(), express.json(), router)
 app.get('/', (_req, res) => { res.send('Hello World!') })
-app.listen(3000, () => console.log('Listening at port 3000 ...'))
+const PORT = 4000
+app.listen(PORT, () => console.log(`Listening at port ${PORT} ...`))

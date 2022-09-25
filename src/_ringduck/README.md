@@ -7,4 +7,4 @@
 
 Other ducks can:
 - Expose (this duck's) `injectReact()` for accepting React, and
-- call (this duck's) `getReact()` for accessing (the accepted) React.
+- call (this duck's) `getInjectedReact()` for accessing React.

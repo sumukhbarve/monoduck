@@ -21,5 +21,5 @@ export { sqlduck } from './sqlduck/index-sqlduck'
 export type { RouteInfo } from './roqsduck/index-roqsduck'
 export { roqsduck } from './roqsduck/index-roqsduck'
 
-export type { Reacty } from './_ringduck/index-ringduck'
-export { injectReact } from './_ringduck/index-ringduck'
+export type { Reacty, FetchyFn } from './_ringduck/index-ringduck'
+export { injectReact, injectFetch } from './_ringduck/index-ringduck'

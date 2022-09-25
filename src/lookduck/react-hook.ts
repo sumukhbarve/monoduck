@@ -1,5 +1,5 @@
 import type { VoidFn, Reacty } from './indeps-lookduck'
-import { _, getReact, injectReact } from './indeps-lookduck'
+import { _, injectReact, getInjectedReact } from './indeps-lookduck'
 import type {
   Lookable, AnyLookableMap, GottenLookableMapValues
 } from './lookable'
@@ -21,7 +21,7 @@ const defaultHookOpt: HookOpt = {
 const useMinimalRerender = function (
   lkArr: Array<Lookable<unknown>>, opt: HookOpt
 ): VoidFn {
-  const React = getReact()
+  const React = getInjectedReact()
   const valArrRef = React.useRef(_.map(lkArr, lk => lk.get()))
   const [, setNum] = React.useState(0)
   const equalityFn = makeEqualityFn(opt.equality)
@@ -46,7 +46,7 @@ const useMinimalRerender = function (
 const useSubscription = function (
   lkArr: Array<Lookable<unknown>>, minRerender: VoidFn
 ): void {
-  const React = getReact()
+  const React = getInjectedReact()
   const phase = React.useRef<'premount' | 'mounted' | 'unmounted'>('premount')
   const didChangePremount = React.useRef(false)
   const didSubscribe = React.useRef(false)
@@ -154,7 +154,7 @@ const makeUseLookable = function (React: Reacty): (typeof useLookable) {
 }
 
 const batch = function (fn: VoidFn): void {
-  const React = getReact()
+  const React = getInjectedReact()
   if (_.bool(React.unstable_batchedUpdates)) {
     React.unstable_batchedUpdates(fn)
   } else {
