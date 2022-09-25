@@ -37,7 +37,10 @@ interface Reacty {
 }
 const [injectReact, getInjectedReact] = buildInjectionTup<Reacty>('React')
 
-type FetchyFn = typeof window.fetch
+type FetchyFn = (url: string, data: Record<string, any>) => Promise<{
+  status: number
+  text: () => Promise<string>
+}>
 const [injectFetch, getInjectedFetch] = buildInjectionTup<FetchyFn>('fetch')
 
 // On the browser, we auto-inject window.fetch:
