@@ -1,5 +1,7 @@
 import { z } from 'zod'
-import { tapiduck } from '../index-tapiduck'
+import { tapiduck } from '../../index-tapiduck'
+
+const SERVER_PORT = 4000
 
 const zTodo = z.object({
   id: z.number(),
@@ -35,4 +37,4 @@ const getTodos = tapiduck.endpoint({
 const ept = { addTodo, toggleTodo, updateText, getTodos }
 
 export type { Todo }
-export { zTodo, ept }
+export { SERVER_PORT, zTodo, ept }

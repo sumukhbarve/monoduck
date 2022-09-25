@@ -1,6 +1,6 @@
-import { tapiduck } from '../index-tapiduck'
+import { tapiduck } from '../../index-tapiduck'
 import type { Todo } from './todo-shared'
-import { ept } from './todo-shared'
+import { ept, SERVER_PORT } from './todo-shared'
 
 let todos: Todo[] = []
 
@@ -54,7 +54,7 @@ const renderApp = function (): void {
   `
 }
 
-const tapiFetch = tapiduck.fetchUsing('http://localhost:3000')
+const tapiFetch = tapiduck.fetchUsing(`http://localhost:${SERVER_PORT}`)
 const fetchTodos = async function (): Promise<void> {
   todos = await tapiFetch(ept.getTodos, {})
   renderApp()

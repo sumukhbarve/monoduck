@@ -1,8 +1,8 @@
 import express from 'express'
 import cors from 'cors'
-import { tapiduck, TapiError } from '../index-tapiduck'
+import { tapiduck, TapiError } from '../../index-tapiduck'
 import type { Todo } from './todo-shared'
-import { ept } from './todo-shared'
+import { ept, SERVER_PORT } from './todo-shared'
 
 const todos: Todo[] = [] // Temporary, in-memory todo store
 
@@ -38,8 +38,11 @@ tapiduck.route(router, ept.updateText, async function (reqData) {
   return todo
 })
 
+tapiduck.route(router, ept.getTodos, async function (reqData) {
+  return todos
+})
+
 const app = express()
 app.use(cors(), express.json(), router)
 app.get('/', (_req, res) => { res.send('Hello World!') })
-const PORT = 4000
-app.listen(PORT, () => console.log(`Listening at port ${PORT} ...`))
+app.listen(SERVER_PORT, () => console.log(`Listening @ port ${SERVER_PORT}...`))
