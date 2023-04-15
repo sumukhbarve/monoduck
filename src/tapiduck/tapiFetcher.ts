@@ -1,10 +1,12 @@
+import type { ZodSchema } from 'zod'
 import type { TapiEndpoint } from './tapiEndpoint'
-import type { NoInfer } from './indeps-tapiduck'
-import {
-  injectFetch as injectIsomorphicFetch, getInjectedFetch
-} from './indeps-tapiduck'
+import type { NoInfer, JsonValue } from './indeps-tapiduck'
+import { TapiError } from './tapiEndpoint'
+import { getInjectedFetch } from './indeps-tapiduck'
 
-const fetch = async function<ZReq, ZRes> (
+export { injectFetch as injectIsomorphicFetch } from './indeps-tapiduck'
+
+export const fetch = async function<ZReq extends JsonValue, ZRes extends JsonValue> (
   endpoint: TapiEndpoint<ZReq, ZRes>,
   reqData: NoInfer<ZReq>,
   baseUrl: string = ''
@@ -20,26 +22,29 @@ const fetch = async function<ZReq, ZRes> (
     body: JSON.stringify(reqData)
   })
   const text = await res.text()
-  if (res.status !== 200) {
-    console.warn(`${endpoint.path}: Non-200 response, text:`)
-    console.warn(text)
-  }
   const sdata = JSON.parse(text)
+  if (res.status === 418) {
+    throw new TapiError(sdata)
+  }
+  if (res.status !== 200) {
+    console.warn(`${endpoint.path}: Unexpected, non-200 response code.`)
+  }
   const parsedRes = endpoint.zRes.safeParse(sdata)
   if (!parsedRes.success) {
+    console.error('Bad response format', parsedRes.error)
     const errMsg = `${endpoint.path}: Bad response format`
     throw new Error(errMsg)
   }
   return parsedRes.data
 }
 
-type BoundFetchFn = <ZReq, ZRes>(
+export type BoundFetchFn = <ZReq extends JsonValue, ZRes extends JsonValue>(
     endpoint: TapiEndpoint<ZReq, ZRes>,
     reqData: NoInfer<ZReq>
   ) => Promise<NoInfer<ZRes>>
 
-const fetchUsing = function (baseUrl: string): BoundFetchFn {
-  const boundHit = async function<ZReq, ZRes> (
+export const fetchUsing = function (baseUrl: string): BoundFetchFn {
+  const boundHit = async function<ZReq extends JsonValue, ZRes extends JsonValue> (
     endpoint: TapiEndpoint<ZReq, ZRes>,
     reqData: NoInfer<ZReq>
   ): Promise<NoInfer<ZRes>> {
@@ -48,5 +53,20 @@ const fetchUsing = function (baseUrl: string): BoundFetchFn {
   return boundHit
 }
 
-export type { BoundFetchFn }
-export { fetch, fetchUsing, injectIsomorphicFetch }
+export const tapiCatch = async function<ZErr extends JsonValue, ZRes extends JsonValue> (
+  zErr: ZodSchema<ZErr>,
+  resPromise: Promise<ZRes>,
+  fallback: (errorData: NoInfer<ZErr>) => NoInfer<ZRes>
+): Promise<NoInfer<ZRes>> {
+  try {
+    return await resPromise
+  } catch (error) {
+    if (error instanceof TapiError) {
+      const parsed = zErr.safeParse(error.data)
+      if (parsed.success) {
+        return fallback(parsed.data)
+      }
+    }
+    throw error
+  }
+}

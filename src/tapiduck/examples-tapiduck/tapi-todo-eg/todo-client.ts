@@ -1,4 +1,6 @@
+import { z } from 'zod'
 import { tapiduck } from '../../index-tapiduck'
+import { tapiCatch } from '../../tapiFetcher'
 import type { Todo } from './todo-shared'
 import { ept, SERVER_PORT } from './todo-shared'
 
@@ -60,13 +62,24 @@ const fetchTodos = async function (): Promise<void> {
   renderApp()
 }
 const addTodo = async function (text: string): Promise<void> {
-  const todo = await tapiFetch(ept.addTodo, { text })
+  const todo = await tapiCatch(z.string(), tapiFetch(ept.addTodo, { text }),
+    (errorMsg) => {
+      alert(errorMsg)
+      return { id: Math.random(), text: 'errored', done: false }
+    }
+  )
   todos.push(todo)
+  console.log(todos)
   renderApp()
   document.getElementById('todoText')?.focus()
 }
 const toggleTodo = async function (id: number, index: number): Promise<void> {
-  const todo = await tapiFetch(ept.toggleTodo, { id })
+  const todo = await tapiCatch(z.string(), tapiFetch(ept.toggleTodo, { id }),
+    (errorMsg) => {
+      alert(errorMsg)
+      return { id: Math.random(), text: 'errored', done: false }
+    }
+  )
   todos[index] = todo
   renderApp()
 }

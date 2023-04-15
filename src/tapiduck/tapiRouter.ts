@@ -1,6 +1,6 @@
 import { TapiError } from './tapiEndpoint'
 import type { TapiEndpoint } from './tapiEndpoint'
-import type { NoInfer } from './indeps-tapiduck'
+import type { NoInfer, JsonValue } from './indeps-tapiduck'
 
 // Highly simplified, eXpress-compatible types:
 interface XReq {
@@ -17,7 +17,7 @@ interface XRtApp { // Compatible with eXpress apps & routers
 
 type TapiHandler<Inp, Out> = (inp: NoInfer<Inp>) => Promise<NoInfer<Out>>
 
-const route = function<ZReq, ZRes> (
+const route = function<ZReq extends JsonValue, ZRes extends JsonValue> (
   xRtApp: XRtApp,
   endpoint: TapiEndpoint<ZReq, ZRes>,
   handler: TapiHandler<ZReq, ZRes>
@@ -42,7 +42,7 @@ const route = function<ZReq, ZRes> (
       } catch (error) {
         if (error instanceof TapiError) {
           res.status(418)
-          res.json({ error: error.message })
+          res.json(error.data)
           return undefined
         }
         throw error
@@ -52,13 +52,13 @@ const route = function<ZReq, ZRes> (
   })
 }
 
-type BoundRouteFn = <ZReq, ZRes>(
+type BoundRouteFn = <ZReq extends JsonValue, ZRes extends JsonValue>(
     endpoint: TapiEndpoint<ZReq, ZRes>,
     handler: TapiHandler<ZReq, ZRes>
   ) => void
 
 const routeUsing = function (xRtApp: XRtApp): BoundRouteFn {
-  return function<ZReq, ZRes> (
+  return function<ZReq extends JsonValue, ZRes extends JsonValue> (
     endpoint: TapiEndpoint<ZReq, ZRes>,
     handler: TapiHandler<ZReq, ZRes>
   ): void {

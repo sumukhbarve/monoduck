@@ -1,6 +1,8 @@
 import { endpoint, TapiError } from './tapiEndpoint'
 import { route, routeUsing } from './tapiRouter'
-import { fetch, fetchUsing, injectIsomorphicFetch } from './tapiFetcher'
+import {
+  fetch, fetchUsing, injectIsomorphicFetch, tapiCatch
+} from './tapiFetcher'
 import { sockpoint, sockEmit, sockOn, sockUse } from './tapiSockpoint'
 
 export type { TapiEndpoint } from './tapiEndpoint'
@@ -16,6 +18,7 @@ export const tapiduck = {
   fetch,
   fetchUsing,
   injectIsomorphicFetch,
+  tapiCatch,
   sockpoint,
   sockEmit,
   sockOn,

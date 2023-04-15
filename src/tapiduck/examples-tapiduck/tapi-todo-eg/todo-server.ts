@@ -9,13 +9,18 @@ const todos: Todo[] = [] // Temporary, in-memory todo store
 const router = express.Router()
 
 tapiduck.route(router, ept.addTodo, async function (reqData) {
+  if (reqData.text === 'aaa') {
+    // for testing tapCatch @ client
+    throw new TapiError('aaa not allowed')
+  }
   const todo = {
     id: Date.now() + Math.random(),
     text: reqData.text,
     done: false
   }
   todos.push(todo)
-  return todo
+  // for testing, should cause down-the-line errors on the client
+  return { ...todo, id: 123 }
 })
 
 tapiduck.route(router, ept.toggleTodo, async function (reqData) {
@@ -38,7 +43,7 @@ tapiduck.route(router, ept.updateText, async function (reqData) {
   return todo
 })
 
-tapiduck.route(router, ept.getTodos, async function (reqData) {
+tapiduck.route(router, ept.getTodos, async function () {
   return todos
 })
 

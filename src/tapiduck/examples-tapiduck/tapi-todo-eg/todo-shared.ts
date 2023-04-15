@@ -30,7 +30,7 @@ const updateText = tapiduck.endpoint({
 
 const getTodos = tapiduck.endpoint({
   path: '/todo/getAll',
-  zReq: z.unknown(),
+  zReq: z.object({}),
   zRes: z.array(zTodo)
 })
 
