@@ -302,19 +302,29 @@ const once = function<F extends AnyFn> (fn: F): SameFn<F> {
   }
   return newFn
 }
+const timedMemoize = function<F extends AnyFn> (
+  ttl: number, fn: F, hasher?: (...args: Parameters<F>) => string
+): SameFn<F> {
+  const hashFn = hasher ?? ((...args: Parameters<F>) => JSON.stringify(args))
+  interface CacheVal {val: ReturnType<F>, at: number}
+  const cache: Record<string, CacheVal> = {}
+  const newFn = function (...args: Parameters<F>): ReturnType<F> {
+    const key = hashFn(...args)
+    const atNow = Date.now()
+    const deltaT = atNow - (cache[key]?.at ?? 0)
+    // The `if` must explicitly check !keyHas(), as `ttl` may be +Infinity
+    if (!keyHas(cache, key) || deltaT > ttl) {
+      const val = fn(...args)
+      cache[key] = { val, at: atNow }
+    }
+    return _.bang(cache[key]).val
+  }
+  return newFn
+}
 const memoize = function<F extends AnyFn> (
   fn: F, hasher?: (...args: Parameters<F>) => string
 ): SameFn<F> {
-  const hashFn = hasher ?? ((...args: Parameters<F>) => JSON.stringify(args))
-  const cache: Record<string, ReturnType<F>> = {}
-  const newFn = function (...args: Parameters<F>): ReturnType<F> {
-    const key = hashFn(...args)
-    if (!keyHas(cache, key)) {
-      cache[key] = fn(...args)
-    }
-    return _.bang(cache[key])
-  }
-  return newFn
+  return timedMemoize(+Infinity, fn, hasher)
 }
 const debounce = function (fn: VoidFn, waitMs: number): VoidFn {
   let prevCallAt = 0
@@ -423,6 +433,7 @@ export const _ = {
   partition,
   sortBy,
   once,
+  timedMemoize,
   memoize,
   debounce,
   delay,

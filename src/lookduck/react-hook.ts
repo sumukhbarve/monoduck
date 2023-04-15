@@ -12,13 +12,14 @@ interface HookOpt {
   logRerender: string | null // msg to log on rerender, or null to disable
   equality: EqualityMode
 }
-const defaultHookOpt: HookOpt = {
+const DEFAULT_HOOK_OPT: HookOpt = {
   debounce: null,
   logRerender: null,
   equality: 'is'
 }
 
-const useMinimalRerender = function (
+// Internal helper. Returns a func that forces rerender, if (minimally) req'd.
+const useForceRerenderMinimally = function (
   lkArr: Array<Lookable<unknown>>, opt: HookOpt
 ): VoidFn {
   const React = getInjectedReact()
@@ -43,8 +44,9 @@ const useMinimalRerender = function (
   return _.debounce(forceUpdateIfChanged, opt.debounce)
 }
 
+// Internal helper. Creates and manages a subscription for force-rerendering.
 const useSubscription = function (
-  lkArr: Array<Lookable<unknown>>, minRerender: VoidFn
+  lkArr: Array<Lookable<unknown>>, forceRerender: VoidFn
 ): void {
   const React = getInjectedReact()
   const phase = React.useRef<'premount' | 'mounted' | 'unmounted'>('premount')
@@ -52,7 +54,7 @@ const useSubscription = function (
   const didSubscribe = React.useRef(false)
   const phasewiseListenerMap = {
     premount: () => { didChangePremount.current = true },
-    mounted: minRerender,
+    mounted: forceRerender,
     unmounted: () => _.defer(unsubAll) // async-unsub, as we're amid pub-loop
   }
   const rootListener = (): void => phasewiseListenerMap[phase.current]()
@@ -60,7 +62,7 @@ const useSubscription = function (
   const unsubAll = (): void => lkArr.forEach(o => o.unsubscribe(rootListener))
   React.useEffect(function () {
     phase.current = 'mounted'
-    if (didChangePremount.current) { minRerender() }
+    if (didChangePremount.current) { forceRerender() }
     return function () {
       phase.current = 'unmounted'
       unsubAll()
@@ -72,13 +74,24 @@ const useSubscription = function (
   }
 }
 
+// Note: useRef vs useCallback regarding `didSubscribe`
+// --- --- --- --- --- --- --- --- --- --- --- --- ---
+// The `didSubscribe` ref ensures that we subscribe at most once.
+// (It is only relevant in the premount/mounted phases, not when unmounted.)
+// Alternatively, useCallback-wrapped listener would work too, as subscribeAll()
+// internally calls pubsubable.subscribe, which uses a Set for subscribers.
+// Howerever, useCallback(fn, deps) is equivalnt to useMemo(() => fn, deps),
+// and useMemo may only be used for optimizations, not as a semantic guarantee.
+// We need a semantic guarantee that we subscribe at most once, so useCallback
+// alone isn't sufficient. Since we'll need useRef anyway, and since the
+// callbacks aren't being passed as props, useCallback is unnecessary.
+
 const useLookableArray = function <T extends Array<Lookable<unknown>>>(
   lkArr: T, opts?: Partial<HookOpt>
-): undefined {
-  const opt: HookOpt = { ...defaultHookOpt, ...opts }
-  const minRerender = useMinimalRerender(lkArr, opt)
-  useSubscription(lkArr, minRerender)
-  return undefined
+): void {
+  const opt: HookOpt = { ...DEFAULT_HOOK_OPT, ...opts }
+  const forceRerender = useForceRerenderMinimally(lkArr, opt)
+  useSubscription(lkArr, forceRerender)
 }
 
 const useLookableMap = function <LMap extends AnyLookableMap>(
@@ -95,18 +108,6 @@ const usePickLookables = function <
 ): GottenLookableMapValues<Pick<LMap, K>> {
   return useLookableMap(_.pick(lkMap, keys), opt)
 }
-
-// Note: useRef vs useCallback (in makeUseLookables)
-// --- --- --- --- --- --- --- --- --- --- --- ---
-// The `didSubscribe` ref ensures that we subscribe at most once.
-// (It is only relevant in the premount/mounted phases, not when unmounted.)
-// Alternatively, useCallback-wrapped listener would work too, as subscribeAll()
-// internally calls pubsubable.subscribe, which uses a Set for subscribers.
-// Howerever, useCallback(fn, deps) is equivalnt to useMemo(() => fn, deps),
-// and useMemo may only be used for optimizations, not as a semantic guarantee.
-// We need a semantic guarantee that we subscribe at most once, so useCallback
-// alone isn't sufficient. Since we'll need useRef anyway, and since the
-// callbacks aren't being passed as props, useCallback is unnecessary.
 
 type AnyLookables =
   | Array<Lookable<any>>
@@ -164,6 +165,6 @@ const batch = function (fn: VoidFn): void {
 
 export type { HookOpt }
 export {
-  useSingleLookable, usePickLookables, useLookables, batch,
+  useLookables, useSingleLookable, usePickLookables, batch,
   useLookable, makeUseLookable
 }

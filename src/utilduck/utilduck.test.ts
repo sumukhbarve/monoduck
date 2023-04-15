@@ -411,6 +411,41 @@ test('_.memoize', function () {
   expect(memCallCount).toBe(5) // Not 10, as 1! to 5! should be memoized
 })
 
+test('_.timedMemoize', async function () {
+  let rawCallCount = 0
+  const rawHello = function (): void {
+    rawCallCount += 1
+  }
+  let memCallCount = 0
+  const ttl = 50 // ms
+  const memHello = _.timedMemoize(ttl, function (): void {
+    memCallCount += 1
+  })
+
+  expect(rawCallCount).toBe(0)
+  expect(memCallCount).toBe(0)
+
+  for (const i of _.range(10)) {
+    rawHello()
+    expect(rawCallCount).toBe(i + 1)
+  }
+
+  for (const _i of _.range(10)) {
+    _.noop(_i) // pacify linter no-unused-vars
+    memHello()
+    expect(memCallCount).toBe(1) // should remain 1, assume ttl not crossed
+  }
+
+  memCallCount = 0 // reset memCallCount
+  expect(memCallCount).toBe(0)
+
+  for (const i of _.range(4)) {
+    await _.sleep(ttl + 10)
+    memHello()
+    expect(memCallCount).toBe(i + 1) // should _not_ remain 1, as ttl crossed
+  }
+})
+
 test('_.debounce', async function () {
   let count = 0
   const originalFn = (): void => { count += 1 }
