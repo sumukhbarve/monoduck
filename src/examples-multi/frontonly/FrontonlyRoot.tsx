@@ -5,6 +5,7 @@ import { roqsduck, lookduck, _, injectReact } from './indeps-frontonly'
 import { io } from 'socket.io-client'
 import { nameStore } from './nameStore'
 import { useLookables, useLookable } from '../../lookduck/react-hook'
+import { atom, useAtom } from '../../lookduck/atom'
 
 _.noop()
 
@@ -97,6 +98,30 @@ const SockViewer: React.VFC = function () {
   return <pre>{_.pretty(useLookable(obSockObjs))}</pre>
 }
 
+const msgAtom = atom('Sample message')
+const countAtom = atom(10)
+const doubleAtom = atom(get => get(countAtom) * 2)
+const RouteAtom: React.VFC = function () {
+  const [msg, setMsg] = useAtom(msgAtom)
+  const [count, setCount] = useAtom(countAtom)
+  const [doubleCount, setDoubleCount] = useAtom(doubleAtom)
+  return (
+    <div>
+      <p>Show Message: {msg}</p>
+      Edit Message: <input value={msg} onChange={e => setMsg(e.target.value)} />
+      <hr />
+      <p>Count: {count}</p>
+      <p>Double Count: {doubleCount}</p>
+      <button onClick={() => setCount(count + 1)}>+1</button>
+      <button onClick={() => setCount(count - 1)}>-1</button>
+      <p />
+      <button onClick={() => setDoubleCount(count + 1)}>
+        Attempt setting derived atom. Should throw! Click and see console.
+      </button>
+    </div>
+  )
+}
+
 // Set up a routing map based on query-string id.
 const routeMap: Record<string, React.VFC> = {
   aaa: RouteAAA,
@@ -107,7 +132,8 @@ const routeMap: Record<string, React.VFC> = {
   sock: SockViewer,
   oldXyz: OldXyzRoute,
   newXyz: NewXyzRoute,
-  nameEtc: NamesEtc
+  nameEtc: NamesEtc,
+  atom: RouteAtom
 }
 
 const ActiveRoute: React.VFC = function () {
@@ -133,6 +159,7 @@ const FrontonlyRoot: React.VFC = function () {
         <Link to={{ id: 'oldXyz' }}>oldXyz</Link> |{' '}
         <Link to={{ id: 'newXyz' }}>newXyz</Link> |{' '}
         <Link to={{ id: 'nameEtc' }}>NameEtc</Link> |{' '}
+        <Link to={{ id: 'atom' }}>Atom</Link> |{' '}
         <Link to={{ id: 'other' }}>Other</Link>
       </nav>
       <hr />

@@ -326,6 +326,13 @@ const memoize = function<F extends AnyFn> (
 ): SameFn<F> {
   return timedMemoize(+Infinity, fn, hasher)
 }
+const warnOnce = memoize(function (warning: string) {
+  // Using _.memoize() instead of _.once().
+  // With _.once(), there'd need to be something like makeWarnOnce(warning),
+  // which'd return a fresh one-time-warning function for a given warning.
+  // With _.memoize(), this _.warnOnce() can be called directly from anywhere.
+  console.warn(warning)
+})
 const debounce = function (fn: VoidFn, waitMs: number): VoidFn {
   let prevCallAt = 0
   let timeoutId: ReturnType<typeof setTimeout> | null = null
@@ -435,6 +442,7 @@ export const _ = {
   once,
   timedMemoize,
   memoize,
+  warnOnce,
   debounce,
   delay,
   defer,

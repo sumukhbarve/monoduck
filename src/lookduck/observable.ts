@@ -47,8 +47,6 @@ const observable = function<T> (
       internalLookableGetterWatcher.publish(self)
       return val
     },
-    // TODO: Consider with caution::
-    // notify: () => pubsub.publish(val),
     set: function (newVal: T): void {
       if (!equalityFn(val, newVal)) {
         val = newVal

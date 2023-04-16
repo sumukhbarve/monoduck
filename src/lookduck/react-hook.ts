@@ -131,22 +131,14 @@ const useLookables = function <T extends AnyLookables>(
   }
 }
 
-const useSingleLookable = function <T>(
+const useLookable = function <T>(
   lk: Lookable<T>, opt?: Partial<HookOpt>
 ): T {
   return useLookableMap({ lk }, opt).lk
 }
-const useLookable = function <T>(
-  lk: Lookable<T>, opt?: Partial<HookOpt>
-): T {
-  console.warn(_.singleSpaced(`
-    Lookduck: useLookable() is deprecated.
-    Please switch to usePickLookables() or useSingleLookable() instead.
-  `))
-  return useSingleLookable(lk, opt)
-}
+
 const makeUseLookable = function (React: Reacty): (typeof useLookable) {
-  console.warn(_.singleSpaced(`
+  _.warnOnce(_.singleSpaced(`
     Lookduck: makeUseLookable() is deprecated.
     Please call lookduck.injectReact() and then lookduck.useLookables() instead.
   `))
@@ -154,17 +146,5 @@ const makeUseLookable = function (React: Reacty): (typeof useLookable) {
   return useLookable
 }
 
-const batch = function (fn: VoidFn): void {
-  const React = getInjectedReact()
-  if (_.bool(React.unstable_batchedUpdates)) {
-    React.unstable_batchedUpdates(fn)
-  } else {
-    fn()
-  }
-}
-
 export type { HookOpt }
-export {
-  useLookables, useSingleLookable, usePickLookables, batch,
-  useLookable, makeUseLookable
-}
+export { useLookables, usePickLookables, useLookable, makeUseLookable }
