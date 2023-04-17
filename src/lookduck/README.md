@@ -10,56 +10,89 @@
 - No hard dependency on React. Could be used on the server.
 - Intentionally simple, highly composable, and strictly typed.
 
-## Quickstart: Duck Counter
+## Quickstart: React Duck Counter
 
-**0. Install monoduck:**
+### 0. Install Monoduck:
 ```shell
 npm install monoduck
 ```
 
-**1. Create your `store.ts`:**
+### 1. Create your `store.ts`:
 ```ts
 import React from 'react'
 import { lookduck } from 'monoduck'
 
-const LOW_DUCK_MARK = 10;
+const MIN_EXPECTED_DUCK_COUNT = 5
 
-export const duckCount = lookduck.observable(5)
-export const belowMark = lookduck.computed(() => duckCount.get() < LOW_DUCK_MARK)
-export const incrDucks = (delta: number) => duckCount.set(duckCount.get() + delta)
+export const store = {
+  duckCount: lookduck.observable(0),
+  duckNoun: lookduck.computed(function (): string {
+    return store.duckCount.get() === 1 ? 'duck' : 'ducks'
+  }),
+  isTooLow: lookduck.computed(function (): boolean {
+    return store.duckCount.get() < MIN_EXPECTED_DUCK_COUNT
+  })
+}
 
-export const use = lookduck.makeUseLookable(React)
+export const useStore = lookduck.makeUseStore(store, React)
 ```
 
-**2. Bind your components. Done!**
-```tsx
-import React from 'react'
-import * as store from './store'
+### 2. Bind your components. That's it!
 
-export const DuckCounter: React.VFC = () => {
-    const duckCount = store.use(store.duckCount)
-    const belowMark = store.use(store.belowMark)
-    return (
-        <div>
-            <h3>There are {duckCount} ducks in the park.</h3>
-            {belowMark && <h4>Oh no, that's below the low-duck-mark!</h4>}
-            <button onClick={() => store.incrDucks(1)}>
-                Add a duck
-            </button>
-        </div>
-    )
+Call `useStore()` to reactively select any properties from the store.
+```tsx
+const DuckCountHeading: React.FC = function () {
+  const { duckCount, duckNoun } = useStore('duckCount', 'duckNoun')
+  return <h3>Duck Count: {duckCount} {duckNoun}</h3>
 }
 ```
 
+Call `.set()` to update observables.
+```tsx
+const DuckAdder: React.FC<{delta: number, label: string}> = function (props) {
+  const { delta, label } = props
+  const onAdd = () => store.duckCount.set(store.duckCount.get() + delta)
+  return <button onClick={onAdd}>{label}</button>
+}
+```
+(Notice that we didn't call `useStore()` above, as the component needn't rerender when duckCount changes.)
+
+Only select properties that the component needs; this'll prevent unnecessary re-renders.
+```tsx
+const LowCountWarning: React.FC = function () {
+  const { isTooLow } = useStore('isTooLow')
+  return isTooLow ? <p>Warning: There are too few ducks. Add some!</p> : null
+}
+```
+
+For completeness, here's a mini-app, composed of above components.
+```tsx
+const MiniDuckPondApp: React.VFC = function () {
+  return (
+    <>
+      <DuckCountHeading />
+      <DuckAdder delta={+1} label={'Add a duck'} />{' '}
+      <DuckAdder delta={-2} label={'Remove two ducks'} />{' '}
+      <DuckAdder delta={+5} label={'Add five ducks'} />{' '}
+      <LowCountWarning />
+    </>
+  )
+}
+```
+
+## The `store` Is Optional
+
+A `store` can help with code organization, and we recommend creating one. But if you prefer, you may work with lookables directly instead. For brevity, code snippets below don't create a store.
+
 ## Lookables, Observables, and Computeds
 
-**Lookables:**
+### Lookables:
 - A lookable is something you can look at.
 - To look at it, call `.get()`, and you'll get it's current value.
 - To be notified of changes, call `.subscribe()` with a listener of type `() => void`.
 - If you use Lookduck with React, in most cases, you shouldn't need to subscribe manually.
 
-**Observables:**
+### Observables:
 - An observable is a _settable_ lookable.
 - To set it's value, call `.set()` with the new value.
 - If the new value is different from the previous value, subscribers will be notified.
@@ -79,7 +112,7 @@ console.log(`${fistName.get()} ${lastName.get()}`) // Jane Doe
 ```
 
 
-**Computeds:**
+### Computeds:
 - A computed is a lookable whose value is determined by a computation.
 - If the computation depends on other lookables, the value gets recomputed when any dependency changes.
 - Dependencies are automatically tracked and managed by Lookduck.
@@ -149,28 +182,71 @@ ob2.set({...ob2.get(), status: 'Hi!'}) // logs "ob2 updated"
 ob2.set({...ob2.get(), status: 'Hi!'}) // doesn't log anything!
 ```
 
-**Why does the equality mode matter?**
+### Why does the equality mode matter?
 
-The equality mode is used to determine if the observable changed, and whenever it changes, all the computeds that depend on it are recomputed. Those recomputeations can trigger additional recomputations, as computeds can depend on computeds.
+The equality mode is used to determine if an observable changed, and whenever it changes, all the computeds that depend on it are recomputed. Those recomputeations can trigger additional recomputations, as computeds can depend on computeds.
 
-If an observable (or computed) impacts multiple downstream computeds (or if it has multiple subscribers), it might make sense to an alternative equality mode. This way, noop-like updates won't trigger a recomputation cascade.
+If a non-primitive observable (or computed) impacts multiple downstream computeds (or if it has multiple subscribers), it might make sense to use an alternative equality mode. This way, noop-like updates won't trigger a recomputation cascade.
 
 ## React Integration:
 
-Lookduck doesn't internally import React. Instead, it includes a helper that returns a React hook:
+Lookduck doesn't internally import React; allowing us to embrace plugin architecture, and keep Monoducks' footprint minimal. Instead, Lookduck includes a helpers for React injection.
 
-```ts
-import { lookduck } from 'monoduck'
-import React from 'react'
+### With a `store`:
 
-export const useLookable = lookduck.makeUseLookable(React)
+As demonstrated in the quickstart, right after creating the `store`:
+- `const useStore = lookduck.makeUseStore(store, React)`
+- and then call `useStore()` in your components.
+
+### Without a `store`:
+
+Before the first render (ideally before calling `ReactDOM.createRoot()`), call:
+- `lookduck.injectReact(React)`
+- and then call `lookduck.useLookable()` in your components. For example:
+
+```tsx
+const observableCount = lookduck.observable(0)
+const computedDoubleCount = lookduck.computed(() => observableCount.get() * 2)
+
+const Counter: React.FC = function () {
+  const count = lookduck.useLookable(observableCount)
+  const doubleCount = lookduck.useLookable(computedDoubleCount)
+  const onIncrement = React.useCallback(() => {
+    observableCount.set(observableCount.get() + 1)
+    // If we use `count` instead of `observableCount.get()` above,
+    // then we should add add `count` to useCallback's dependency array.
+  }, [])
+  return (
+    <>
+      <p>The count is {count}, and twice that is {doubleCount}.</p>      
+      <button onClick={onIncrement}>Increment count</button>
+    </>
+  )
+}
 ```
 
-The decision to _not_ import react was taken with a view to:
-- embrace plugin architecture, and
-- keep Monoduck's overall footprint minimal.
+### Working with Jotai-like `atom`s:
 
-The `useLookable` hook accepts a lookable, and returns it's current value. Then, whenever the lookable changes, it triggers a rerender.
+If you've used Jotai (or Recoil), you may've noticed that working directly with lookalbes (without a `store`) feels very similar to working with atoms. You're correct indeed, and in fact, Lookduck includes `atom`, and is highly Jotai-compatible. Repeating the above example with atoms:
+
+```tsx
+const countAtom = lookduck.atom(0)
+const doubleCountAtom = lookduck.atom(get => get(countAtom) * 2)
+
+const Counter: React.FC = function () {
+  const [count, setCount] = lookduck.useAtom(countAtom)
+  const [doubleCount] = lookduck.useAtom(doubleCountAtom)
+  const onIncrement = React.useCallback(() => {
+    setCount(count + 1)
+  }, [count])
+  return (
+    <>
+      <p>The count is {count}, and twice that is {doubleCount}.</p>
+      <button onClick={onIncrement}>Increment count</button>
+    </>
+  )
+}
+```
 
 <!--## Observable ID Maps-->
 

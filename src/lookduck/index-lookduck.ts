@@ -10,15 +10,17 @@ import {
 import {
   atom, getAtomValue, makeAtomSetter, atomPair, useAtomValue, useAtom
 } from './atom'
+import { makeUseStore } from './store'
 
 export type { AcceptorFn, Pubsubable } from './pubsubable'
-export type { Lookable, InferLookable } from './lookable'
+export type {
+  Lookable, InferLookable, AnyLookableMap as LookduckStore
+} from './lookable'
 export type { Observable } from './observable'
 export type { Computed } from './computed'
 export type { Idful, IdMap, ObservableIdMap } from './observableIdMap'
 
 export const lookduck = {
-  // injection:
   injectReact,
   // foundation:
   pubsubable,
@@ -35,6 +37,7 @@ export const lookduck = {
   usePickLookables,
   useLookable,
   makeUseLookable,
+  makeUseStore,
   // atom core:
   atom,
   getAtomValue,

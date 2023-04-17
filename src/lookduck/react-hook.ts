@@ -137,11 +137,8 @@ const useLookable = function <T>(
   return useLookableMap({ lk }, opt).lk
 }
 
+// TODO: Consider deprecating in favor of injectReact() and useLookable()
 const makeUseLookable = function (React: Reacty): (typeof useLookable) {
-  _.warnOnce(_.singleSpaced(`
-    Lookduck: makeUseLookable() is deprecated.
-    Please call lookduck.injectReact() and then lookduck.useLookables() instead.
-  `))
   injectReact(React)
   return useLookable
 }
