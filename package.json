@@ -13,6 +13,7 @@
     "test-utilduck": "jest src/utilduck/",
     "test-sqlduck": "jest src/sqlduck/",
     "test-lookduck": "jest src/lookduck/",
+    "test-patchduck": "jest src/patchduck/",
     "lint": "ts-standard --fix",
     "watch": "parcel watch",
     "build": "rm -rf dist && tsc",

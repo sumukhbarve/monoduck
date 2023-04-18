@@ -37,6 +37,7 @@ export const lookduck = {
   usePickLookables,
   useLookable,
   makeUseLookable,
+  // store:
   makeUseStore,
   // atom core:
   atom,

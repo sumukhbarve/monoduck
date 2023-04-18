@@ -16,6 +16,7 @@
 
 - [**Lookduck**](/src/lookduck/README.md): React state manager with automatic dependency management for derived state.
 - [**Tapiduck**](/src/tapiduck/README.md): End-to-end type-safe APIs with fullstack intillisense. Simple and restful-ish.
+- [**Patchduck**](/src/patchduck/README.md): TS-first, React-friendly utility for deep-patching (deep-spreading) objects.
 - [**Utilduck**](/src/utilduck/README.md): Commonly used, Underscore-style, typed utils like `_.map`, `_.deepClone`, etc.
 - [**Sqlduck**](/src/sqlduck/README.md): A thin Sequelize wrapper. Plays well with Zod. Prioritizes simplicity & type-safety.
 - [**Roqsduck**](/src/roqsduck/README.md): Intentionally simple, query-string based, client-side routing for React apps.

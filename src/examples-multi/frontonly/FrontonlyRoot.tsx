@@ -6,6 +6,7 @@ import { io } from 'socket.io-client'
 import { nameStore } from './nameStore'
 import { useLookables, useLookable } from '../../lookduck/react-hook'
 import { atom, useAtom } from '../../lookduck/atom'
+import { patchduck } from '../../patchduck/index-patchduck'
 
 _.noop()
 
@@ -122,6 +123,29 @@ const RouteAtom: React.VFC = function () {
   )
 }
 
+const usePatchable = patchduck.makeUsePatchable(React)
+const RoutePatchduckUser: React.FC = function () {
+  const [user, patchUser] = usePatchable({
+    name: { first: 'John', last: 'Doe' },
+    contact: { email: 'john.smartypants@example.com', phone: '555-555-5555' },
+    address: {
+      home: { line1: 'Line 1', zip: '10001', city: 'NYC', state: 'NY' },
+      work: null
+    }
+  })
+  return (
+    <div>
+      <h4>User:</h4>
+      <pre>{JSON.stringify(user)}</pre>
+      <h4>Email Input:</h4>
+      <input
+        value={user.contact.email}
+        onChange={event => patchUser({ contact: { email: event.target.value } })}
+      />
+    </div>
+  )
+}
+
 // Set up a routing map based on query-string id.
 const routeMap: Record<string, React.VFC> = {
   aaa: RouteAAA,
@@ -133,7 +157,8 @@ const routeMap: Record<string, React.VFC> = {
   oldXyz: OldXyzRoute,
   newXyz: NewXyzRoute,
   nameEtc: NamesEtc,
-  atom: RouteAtom
+  atom: RouteAtom,
+  patchduckUser: RoutePatchduckUser
 }
 
 const ActiveRoute: React.VFC = function () {
@@ -160,7 +185,9 @@ const FrontonlyRoot: React.VFC = function () {
         <Link to={{ id: 'newXyz' }}>newXyz</Link> |{' '}
         <Link to={{ id: 'nameEtc' }}>NameEtc</Link> |{' '}
         <Link to={{ id: 'atom' }}>Atom</Link> |{' '}
+        <Link to={{ id: 'patchduckUser' }}>PatchduckUser</Link> |{' '}
         <Link to={{ id: 'other' }}>Other</Link>
+
       </nav>
       <hr />
       <ActiveRoute />
