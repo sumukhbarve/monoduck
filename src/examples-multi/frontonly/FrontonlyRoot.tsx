@@ -125,22 +125,25 @@ const RouteAtom: React.VFC = function () {
 
 const usePatchable = patchduck.makeUsePatchable(React)
 const RoutePatchduckUser: React.FC = function () {
-  const [user, patchUser] = usePatchable({
+  const JOHN = {
     name: { first: 'John', last: 'Doe' },
-    contact: { email: 'john.smartypants@example.com', phone: '555-555-5555' },
+    contact: { email: 'john.doe@example.com', phone: '555-555-5555' },
     address: {
-      home: { line1: 'Line 1', zip: '10001', city: 'NYC', state: 'NY' },
+      home: { line1: 'Line 1', zip: '10002', city: 'NYC', state: 'NY' },
       work: null
     }
-  })
+  }
+  type User = typeof JOHN
+  // _.deepClone can be replaced by _.identity, it's just an optional extra
+  const [user, patchUser] = usePatchable<User>(_.deepClone(JOHN))
   return (
     <div>
       <h4>User:</h4>
-      <pre>{JSON.stringify(user)}</pre>
-      <h4>Email Input:</h4>
+      <pre>{JSON.stringify(user, null, 4)}</pre>
+      <h4>First Name:</h4>
       <input
-        value={user.contact.email}
-        onChange={event => patchUser({ contact: { email: event.target.value } })}
+        value={user.name.first}
+        onChange={event => patchUser({ name: { first: event.target.value } })}
       />
     </div>
   )

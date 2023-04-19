@@ -41,7 +41,7 @@ const patch = function<T extends JsonObject> (
   original: T, ...patchlets: Array<Patchlet<T>>
 ): T {
   let output = original
-  patchlets.forEach(patchlet => {
+  patchlets.forEach(function (patchlet) {
     output = patchBinary(output, patchlet ?? {})
   })
   return output

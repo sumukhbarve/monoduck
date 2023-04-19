@@ -3,14 +3,14 @@
 ### What is it?
 
 - Monoduck is a Typescript-first, monolithic repository of subpackages.
-- To avoid bloat, it has no hard `dependencies`, and all `peerDependencies` are optional.
+- To avoid bloat, it has absolutely no `dependencies`, and all `peerDependencies` are _optional_.
 - And to keep things tree-shakable, only named exports are used.
 
-### Pre-Alpha Software
+### Nearly Production-Ready
 
-- Monoduck is not currently suitable for production use.
-- Large sections of it are being (re-)written every weekend.
-- Object/function shapes are likely to undergo rapid change.
+- Monoduck is not _fully_ ready for production use yet, but it's getting there.
+- It is already stable enough for use in internal apps, and even customer-facing POCs.
+- If things go as per plan, it'll become fully production-ready by Q4 of 2023.
 
 ### What's included?
 

@@ -7,12 +7,12 @@
 ### How's it different?
 - No boilerplate needed, not even a wrapping `<Provider>`.
 - **Automatic dependency management** for computed values (i.e. derived state).
-- No hard dependency on React. Could be used on the server.
+- No hard dependency on React. Lookduck can even be used on the server!
 - Intentionally simple, highly composable, and strictly typed.
 
 ## Quickstart: React Duck Counter
 
-### 0. Install Monoduck:
+### 0. Install [Monoduck](./../../README.md):
 ```shell
 npm install monoduck
 ```
