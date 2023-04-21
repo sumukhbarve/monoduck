@@ -12,29 +12,41 @@ type Todo = z.infer<typeof zTodo>
 
 const addTodo = tapiduck.endpoint({
   path: '/todo/add',
-  zReq: zTodo.pick({ text: true }),
-  zRes: zTodo
+  zRequest: zTodo.pick({ text: true }),
+  zSuccess: zTodo,
+  zFail: z.object({ message: z.string() })
 })
 
 const toggleTodo = tapiduck.endpoint({
   path: '/todo/toggle',
-  zReq: zTodo.pick({ id: true }),
-  zRes: zTodo
+  zRequest: zTodo.pick({ id: true }),
+  zSuccess: zTodo,
+  zFail: z.string()
 })
 
 const updateText = tapiduck.endpoint({
   path: '/todo/updateText',
-  zReq: zTodo.pick({ id: true, text: true }),
-  zRes: zTodo
+  zRequest: zTodo.pick({ id: true, text: true }),
+  zSuccess: zTodo,
+  zFail: z.string()
 })
 
 const getTodos = tapiduck.endpoint({
   path: '/todo/getAll',
-  zReq: z.object({}),
-  zRes: z.array(zTodo)
+  zRequest: z.object({}),
+  zSuccess: z.array(zTodo),
+  zFail: z.string()
 })
 
-const ept = { addTodo, toggleTodo, updateText, getTodos }
+const divisionEndpoint = tapiduck.endpoint({
+  path: '/api/divide',
+  // Use Zod to specify request and response shapes:
+  zRequest: z.object({ numerator: z.number(), denominator: z.number() }),
+  zSuccess: z.object({ quotient: z.number(), remainder: z.number() }),
+  zFail: z.object({ message: z.string() })
+})
+
+const ept = { addTodo, toggleTodo, updateText, getTodos, divisionEndpoint }
 
 export type { Todo }
 export { SERVER_PORT, zTodo, ept }

@@ -1,6 +1,9 @@
-import { TapiError } from './tapiEndpoint'
-import type { TapiEndpoint } from './tapiEndpoint'
+import type { JSendOutput, JSendy, TapiEndpoint } from './tapiEndpoint'
+import { buildJSendy } from './tapiEndpoint'
 import type { NoInfer, JsonValue } from './indeps-tapiduck'
+import { _ } from './indeps-tapiduck'
+
+type JV = JsonValue // Short, local alias
 
 // Highly simplified, eXpress-compatible types:
 interface XReq {
@@ -10,57 +13,61 @@ interface XRes {
   status: (code: number) => void
   json: (data: unknown) => void
 }
+// type XNextFn =  (err: any) => void;
 type XHandlerFn = (req: XReq, res: XRes) => void
 interface XRtApp { // Compatible with eXpress apps & routers
   post: (path: string, xHandler: XHandlerFn) => void
 }
 
-type TapiHandler<Inp, Out> = (inp: NoInfer<Inp>) => Promise<NoInfer<Out>>
+type TapiHandler<ZReq extends JV, ZSuc extends JV, ZErr extends JV> =
+  (
+    inp: NoInfer<ZReq>,
+    jsend: JSendy<NoInfer<ZSuc>, NoInfer<ZErr>>,
+  ) => Promise<JSendOutput<NoInfer<ZSuc>, NoInfer<ZErr>>>
 
-const route = function<ZReq extends JsonValue, ZRes extends JsonValue> (
+const route = function<ZReq extends JV, ZSuc extends JV, ZFal extends JV> (
   xRtApp: XRtApp,
-  endpoint: TapiEndpoint<ZReq, ZRes>,
-  handler: TapiHandler<ZReq, ZRes>
+  endpoint: TapiEndpoint<ZReq, ZSuc, ZFal>,
+  handler: TapiHandler<ZReq, ZSuc, ZFal>
 ): void {
+  const jSendy = buildJSendy<ZSuc, ZFal>()
   xRtApp.post(endpoint.path, function (req: XReq, res: XRes) {
-    // Using async IIFE (with .catch()) to pacify ts-standard (linter), which
-    // correctly points out that `void` and `Promise<void>` aren't the same.
-    const iife = async function (): Promise<void> {
-      const parsedReq = endpoint.zReq.safeParse(req.body)
-      if (!parsedReq.success) {
-        res.status(400)
-        res.json({
-          error: `${endpoint.path}: Bad request format`,
-          data: parsedReq.error
-        })
-        return undefined
-      }
-      try {
-        const resData: ZRes = await handler(parsedReq.data)
-        res.json(resData)
-        return undefined
-      } catch (error) {
-        if (error instanceof TapiError) {
-          res.status(418)
-          res.json(error.data)
-          return undefined
-        }
-        throw error
-      }
+    // interna helper:
+    const sendJson = function (status: number, data: JsonValue): void {
+      res.status(status)
+      res.json(data)
     }
-    iife().catch((error) => { throw error })
+    // main iife:
+    const iife = async function (): Promise<void> {
+      const parsedReq = endpoint.zRequest.safeParse(req.body)
+      if (!parsedReq.success) {
+        return sendJson(400, jSendy.zodfail('server', parsedReq.error.message))
+      }
+      let handlerOutput: JSendOutput<ZSuc, ZFal>
+      try {
+        handlerOutput = await handler(parsedReq.data, jSendy)
+      } catch (error) {
+        console.error(error)
+        return sendJson(500, jSendy.error('An unexpected error occured'))
+      }
+      const status = _.bang(handlerOutput).status
+      const httpCode = status === 'success' ? 200 : status === 'fail' ? 422 : 500
+      return sendJson(httpCode, handlerOutput)
+    }
+    // The iife pacifies errors, and don't expect main iife() to throw at all.
+    iife().catch((error) => { throw error }) // So if it throws, we re-throw.
   })
 }
 
-type BoundRouteFn = <ZReq extends JsonValue, ZRes extends JsonValue>(
-    endpoint: TapiEndpoint<ZReq, ZRes>,
-    handler: TapiHandler<ZReq, ZRes>
+type BoundRouteFn = <ZReq extends JV, ZSuc extends JV, ZErr extends JV>(
+    endpoint: TapiEndpoint<ZReq, ZSuc, ZErr>,
+    handler: TapiHandler<ZReq, ZSuc, ZErr>
   ) => void
 
 const routeUsing = function (xRtApp: XRtApp): BoundRouteFn {
-  return function<ZReq extends JsonValue, ZRes extends JsonValue> (
-    endpoint: TapiEndpoint<ZReq, ZRes>,
-    handler: TapiHandler<ZReq, ZRes>
+  return function<ZReq extends JV, ZSuc extends JV, ZErr extends JV> (
+    endpoint: TapiEndpoint<ZReq, ZSuc, ZErr>,
+    handler: TapiHandler<ZReq, ZSuc, ZErr>
   ): void {
     route(xRtApp, endpoint, handler)
   }

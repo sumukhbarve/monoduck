@@ -16,13 +16,21 @@ const joinChannel = async function (channelName: string): Promise<void> {
     tok: me.tok,
     socketId: socket.id
   })
-  store.thisChannelName.set(joinRes.channelName)
+  if (joinRes.status !== 'success') {
+    alert('Joining failed')
+    return undefined
+  }
+  store.thisChannelName.set(joinRes.data.channelName)
 
   const getRes = await tapiduck.fetch(shared.api_getChannelMsgs, {
-    channelName: joinRes.channelName,
+    channelName: joinRes.data.channelName,
     tok: me.tok
   })
-  store.addMsgs(getRes.msgs)
+  if (getRes.status !== 'success') {
+    alert('could not get channel messages')
+    return undefined
+  }
+  store.addMsgs(getRes.data.msgs)
 }
 
 socket.on('connect', function () {
@@ -57,9 +65,13 @@ const ClaimNick: React.VFC = function () {
     const desiredNick = window.prompt('Desired Nick: ')
     if (!_.stringIs(desiredNick)) { return undefined }
     const resData = await tapiduck.fetch(shared.api_claimNick, { desiredNick })
-    store.me.set(resData)
+    if (resData.status !== 'success') {
+      alert('could not claim')
+      return undefined
+    }
+    store.me.set(resData.data)
   }
-  return <button onClick={onClick}>Claim Nick</button>
+  return <button onClick={onClick}>Claim a nickname</button>
 }
 
 const ChannelSelector: React.VFC = function () {
@@ -73,8 +85,10 @@ const ChannelSelector: React.VFC = function () {
   }
   return (
     <div>
-      <h4>Channel: {thisChannelName}</h4>
-      <button onClick={onClick}>Switch Channel</button>
+      <h4>Channel: {_.bool(thisChannelName) ? thisChannelName : <i>(blank)</i>}</h4>
+      <button onClick={onClick}>
+        Join {_.bool(thisChannelName) ? 'another' : 'a'} channel
+      </button>
       <hr />
     </div>
   )
@@ -106,7 +120,7 @@ const ChatForm: React.VFC = function () {
       tok: me.tok
     })
   }
-  return <button onClick={onClick}>Add Message</button>
+  return <button onClick={onClick}>Add message</button>
 }
 
 const ChatRoot: React.VFC = function () {

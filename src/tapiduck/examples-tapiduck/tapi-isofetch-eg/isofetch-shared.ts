@@ -7,12 +7,14 @@ export const CONSUMER_PORT = 5055
 export const producerApi = {
   factorial: tapiduck.endpoint({
     path: '/papi/factorial',
-    zReq: z.object({ n: z.number() }),
-    zRes: z.object({ ans: z.number() })
+    zRequest: z.object({ n: z.number() }),
+    zSuccess: z.object({ ans: z.number() }),
+    zFail: z.string()
   }),
   square: tapiduck.endpoint({
     path: '/papi/square',
-    zReq: z.object({ n: z.number() }),
-    zRes: z.object({ ans: z.number() })
+    zRequest: z.object({ n: z.number() }),
+    zSuccess: z.object({ ans: z.number() }),
+    zFail: z.string()
   })
 } as const

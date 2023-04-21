@@ -10,28 +10,38 @@ const tapiFetch = tapiduck.fetchUsing(PRODUCER_API_URL)
 
 const app = express()
 
-app.get('/factorial', function (req, res) {
+app.get('/factorial', function (req, res, next) {
   (async function () {
     const n = z.number().parse(Number(req.query.n))
-    const { ans } = await tapiFetch(producerApi.factorial, { n })
+    const resp = await tapiFetch(producerApi.factorial, { n })
+    if (resp.status !== 'success') {
+      res.json(resp)
+      return
+    }
+    const ans = resp.data.ans
     res.send(`
         <h2>Factorial Page</h2>
         <div>n = ${n}</div>
         <div>n! = ${ans}</div>
       `)
-  }()).catch(e => { throw new Error(e) })
+  }()).catch(error => next(error))
 })
 
-app.get('/square', function (req, res) {
+app.get('/square', function (req, res, next) {
   (async function () {
     const n = z.number().parse(Number(req.query.n))
-    const { ans } = await tapiFetch(producerApi.square, { n })
+    const resp = await tapiFetch(producerApi.square, { n })
+    if (resp.status !== 'success') {
+      res.json(resp)
+      return
+    }
+    const ans = resp.data.ans
     res.send(`
         <h2>Square Page</h2>
         <div>n = ${n}</div>
         <div>n<sup>2</sup> = ${ans}</div>
       `)
-  }()).catch(e => { throw new Error(e) })
+  }()).catch(error => next(error))
 })
 
 app.get('/', function (req, res) {

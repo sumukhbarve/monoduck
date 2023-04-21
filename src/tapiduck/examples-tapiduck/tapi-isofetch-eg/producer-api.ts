@@ -8,11 +8,19 @@ const square = (n: number): number => n * n
 
 const router = express.Router()
 
-tapiduck.route(router, producerApi.factorial, async function (reqData) {
-  return { ans: factorial(reqData.n) }
+tapiduck.route(router, producerApi.factorial, async function (reqData, jsend) {
+  // if (reqData.n > 100) {
+  //   return jsend.fail('Not supported, for n greater than 100.')
+  // }
+  const ans = factorial(reqData.n)
+  console.log(`factorial(${reqData.n}) -> ${ans}`)
+  if (ans === 100) {
+    return jsend.fail('Max n is 100')
+  }
+  return jsend.success({ ans })
 })
-tapiduck.route(router, producerApi.square, async function (reqData) {
-  return { ans: square(reqData.n) }
+tapiduck.route(router, producerApi.square, async function (reqData, jsend) {
+  return jsend.success({ ans: square(reqData.n) })
 })
 
 const app = express()

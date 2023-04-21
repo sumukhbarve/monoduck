@@ -6,11 +6,10 @@
 - To avoid bloat, it has absolutely no `dependencies`, and all `peerDependencies` are _optional_.
 - And to keep things tree-shakable, only named exports are used.
 
-### Nearly Production-Ready
+### Production Readiness
 
-- Monoduck is not _fully_ ready for production use yet, but it's getting there.
-- It is already stable enough for use in internal apps, and even customer-facing POCs.
-- If things go as per plan, it'll become fully production-ready by Q4 of 2023.
+- Monoduck is not generally ready for production use, but it's getting there.
+- However, it should be stable enough for use in internal apps, and POCs.
 
 ### What's included?
 

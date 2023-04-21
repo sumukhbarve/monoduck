@@ -1,6 +1,4 @@
-import { z } from 'zod'
 import { tapiduck } from '../../index-tapiduck'
-import { tapiCatch } from '../../tapiFetcher'
 import type { Todo } from './todo-shared'
 import { ept, SERVER_PORT } from './todo-shared'
 
@@ -58,31 +56,55 @@ const renderApp = function (): void {
 
 const tapiFetch = tapiduck.fetchUsing(`http://localhost:${SERVER_PORT}`)
 const fetchTodos = async function (): Promise<void> {
-  todos = await tapiFetch(ept.getTodos, {})
+  const resp = await tapiFetch(ept.getTodos, {})
+  if (resp.status !== 'success') {
+    alert('failed to load todos')
+    todos = []
+  } else {
+    todos = resp.data
+  }
   renderApp()
 }
 const addTodo = async function (text: string): Promise<void> {
-  const todo = await tapiCatch(z.string(), tapiFetch(ept.addTodo, { text }),
-    (errorMsg) => {
-      alert(errorMsg)
-      return { id: Math.random(), text: 'errored', done: false }
-    }
-  )
+  const resp = await tapiFetch(ept.addTodo, { text })
+  if (resp.status !== 'success') {
+    alert(resp.status === 'fail' ? resp.data.message : resp.message ?? 'unknown err')
+    return undefined
+  }
+  const todo = resp.data
   todos.push(todo)
   console.log(todos)
   renderApp()
   document.getElementById('todoText')?.focus()
 }
 const toggleTodo = async function (id: number, index: number): Promise<void> {
-  const todo = await tapiCatch(z.string(), tapiFetch(ept.toggleTodo, { id }),
-    (errorMsg) => {
-      alert(errorMsg)
-      return { id: Math.random(), text: 'errored', done: false }
-    }
-  )
+  const resp = await tapiFetch(ept.toggleTodo, { id })
+  if (resp.status !== 'success') {
+    alert(resp.status === 'fail' ? resp.data : resp.message ?? 'unknown error')
+    renderApp() // Re-rendering to remove stale/tmp checkmark in checkbox
+    return undefined
+  }
+  const todo = resp.data
   todos[index] = todo
   renderApp()
 }
 
-Object.assign(window, { fetchTodos, addTodo, toggleTodo })
-window.onload = fetchTodos
+const performDivision = async function (): Promise<void> {
+  const numerator = Number(window.prompt('Numerator: ', '1'))
+  const denominator = Number(window.prompt('Denominator: ', '1'))
+  const resp = await tapiFetch(ept.divisionEndpoint, { numerator, denominator })
+  if (resp.status !== 'success') {
+    window.alert(resp.status === 'fail' ? resp.data.message : 'Unknown error')
+    return
+  }
+  // Here, typeof resp.data is { quotient: number, remainder: number }
+  // And your IDE will know this, so you'll get proper hinting!
+  const { quotient, remainder } = resp.data
+  window.alert(`Quotient: ${quotient}; Remainder: ${remainder}`)
+}
+
+Object.assign(window, { fetchTodos, addTodo, toggleTodo, performDivision })
+window.onload = async function () {
+  await performDivision()
+  await fetchTodos()
+}

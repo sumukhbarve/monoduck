@@ -1,1 +1,1 @@
-npx ts-node-dev producer-api.ts
+npx ts-node-dev consumer-app.ts

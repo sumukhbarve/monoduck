@@ -23,29 +23,33 @@ const zOk = z.object({ ok: z.literal(true) })
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const api_claimNick = tapiduck.endpoint({
   path: '/api/claimNick',
-  zReq: z.object({ desiredNick: z.string() }),
-  zRes: z.object({ nick: z.string(), tok: z.string() })
+  zRequest: z.object({ desiredNick: z.string() }),
+  zSuccess: z.object({ nick: z.string(), tok: z.string() }),
+  zFail: z.string()
 })
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const api_joinChannel = tapiduck.endpoint({
   path: '/api/joinChannel',
-  zReq: zTok.extend({ channelName: z.string(), socketId: z.string() }),
-  zRes: z.object({ channelName: z.string() })
+  zRequest: zTok.extend({ channelName: z.string(), socketId: z.string() }),
+  zSuccess: z.object({ channelName: z.string() }),
+  zFail: z.string()
 })
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const api_getChannelMsgs = tapiduck.endpoint({
   path: '/api/getChannelMsgs',
-  zReq: zTok.extend({ channelName: z.string() }),
-  zRes: z.object({ msgs: z.array(zMsg) })
+  zRequest: zTok.extend({ channelName: z.string() }),
+  zSuccess: z.object({ msgs: z.array(zMsg) }),
+  zFail: z.string()
 })
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
 export const api_sendChannelMsg = tapiduck.endpoint({
   path: '/api/sendChannelMsg',
-  zReq: zTok.extend({ channelName: z.string(), msgText: z.string() }),
-  zRes: zOk
+  zRequest: zTok.extend({ channelName: z.string(), msgText: z.string() }),
+  zSuccess: zOk,
+  zFail: z.string()
 })
 
 // eslint-disable-next-line @typescript-eslint/naming-convention
