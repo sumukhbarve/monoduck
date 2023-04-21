@@ -1,7 +1,6 @@
-// import { z, ZodSchema } from 'zod'
-import { buildJSendy, TapiEndpoint, buildZJSendOutput } from './tapiEndpoint'
+import type { TapiEndpoint } from './tapiEndpoint'
+import { buildJSendy, buildZJSendOutput } from './tapiEndpoint'
 import type { NoInfer, JsonValue } from './indeps-tapiduck'
-// import { TapiError } from './tapiEndpoint'
 import { getInjectedFetch } from './indeps-tapiduck'
 
 export { injectFetch as injectIsomorphicFetch } from './indeps-tapiduck'

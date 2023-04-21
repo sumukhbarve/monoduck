@@ -10,7 +10,7 @@ export { lookduck } from './lookduck/index-lookduck'
 export type {
   TapiEndpoint, TapiSockpoint, TapiSocky
 } from './tapiduck/index-tapiduck'
-export { tapiduck, TapiError } from './tapiduck/index-tapiduck'
+export { tapiduck } from './tapiduck/index-tapiduck'
 
 export type { NoInfer, VoidFn, AnyFn, SameFn } from './utilduck/index-utilduck'
 export { _ } from './utilduck/index-utilduck'

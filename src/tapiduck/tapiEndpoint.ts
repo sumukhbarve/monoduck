@@ -1,16 +1,8 @@
-import { ZodSchema, ZodError, z } from 'zod'
+import type { ZodSchema, ZodError } from 'zod'
+import { z } from 'zod'
 import type { JsonValue } from './indeps-tapiduck'
 
 type JV = JsonValue // Short, local alias
-
-class TapiError extends Error {
-  originalErr: JsonValue = null
-  constructor (err: JsonValue) {
-    super(JSON.stringify(err)) // CaughtError.message will be stringified `err`
-    Object.setPrototypeOf(this, TapiError.prototype)
-    this.originalErr = err
-  }
-}
 
 interface TapiEndpoint<ZReq extends JV, ZSuc extends JV, ZFal extends JV> {
   path: string
@@ -102,4 +94,4 @@ const buildZJSendOutput = function<ZReq extends JV, ZSuc extends JV, ZFal extend
 }
 
 export type { TapiEndpoint, FlattenedZodError, JSendOutput, JSendy }
-export { endpoint, TapiError, flattenZodError, buildJSendy, buildZJSendOutput }
+export { endpoint, flattenZodError, buildJSendy, buildZJSendOutput }
