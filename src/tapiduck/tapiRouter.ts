@@ -1,6 +1,7 @@
-import type { JSendOutput, JSendy, TapiEndpoint } from './tapiEndpoint'
-import { buildJSendy } from './tapiEndpoint'
 import type { NoInfer, JsonValue } from './indeps-tapiduck'
+import type { TapiEndpoint } from './tapiEndpoint'
+import type { JSendOutput, JSendy } from './jsend'
+import { buildJSendy } from './jsend'
 import { _ } from './indeps-tapiduck'
 
 type JV = JsonValue // Short, local alias
@@ -41,7 +42,7 @@ const route = function<ZReq extends JV, ZSuc extends JV, ZFal extends JV> (
     const iife = async function (): Promise<void> {
       const parsedReq = endpoint.zRequest.safeParse(req.body)
       if (!parsedReq.success) {
-        return sendJson(400, jSendy.zodfail('server', parsedReq.error.message))
+        return sendJson(400, jSendy.zodfail('server', parsedReq.error))
       }
       let handlerOutput: JSendOutput<ZSuc, ZFal>
       try {

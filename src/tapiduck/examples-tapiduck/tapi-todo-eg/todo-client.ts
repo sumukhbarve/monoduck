@@ -80,7 +80,7 @@ const addTodo = async function (text: string): Promise<void> {
 const toggleTodo = async function (id: number, index: number): Promise<void> {
   const resp = await tapiFetch(ept.toggleTodo, { id })
   if (resp.status !== 'success') {
-    alert(resp.status === 'fail' ? resp.data : resp.message ?? 'unknown error')
+    alert(resp.status === 'fail' ? resp.data : resp.message)
     renderApp() // Re-rendering to remove stale/tmp checkmark in checkbox
     return undefined
   }
@@ -94,7 +94,7 @@ const performDivision = async function (): Promise<void> {
   const denominator = Number(window.prompt('Denominator: ', '1'))
   const resp = await tapiFetch(ept.divisionEndpoint, { numerator, denominator })
   if (resp.status !== 'success') {
-    window.alert(resp.status === 'fail' ? resp.data.message : 'Unknown error')
+    window.alert(resp.status === 'fail' ? resp.data.message : resp.message)
     return
   }
   // Here, typeof resp.data is { quotient: number, remainder: number }
@@ -104,7 +104,4 @@ const performDivision = async function (): Promise<void> {
 }
 
 Object.assign(window, { fetchTodos, addTodo, toggleTodo, performDivision })
-window.onload = async function () {
-  await performDivision()
-  await fetchTodos()
-}
+window.onload = async () => await fetchTodos()// .then(() => performDivision())

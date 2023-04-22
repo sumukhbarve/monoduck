@@ -5,7 +5,6 @@ import { sockpoint, sockEmit, sockOn, sockUse } from './tapiSockpoint'
 
 export type { TapiEndpoint } from './tapiEndpoint'
 export type { TapiSockpoint, TapiSocky } from './tapiSockpoint'
-// export type { FlattenedZodError } from './tapiFetcher'
 
 export const tapiduck = {
   endpoint,

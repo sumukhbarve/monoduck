@@ -1,5 +1,6 @@
-import { ZodSchema } from 'zod'
-import { NoInfer, _ } from './indeps-tapiduck'
+import type { ZodSchema } from 'zod'
+import type { NoInfer } from './indeps-tapiduck'
+import { _ } from './indeps-tapiduck'
 
 interface TapiSockpoint<zData> {
   name: string

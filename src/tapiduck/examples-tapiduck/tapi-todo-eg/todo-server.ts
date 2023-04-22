@@ -3,27 +3,11 @@ import cors from 'cors'
 import { tapiduck } from '../../index-tapiduck'
 import type { Todo } from './todo-shared'
 import { ept, SERVER_PORT } from './todo-shared'
+import { _ } from '../../indeps-tapiduck'
 
 const todos: Todo[] = [] // Temporary, in-memory todo store
 
 const router = express.Router()
-
-// import { _ } from '../../indeps-tapiduck'
-// router.get('/foo/ok/sync', function (_req, res) {
-//   res.json({ foo: 'ok-sync' })
-// })
-// router.get('/foo/ok/async', async function (_req, res) {
-//   await _.sleep(100)
-//   res.json({ foo: 'ok-async' })
-// })
-// router.get('/foo/throw/sync', function (_req, res) {
-//   throw new Error('foo-throw-sync')
-// })
-// router.get('/foo/throw/async', async function (_req, res, next) {
-//   await _.sleep(100)
-//   next()
-//   next(new Error('foo-throw-async'))
-// })
 
 tapiduck.route(router, ept.addTodo, async function (reqData, jsend) {
   // for testing tapCatch @ client
@@ -75,6 +59,17 @@ tapiduck.route(router, ept.divisionEndpoint, async function (reqData, jsend) {
   const quotient = Math.floor(reqData.numerator / reqData.denominator)
   const remainder = reqData.numerator % reqData.denominator
   return jsend.success({ quotient, remainder })
+})
+
+// Non-tapi block for fiddling with sync-v-async express (error) behavior
+router.get('/foo/ok/sync', function (_req, res) {
+  res.json({ foo: 'ok-sync' })
+}).get('/foo/ok/async', function (_req, res) {
+  void _.sleep(100).then(() => res.json({ foo: 'ok-async' }))
+}).get('/foo/throw/sync', function (_req, _res) {
+  throw new Error('foo-throw-sync')
+}).get('/foo/throw/async', function (_req, _res, next) {
+  void _.sleep(100).then(() => next(new Error('foo-throw-async')))
 })
 
 const app = express()
