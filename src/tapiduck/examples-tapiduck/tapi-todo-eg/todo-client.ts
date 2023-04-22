@@ -58,7 +58,7 @@ const tapiFetch = tapiduck.fetchUsing(`http://localhost:${SERVER_PORT}`)
 const fetchTodos = async function (): Promise<void> {
   const resp = await tapiFetch(ept.getTodos, {})
   if (resp.status !== 'success') {
-    alert('failed to load todos')
+    window.alert(tapiduck.failMsg(resp, data => data))
     todos = []
   } else {
     todos = resp.data
@@ -68,8 +68,7 @@ const fetchTodos = async function (): Promise<void> {
 const addTodo = async function (text: string): Promise<void> {
   const resp = await tapiFetch(ept.addTodo, { text })
   if (resp.status !== 'success') {
-    alert(resp.status === 'fail' ? resp.data.message : resp.message ?? 'unknown err')
-    return undefined
+    return window.alert(tapiduck.failMsg(resp, data => data.message))
   }
   const todo = resp.data
   todos.push(todo)
@@ -80,7 +79,7 @@ const addTodo = async function (text: string): Promise<void> {
 const toggleTodo = async function (id: number, index: number): Promise<void> {
   const resp = await tapiFetch(ept.toggleTodo, { id })
   if (resp.status !== 'success') {
-    alert(resp.status === 'fail' ? resp.data : resp.message)
+    window.alert(tapiduck.failMsg(resp, data => data))
     renderApp() // Re-rendering to remove stale/tmp checkmark in checkbox
     return undefined
   }
@@ -89,17 +88,17 @@ const toggleTodo = async function (id: number, index: number): Promise<void> {
   renderApp()
 }
 
+// README quickstart example, avoid using tapiduck.failMsg() here.
 const performDivision = async function (): Promise<void> {
   const numerator = Number(window.prompt('Numerator: ', '1'))
   const denominator = Number(window.prompt('Denominator: ', '1'))
   const resp = await tapiFetch(ept.divisionEndpoint, { numerator, denominator })
   if (resp.status !== 'success') {
-    window.alert(resp.status === 'fail' ? resp.data.message : resp.message)
-    return
+    // failMsg() is a util for handling non-success responses
+    return window.alert(tapiduck.failMsg(resp, data => data.message))
+    //                                         ^^^^ matches zFail
   }
-  // Here, typeof resp.data is { quotient: number, remainder: number }
-  // And your IDE will know this, so you'll get proper hinting!
-  const { quotient, remainder } = resp.data
+  const { quotient, remainder } = resp.data // matches zSuccess
   window.alert(`Quotient: ${quotient}; Remainder: ${remainder}`)
 }
 

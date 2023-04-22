@@ -75,5 +75,16 @@ const jSendEnvelopeIs = function (output: unknown): output is JSendOutput<JV, JV
   return false
 }
 
+// Helper for producing failish (fail/error/zodfail) messages
+const failish = function<ZSuc extends JV, ZFal extends JV> (
+  output: Exclude<JSendOutput<ZSuc, ZFal>, {status: 'success'}>,
+  failMsg: string | ((failData: ZFal) => string)
+): string {
+  if (output.status !== 'fail') {
+    return output.message ?? '' // the `??` is purely defensive, not TS-req'd
+  }
+  return _.stringIs(failMsg) ? failMsg : failMsg(output.data)
+}
+
 export type { JSendStatus, JSendOutput, JSendy }
-export { buildJSendy, jSendEnvelopeIs }
+export { buildJSendy, jSendEnvelopeIs, failish }

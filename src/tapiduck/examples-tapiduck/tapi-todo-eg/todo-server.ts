@@ -52,13 +52,13 @@ tapiduck.route(router, ept.getTodos, async function (_reqData, jsend) {
 })
 
 tapiduck.route(router, ept.divisionEndpoint, async function (reqData, jsend) {
-  console.log(reqData)
-  if (reqData.denominator === 0) {
-    return jsend.fail({ message: 'You cannot divide by zero' })
+  const { numerator, denominator } = reqData // matches zRequest
+  if (denominator === 0) {
+    return jsend.fail({ message: 'You cannot divide by zero' }) // matches zFail
   }
-  const quotient = Math.floor(reqData.numerator / reqData.denominator)
-  const remainder = reqData.numerator % reqData.denominator
-  return jsend.success({ quotient, remainder })
+  const quotient = Math.floor(numerator / denominator)
+  const remainder = numerator % denominator
+  return jsend.success({ quotient, remainder }) // must zSuccess
 })
 
 // Non-tapi block for fiddling with sync-v-async express (error) behavior

@@ -30,40 +30,40 @@ export const divisionEndpoint = tapiduck.endpoint({
 ```ts
 import express from 'express'
 import { tapiduck } from 'monoduck'
-import { sumEndpoint } from './endpoint-shapes'
+import { divisionEndpoint } from './endpoint-shapes'
 
 const app = express().use(express.json())
 
 tapiduck.route(app, divisionEndpoint, async function (reqData, jsend) {
-  if (reqData.denominator === 0) {
-    return jsend.fail({message: 'You cannot divide by zero', })
+  const { numerator, denominator } = reqData // matches zRequest
+  if (denominator === 0) {
+    return jsend.fail({ message: 'You cannot divide by zero' }) // matches zFail
   }
-  const quotient = Math.floor(reqData.numerator / reqData.denominator)
-  const remainder = reqData.numerator % reqData.denominator
-  return jsend.success({quotient, remainder})
+  const quotient = Math.floor(numerator / denominator)
+  const remainder = numerator % denominator
+  return jsend.success({ quotient, remainder }) // must zSuccess
 })
 
 app.listen(3000, () => console.log('Listening at port 3000 ...'))
 ```
 
-The second param, `jsend`, has typed `jsend.success()` and `jsend.fail()` methods. In addition to producing the JSend wrapper, these methods ensure that everything is kept in sync with the endpoint.
+The second param, `jsend` , has typed `jsend.success()` and `jsend.fail()` helpers. In addition to helping with typesafety, they  also produce the [JSend API envelope](#jsend-api-envelope), hence the name `jsend`.
 
 #### 3. Hit your endpoints from the frontend. Done!
 ```ts
 import { tapiduck } from 'monoduck'
 import { divisionEndpoint } from './endpoint-shapes'
 
-const performDivision = async function () {
+const performDivision = async function (): Promise<void> {
   const numerator = Number(window.prompt('Numerator: ', '1'))
   const denominator = Number(window.prompt('Denominator: ', '1'))
-  const resp = await tapiFetch(ept.divisionEndpoint, { numerator, denominator })
+  const resp = await tapiFetch(divisionEndpoint, { numerator, denominator })
   if (resp.status !== 'success') {
-    window.alert(resp.status === 'fail' ? resp.data.message : 'Unknown error')
-    return
+    // failMsg() is a util for handling non-success responses
+    return window.alert(tapiduck.failMsg(resp, data => data.message))
+    //                                         ^^^^ matches zFail
   }
-  // Here, typeof resp.data is { quotient: number, remainder: number }
-  // And your IDE will know this, so you'll get proper hinting!
-  const { quotient, remainder } = resp.data
+  const { quotient, remainder } = resp.data // matches zSuccess
   window.alert(`Quotient: ${quotient}; Remainder: ${remainder}`)
 }
 ```
@@ -74,9 +74,9 @@ const performDivision = async function () {
 3. You needn't pass the app (or router) each time. `tapiduck.routeUsing` helps with that.
 4. On the frontend, you can define a common base URL for multiple endpoints.
 
-## Tapiduck API Envelope
+## JSend API Envelope
 
-[JSend](https://github.com/omniti-labs/jsend) is a lightweight envelope spec for JSON APIs, and Tapiduck adopts it almost exactly. For an endpoint `ept` that was created via `tapiduck.endpint()`:
+[JSend](https://github.com/omniti-labs/jsend) is a lightweight envelope spec for JSON APIs, and Tapiduck adopts it almost exactly. For an endpoint `ept` created via `tapiduck.endpint()`:
 - if a request succeeds:
     - response shape: `{status: "success", data: z.infer<typeof ept.zSuccess>}`
     - HTTP status: 200 OK
