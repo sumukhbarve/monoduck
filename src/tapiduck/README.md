@@ -76,7 +76,9 @@ const performDivision = async function (): Promise<void> {
 
 ## JSend API Envelope
 
-[JSend](https://github.com/omniti-labs/jsend) is a lightweight envelope spec for JSON APIs, and Tapiduck adopts it almost exactly. For an endpoint `ept` created via `tapiduck.endpint()`:
+[JSend](https://github.com/omniti-labs/jsend) is a lightweight envelope spec for JSON APIs, and Tapiduck adopts it almost exactly.
+
+For an endpoint `ept` created via `tapiduck.endpint()`:
 - if a request succeeds:
     - response shape: `{status: "success", data: z.infer<typeof ept.zSuccess>}`
     - HTTP status: 200 OK
@@ -84,8 +86,9 @@ const performDivision = async function (): Promise<void> {
     - response shape: `{status: "fail", data: z.infer<typeof ept.zFail>}`
     - HTTP status: 422 Unprocessable Content
 - if there's an unexpected (uncaught) server error:
-    - response shape: `{status: "error", message: string, code?: number}`
+    - response shape: `{status: "error", message: string, code: number}`
     - HTTP status: 500 Internal Server Error
+    - the `code` defaults to 500, but is unrelated to the HTTP status
 - if Tapiduck can't zod-validate the request on the server, or the response on the client:
     - response shape: `{status: 'zodfail', where: 'server' | 'client', message: string }`
     - HTTP status: 400 Bad Request
