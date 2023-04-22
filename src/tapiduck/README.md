@@ -5,7 +5,7 @@
 - Compile-time type safety, and fullstack intillisense in TS-friendly editors.
 - Inspired by [tRPC](https://trpc.io/); but simpler and restful-ish, like [JSend](https://github.com/omniti-labs/jsend).
 
-## Quickstart: Typed API for simple addition
+## Quickstart: Typed API for simple division
 #### 0. Install [Monoduck](./../../README.md), Zod, and Express:
 ```shell
 npm install monoduck zod express
@@ -74,6 +74,16 @@ const performDivision = async function (): Promise<void> {
 3. You needn't pass the app (or router) each time. `tapiduck.routeUsing` helps with that.
 4. On the frontend, you can define a common base URL for multiple endpoints.
 
+## Larger Example (FlagLeap)
+
+Looking for a larger example of using Tapiduck for end-to-end typesafety? See [FlagLeap](https://github.com/sumukhbarve/flagleap) (a feature flag management service):
+
+- Endpoint definitions are in [`src/shared/endpoints.ts`](https://github.com/sumukhbarve/flagleap/blob/main/src/shared/endpoints.ts)
+- Backend route handlers are defined in [`src/backend/controllers`](https://github.com/sumukhbarve/flagleap/tree/main/src/backend/controllers)
+    - for example, internal (flag-management) routes are defined in [`flag-inapi.ts`](https://github.com/sumukhbarve/flagleap/blob/main/src/backend/controllers/flag-inapi.ts)
+- Frontend components are in [`src/frontend/components`](https://github.com/sumukhbarve/flagleap/tree/main/src/frontend/components), and many of them hit the API
+    - for example, [`<LoginRoute />`](https://github.com/sumukhbarve/flagleap/blob/main/src/frontend/components/LoginRoute.tsx) hits the `api.internal.login` endpoint.
+
 ## JSend API Envelope
 
 [JSend](https://github.com/omniti-labs/jsend) is a lightweight envelope spec for JSON APIs, and Tapiduck adopts it almost exactly.
@@ -88,7 +98,7 @@ For an endpoint `ept` created via `tapiduck.endpint()`:
 - if there's an unexpected (uncaught) server error:
     - response shape: `{status: "error", message: string, code: number}`
     - HTTP status: 500 Internal Server Error
-    - the `code` defaults to 500, but is unrelated to the HTTP status
+    - the `code` defaults to 500, and is unrelated to the HTTP status
 - if Tapiduck can't zod-validate the request on the server, or the response on the client:
     - response shape: `{status: 'zodfail', where: 'server' | 'client', message: string }`
     - HTTP status: 400 Bad Request
