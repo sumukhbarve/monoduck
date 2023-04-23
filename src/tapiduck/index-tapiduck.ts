@@ -1,6 +1,8 @@
 import { endpoint } from './tapiEndpoint'
 import { route, routeUsing } from './tapiRouter'
-import { fetch, fetchUsing, injectIsomorphicFetch } from './tapiFetcher'
+import {
+  injectIsomorphicFetch, fetch, fetchUsing, expectStatus
+} from './tapiFetcher'
 import { sockpoint, sockEmit, sockOn, sockUse } from './tapiSockpoint'
 import { failish } from './jsend'
 
@@ -14,9 +16,10 @@ export const tapiduck = {
   nonSuccessMsg: failish,
   route,
   routeUsing,
+  injectIsomorphicFetch,
   fetch,
   fetchUsing,
-  injectIsomorphicFetch,
+  expectStatus,
   sockpoint,
   sockEmit,
   sockOn,

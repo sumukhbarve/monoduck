@@ -259,6 +259,20 @@ test('_.deepEquals', function () {
   expect(_.deepEquals(new Date(), {})).toBe(false)
   expect(_.deepEquals({}, /regexp/)).toBe(false)
   expect(_.deepEquals(/regexp/, [])).toBe(false)
+
+  const voidFnA = (): void => {}
+  const voidFnB = (): void => {}
+  expect(_.deepEquals(voidFnA, 'primitiveish')).toBe(false)
+  expect(_.deepEquals(voidFnA, voidFnA)).toBe(true)
+  expect(_.deepEquals([1, 2, voidFnA], [1, 2, voidFnA])).toBe(true)
+  expect(() => _.deepEquals(voidFnA, voidFnB)).toThrow('Cannot check eq')
+  expect(() => _.deepEquals([1, 2, voidFnA], [1, 2, voidFnB]))
+    .toThrow('Cannot check eq')
+  const dateA = new Date(1234567890123)
+  const dateB = new Date(1234567890123)
+  expect(_.deepEquals(dateA, 'primitiveish')).toBe(false)
+  expect(() => _.deepEquals(dateA, dateB)).toThrow('Cannot check eq')
+  expect(() => _.deepEquals([1, dateA], [1, dateB])).toThrow('Cannot check eq')
 })
 
 test('_.shallowEquals', function () {
@@ -281,6 +295,20 @@ test('_.shallowEquals', function () {
   expect(_.shallowEquals(new Date(), {})).toBe(false)
   expect(_.shallowEquals({}, /regexp/)).toBe(false)
   expect(_.shallowEquals(/regexp/, [])).toBe(false)
+
+  const voidFnA = (): void => {}
+  const voidFnB = (): void => {}
+  expect(_.shallowEquals(voidFnA, 'primitiveish')).toBe(false)
+  expect(_.shallowEquals(voidFnA, voidFnA)).toBe(true)
+  expect(_.shallowEquals([1, 2, voidFnA], [1, 2, voidFnA])).toBe(true)
+  expect(() => _.shallowEquals(voidFnA, voidFnB)).toThrow('Cannot check eq')
+  expect(_.shallowEquals([1, 2, voidFnA], [1, 2, voidFnB])).toBe(false)
+  const num = 1234567890123
+  const dateA = new Date(num)
+  const dateB = new Date(num)
+  expect(_.shallowEquals(dateA, 'primitiveish')).toBe(false)
+  expect(() => _.shallowEquals(dateA, dateB)).toThrow('Cannot check eq')
+  expect(_.shallowEquals([1, dateA], [1, dateB])).toBe(false)
 })
 
 test('_.mapObject', function () {

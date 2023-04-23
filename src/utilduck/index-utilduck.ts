@@ -234,8 +234,7 @@ const equals = function (x: unknown, y: unknown, depth: number): boolean {
     return all(xKeys, k => keyHas(y, k) && equals(x[k], y[k], depth - 1))
   }
   if (plainObjectIs(y)) { return false }
-  console.error(`Can't check equality of ${String(x)} against ${String(y)}.`)
-  throw new Error(`Can't check equality of ${String(x)} against ${String(y)}.`)
+  throw new Error(`Cannot check equality of ${String(x)} against ${String(y)}.`)
 }
 const deepEquals = (x: unknown, y: unknown): boolean => equals(x, y, Infinity)
 const shallowEquals = (x: unknown, y: unknown): boolean => equals(x, y, 1)
