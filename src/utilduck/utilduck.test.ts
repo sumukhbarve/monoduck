@@ -509,3 +509,29 @@ test('_.uniqueId', function () {
   _.each([1, 2, 3, 4, 5], (n) => expect(_.uniqueId()).toBe(String(n)))
   _.each([1, 2, 3, 4, 5], (n) => expect(_.uniqueId()).toBe(String(n + 5)))
 })
+
+test('_.jsonValueIs', function () {
+  const testCases: Array<['yesJson' | 'notJson', any]> = [
+    ['yesJson', 1],
+    ['yesJson', null],
+    ['yesJson', 'some-string'],
+    ['yesJson', 'some-string'],
+    ['yesJson', true],
+    ['yesJson', false],
+    ['yesJson', []],
+    ['yesJson', {}],
+    ['yesJson', [1, 2, 3, 'four', 'five', true, null, { foo: 'bar' }]],
+    ['yesJson', { foo: { bar: { baz: ['one', { two: 3 }, [true, false]] } } }],
+    ['notJson', undefined],
+    ['notJson', () => null],
+    ['notJson', new Date()],
+    ['notJson', [1, 2, 3, undefined, 5, 6]],
+    ['notJson', [1, 2, 3, () => null, 5, 6]],
+    ['notJson', globalThis.NaN],
+    ['notJson', globalThis],
+    ['notJson', { fn: () => null, foo: { bar: { baz: ['one', { two: 3 }] } } }]
+  ]
+  _.each(testCases, function (testCase) {
+    expect(_.jsonValueIs(testCase[1])).toBe(testCase[0] === 'yesJson')
+  })
+})

@@ -11,8 +11,8 @@ const router = express.Router()
 
 tapiduck.route(router, ept.addTodo, async function (reqData, jsend) {
   // for testing tapCatch @ client
-  if (reqData.text === 'aaa') {
-    return jsend.fail({ message: 'aaa not allowed' })
+  if (reqData.text === 'no-add') {
+    return jsend.fail({ message: 'cannot add no-add' })
   }
   const todo = {
     id: Date.now() + Math.random(),
@@ -30,8 +30,8 @@ tapiduck.route(router, ept.toggleTodo, async function (reqData, jsend) {
   if (todoIndex === -1 || todo === undefined) {
     return jsend.fail('toggle failed, no such todo')
   }
-  if (todoIndex % 2 === 0) {
-    return jsend.fail('sample-error: cannot toggle todo with an even .id')
+  if (todo.text === 'no-toggle') {
+    return jsend.fail('cannot toggle no-toggle')
   }
   todo.done = !todo.done
   return jsend.success(todo)
@@ -43,12 +43,20 @@ tapiduck.route(router, ept.updateText, async function (reqData, jsend) {
   if (todoIndex === -1 || todo === undefined) {
     return jsend.fail('update failed, no such todo.')
   }
+  if (todo.text === 'no-update') {
+    return jsend.fail('cannot update no-update')
+  }
   todo.text = reqData.text
   return jsend.success(todo)
 })
 
 tapiduck.route(router, ept.getTodos, async function (_reqData, jsend) {
   return jsend.success(todos)
+})
+
+tapiduck.route(router, ept.clearTodos, async function (_reqData, jsend) {
+  todos.splice(0, todos.length)
+  return jsend.success({})
 })
 
 tapiduck.route(router, ept.divisionEndpoint, async function (reqData, jsend) {

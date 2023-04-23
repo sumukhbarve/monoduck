@@ -41,6 +41,7 @@ const ifel = function <T>(condition: unknown, consequent: T, alternate: T): T {
 }
 
 const assert = function <T>(val: T | undefined, msg?: string): T {
+  // note: JSON.stringify(NaN) is "null", and json-fy(undefined) is  undefined
   msg = msg ?? `value=${_.nanIs(val) ? 'NaN' : JSON.stringify(val)}`
   // Check NaN first, as _.not (type guard) does not expect NaN.
   if (_.nanIs(val) || _.not(val)) {
@@ -391,6 +392,15 @@ export type {
   JsonPrimitive, JsonArray, JsonObject, JsonValue
 }
 
+const jsonValueIs = function (x: unknown): x is JsonValue {
+  if (_.nanIs(x)) { return false }
+  return _.any([
+    _.stringIs(x), _.numberIs(x), _.booleanIs(x), _.nullIs(x),
+    _.arrayIs(x) && _.all(x, jsonValueIs),
+    _.plainObjectIs(x) && _.all(Object.values(x), jsonValueIs)
+  ])
+}
+
 export const _ = {
   BREAK,
   identity,
@@ -453,5 +463,6 @@ export const _ = {
   uniqueId,
   pretty,
   singleSpaced,
-  never
+  never,
+  jsonValueIs
 }
