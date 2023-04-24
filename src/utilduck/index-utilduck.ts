@@ -211,7 +211,6 @@ const clone = function<T> (x: T, depth: number): T {
     if (depth === 0) { return x }
     return _.mapObject(x, val => clone(val, depth - 1)) as unknown as T
   }
-  console.error('Cannot clone: ', x)
   throw new Error(`Cloning failed, as \`${String(x)}\` is not clonable.`)
 }
 const deepClone = <T> (x: T): T => clone(x, Infinity)

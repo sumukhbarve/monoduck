@@ -213,6 +213,10 @@ test('_.deepClone', function () {
   obj.inner.foo = 'bar'
   expect(alias.inner.foo).toBe('bar')
   expect(clone.inner.foo).toBe('foo')
+
+  const voidFn = (): void => {}
+  expect(() => _.deepClone([0, 1, voidFn])).toThrow('Cloning failed')
+  expect(() => _.deepClone([0, 1, [2, voidFn]])).toThrow('Cloning failed')
 })
 
 test('_.shallowClone', function () {
@@ -237,6 +241,14 @@ test('_.shallowClone', function () {
   expect(alias.inner.foo).toBe('bar')
   expect(clone.inner.foo).toBe('bar')
   expect(alias.inner).toBe(clone.inner)
+
+  const voidFn = (): void => {}
+  expect(() => _.shallowClone([1, 2, voidFn])).toThrow('Cloning failed')
+  const originalArr = [0, 1, [2, voidFn]]
+  const clonedArr = _.shallowClone(originalArr)
+  expect(clonedArr).toStrictEqual(originalArr)
+  expect(clonedArr).not.toBe(originalArr)
+  expect(clonedArr[2]).toBe(originalArr[2])
 })
 
 test('_.deepEquals', function () {
@@ -539,27 +551,17 @@ test('_.uniqueId', function () {
 })
 
 test('_.jsonValueIs', function () {
-  const testCases: Array<['yesJson' | 'notJson', any]> = [
-    ['yesJson', 1],
-    ['yesJson', null],
-    ['yesJson', 'some-string'],
-    ['yesJson', 'some-string'],
-    ['yesJson', true],
-    ['yesJson', false],
-    ['yesJson', []],
-    ['yesJson', {}],
-    ['yesJson', [1, 2, 3, 'four', 'five', true, null, { foo: 'bar' }]],
-    ['yesJson', { foo: { bar: { baz: ['one', { two: 3 }, [true, false]] } } }],
-    ['notJson', undefined],
-    ['notJson', () => null],
-    ['notJson', new Date()],
-    ['notJson', [1, 2, 3, undefined, 5, 6]],
-    ['notJson', [1, 2, 3, () => null, 5, 6]],
-    ['notJson', globalThis.NaN],
-    ['notJson', globalThis],
-    ['notJson', { fn: () => null, foo: { bar: { baz: ['one', { two: 3 }] } } }]
+  const yesJson: unknown[] = [
+    1, null, 'some-string', true, false, [], {},
+    [1, 2, 3, 'four', 'five', true, null, { foo: 'bar' }],
+    { foo: { bar: { baz: ['one', { two: 3 }, [true, false]] } } }
   ]
-  _.each(testCases, function (testCase) {
-    expect(_.jsonValueIs(testCase[1])).toBe(testCase[0] === 'yesJson')
-  })
+  _.each(yesJson, val => expect(_.jsonValueIs(val)).toBe(true))
+  const nonJson = [
+    undefined, () => {}, () => null, new Date(),
+    [1, 2, 3, undefined, 5], [1, 2, 3, () => null, 5],
+    globalThis.NaN, globalThis, /regularExpression/,
+    { fn: () => null, foo: { bar: { baz: ['one', { two: 3 }] } } }
+  ]
+  _.each(nonJson, val => expect(_.jsonValueIs(val)).toBe(false))
 })
