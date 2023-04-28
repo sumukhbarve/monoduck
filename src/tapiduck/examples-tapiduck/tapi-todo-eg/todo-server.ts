@@ -4,6 +4,7 @@ import { tapiduck } from '../../index-tapiduck'
 import type { Todo } from './todo-shared'
 import { ept, SERVER_PORT } from './todo-shared'
 import { _ } from '../../indeps-tapiduck'
+import { openApiDefnObj, openApiDefnStr, writeOpenApiJsonToFile } from './todo-eg-json-schema'
 
 const todos: Todo[] = [] // Temporary, in-memory todo store
 
@@ -69,6 +70,19 @@ tapiduck.route(router, ept.divisionEndpoint, async function (reqData, jsend) {
   return jsend.success({ quotient, remainder }) // must zSuccess
 })
 
+// OpenAPI related:
+// router.get('/openapi.json', function (_req, res) {
+//   res.contentType('application/json')
+//   res.send(openApiDefnStr)
+// })
+// router.get('/swagger-ui', function (_req, res) {
+//   _.noop(openApiDefnObj, openApiDefnStr)
+//   // res.send(tapiduck.swaggerUiHtml(openApiDefnStr))
+//   res.send(tapiduck.swaggerUiHtml(`/openapi.json`))
+// })
+_.noop(openApiDefnObj, openApiDefnStr)
+tapiduck.swaggerfy(router, openApiDefnObj)
+
 // Non-tapi block for fiddling with sync-v-async express (error) behavior
 router.get('/foo/ok/sync', function (_req, res) {
   res.json({ foo: 'ok-sync' })
@@ -79,6 +93,8 @@ router.get('/foo/ok/sync', function (_req, res) {
 }).get('/foo/throw/async', function (_req, _res, next) {
   void _.sleep(100).then(() => next(new Error('foo-throw-async')))
 })
+
+writeOpenApiJsonToFile()
 
 const app = express()
 app.use(cors(), express.json(), router)

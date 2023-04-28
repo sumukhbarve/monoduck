@@ -1,4 +1,5 @@
 import type { VoidFn } from './indeps-ringduck'
+import type { ZodSchema } from 'zod'
 
 // A 2-tuple: [injectFoo, getInjectedFoo]
 type DepInjectionTup<T> = [(dep: T) => void, () => T]
@@ -48,7 +49,16 @@ if (globalThis.fetch !== undefined) {
   injectFetch(globalThis.fetch)
 }
 
-export type { Reacty, FetchyFn }
+type ZodyToJsonSchemaFn =
+  (zodSchema: ZodSchema, options: {target: 'openApi3'})
+  => Record<string, unknown>
+
+const [injectZodToJsonSchema, getInjectedZodToJsonSchema] =
+  buildInjectionTup<ZodyToJsonSchemaFn>('zodToJsonSchema')
+
+export type { Reacty, FetchyFn, ZodyToJsonSchemaFn }
 export {
-  injectReact, getInjectedReact, injectFetch, getInjectedFetch
+  injectReact, getInjectedReact,
+  injectFetch, getInjectedFetch,
+  injectZodToJsonSchema, getInjectedZodToJsonSchema
 }

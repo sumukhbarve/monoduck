@@ -1,4 +1,5 @@
 .DS_Store
+*.generated.*
 .parcel-cache/
 node_modules/
 dist/

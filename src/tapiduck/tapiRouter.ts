@@ -3,6 +3,7 @@ import type { TapiEndpoint } from './tapiEndpoint'
 import type { JSendOutput, JSendy } from './jsend'
 import { buildJSendy } from './jsend'
 import { _ } from './indeps-tapiduck'
+import { swaggerUiHtml } from './tapiToOpenApi'
 
 type JV = JsonValue // Short, local alias
 
@@ -13,10 +14,12 @@ interface XReq {
 interface XRes {
   status: (code: number) => void
   json: (data: unknown) => void
+  send: (data: unknown) => void
 }
 // type XNextFn =  (err: any) => void;
 type XHandlerFn = (req: XReq, res: XRes) => void
 interface XRtApp { // Compatible with eXpress apps & routers
+  get: (path: string, xHandler: XHandlerFn) => void
   post: (path: string, xHandler: XHandlerFn) => void
 }
 
@@ -74,5 +77,15 @@ const routeUsing = function (xRtApp: XRtApp): BoundRouteFn {
   }
 }
 
+const swaggerfy = function (xRtApp: XRtApp, openApiDefn: Record<string, JV>): void {
+  // OpenAPI related:
+  xRtApp.get('/openapi.json', function (_req, res) {
+    res.json(openApiDefn)
+  })
+  xRtApp.get('/swagger-ui', function (_req, res) {
+    res.send(swaggerUiHtml(openApiDefn))
+  })
+}
+
 export type { XReq, XRes, XHandlerFn, XRtApp, BoundRouteFn }
-export { route, routeUsing }
+export { route, routeUsing, swaggerfy }

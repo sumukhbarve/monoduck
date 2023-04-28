@@ -3,7 +3,8 @@
 ## What is it?
 - End-to-end type-safe JSON APIs with TypeScript, Zod, and Express.
 - Compile-time type safety, and fullstack intillisense in TS-friendly editors.
-- Inspired by [tRPC](https://trpc.io/); but simpler and restful-ish, like [JSend](https://github.com/omniti-labs/jsend).
+- Inspired by [tRPC](https://trpc.io/); but simpler and restful, like [JSend](https://github.com/omniti-labs/jsend).
+- Compatible  with Open API v3, and thus easily consumed by non-TS clients.
 
 ## Quickstart: Typed API for simple division
 #### 0. Install [Monoduck](./../../README.md), Zod, and Express:
@@ -119,4 +120,31 @@ app.use(cors()) // optional
 app.use(express.json()) // required
 
 tapiduck.route(app, <your-endpoint-here>, <your-handler-here>)
+```
+
+## OpenAPI Compatibility
+
+To generate an OpenAPI definition for your Tapiduck API:
+
+#### Step 1: Install zod-to-json-schema
+```
+npm install zod-to-json-schema
+```
+
+#### Step 2:  Provide it to tapiduck (dependency injection):
+```ts
+import { tapiduck } from 'monoduck'
+import zodToJsonSchema from 'zod-to-json-schema'
+
+tapiduck.injectZodToJsonSchema(zodToJsonSchema)
+```
+
+#### Step 3: Generate the definition:
+```ts
+const myOpenApiDefinition = tapiduck.toOpenApi3({
+    endpoints: [divisionEndpoint], // Array of TapiEndpoint objects
+    serverUrls: [`http://localhost:3000`], // Array of base URLs for the API
+    title: 'Todo API', // API title
+    version: '0.0.0' // API version
+  })
 ```
