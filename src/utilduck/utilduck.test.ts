@@ -27,6 +27,14 @@ test('_.noop', function () {
   expect(_.noop(1, 'two', [3], null, true, false, { x: 'y' })).toBe(undefined)
 })
 
+test('_.last', function () {
+  expect(_.last([0, 1, 2, 3])).toBe(3)
+  expect(_.last([0, 1, 2, 3, 4])).toBe(4)
+  expect(_.last([0, 1, 2, { foo: 'bar' }])).toStrictEqual({ foo: 'bar' })
+  const barQuax = { bar: 'quax' }
+  expect(_.last([0, 1, 2, barQuax])).toBe(barQuax)
+})
+
 test('_.assert', function () {
   expect(_.assert(true)).toBe(true)
   expect(_.assert(123)).toBe(123)
@@ -564,4 +572,14 @@ test('_.jsonValueIs', function () {
     { fn: () => null, foo: { bar: { baz: ['one', { two: 3 }] } } }
   ]
   _.each(nonJson, val => expect(_.jsonValueIs(val)).toBe(false))
+})
+
+test('_.escape', function () {
+  expect(_.escape('foo')).toBe('foo')
+  expect(_.escape('&')).toBe('&amp;')
+  expect(_.escape('<b>')).toBe('&lt;b&gt;')
+  expect(_.escape('"')).toBe('&quot;')
+  expect(_.escape("'")).toBe('&#39;')
+  expect(_.escape('<b> foo </b>')).toBe('&lt;b&gt; foo &lt;/b&gt;')
+  expect(_.escape('I <3 chai & coffee')).toBe('I &lt;3 chai &amp; coffee')
 })

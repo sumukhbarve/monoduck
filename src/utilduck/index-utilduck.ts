@@ -39,6 +39,8 @@ const noop = (...args: unknown[]): void => { _.identity(args) }
 const ifel = function <T>(condition: unknown, consequent: T, alternate: T): T {
   return _.bool(condition) ? consequent : alternate
 }
+const last = <T>(arr: T[]): T | undefined => arr[arr.length - 1]
+// const reverse = <T>(arr: T[]): T[] => [...arr].reverse()
 
 const assert = function <T>(val: T | undefined, msg?: string): T {
   // note: JSON.stringify(NaN) is "null", and json-fy(undefined) is  undefined
@@ -399,6 +401,12 @@ const jsonValueIs = function (x: unknown): x is JsonValue {
   ])
 }
 
+const ESC = { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }
+const escape = function (s: string): string {
+  _.toPairs(ESC).forEach(pair => { s = s.split(pair[0]).join(pair[1]) })
+  return s
+}
+
 export const _ = {
   BREAK,
   identity,
@@ -406,6 +414,7 @@ export const _ = {
   bool,
   noop,
   ifel,
+  last,
   assert,
   bang,
   each,
@@ -462,5 +471,6 @@ export const _ = {
   pretty,
   singleSpaced,
   never,
-  jsonValueIs
+  jsonValueIs,
+  escape
 }
