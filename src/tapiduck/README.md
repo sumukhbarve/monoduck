@@ -125,7 +125,7 @@ npx parcel serve src/frontend.html
 
 Finally, visit the URL reported by `parcel` (defaults to http://localhost:1234); and try out the division app!
 
-### 5) Optional: Auto-Generate API Docs via Swagger UI
+### 4) Optional: Auto-Generate API Docs via Swagger UI
 
 Install `zod-to-json-schema`:
 ```sh
