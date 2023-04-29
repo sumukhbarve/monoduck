@@ -4,18 +4,44 @@
 - End-to-end type-safe JSON APIs with TypeScript, Zod, and Express.
 - Compile-time type safety, and fullstack intillisense in TS-friendly editors.
 - Inspired by [tRPC](https://trpc.io/); but simpler and restful, like [JSend](https://github.com/omniti-labs/jsend).
-- Compatible  with Open API v3, and thus easily consumed by non-TS clients.
+- OpenAPI compatible, and can auto-generate API docs (Swagger UI
 
-## Quickstart: Typed API for simple division
-#### 0. Install [Monoduck](./../../README.md), Zod, and Express:
-```shell
-npm install monoduck zod express
+## Quickstart: Typesafe Division API & UI
+
+In this quickstart, we'll start from scratch and build a typesafe API for simple (arithmetic) division, and a typesafe UI for consuming it. Let's get started by setting up the project.
+
+### 0) Project setup:
+
+Create a directory, and change into it:
+```sh
+mkdir tapiduck-quickstart && cd tapiduck-quickstart;
 ```
 
-#### 1. Define endpoint shapes in `endpoint-shapes.ts`:
+Set up minimal `package.json` and `tsconfig.json` files:
+```sh
+echo '{}' > package.json;
+echo '{"compilerOptions":{"esModuleInterop":true,"strict": true}}' > tsconfig.json;
+```
+
+Install dependencies:
+```sh
+npm install --save monoduck zod express cors;
+npm install --save-dev typescript @types/express @types/cors parcel ts-node-dev;
+```
+
+Let's create the `src/` directory and some empty files:
+```
+mkdir src && cd src && touch shared.ts backend.ts frontend.ts frontend.html && cd ..;
+```
+
+
+### 1) Define shared endpoint shapes:
+In `src/shared.ts`:
 ```ts
 import { tapiduck } from 'monoduck'
 import { z } from 'zod'
+
+export const SERVER_PORT = 3000
 
 export const divisionEndpoint = tapiduck.endpoint({
     path: '/api/divide',
@@ -26,14 +52,15 @@ export const divisionEndpoint = tapiduck.endpoint({
 })
 ```
 
-#### 2. On the backend, handle endpoint routes:
-
+### 2) On the backend, handle endpoint routes:
+In `src/backend.ts`:
 ```ts
 import express from 'express'
+import cors from 'cors'
 import { tapiduck } from 'monoduck'
-import { divisionEndpoint } from './endpoint-shapes'
+import { SERVER_PORT, divisionEndpoint } from './shared'
 
-const app = express().use(express.json())
+const app = express().use(cors()).use(express.json())
 
 tapiduck.route(app, divisionEndpoint, async function (reqData, jsend) {
   const { numerator, denominator } = reqData // matches zRequest
@@ -45,15 +72,24 @@ tapiduck.route(app, divisionEndpoint, async function (reqData, jsend) {
   return jsend.success({ quotient, remainder }) // must zSuccess
 })
 
-app.listen(3000, () => console.log('Listening at port 3000 ...'))
+app.listen(SERVER_PORT, () => console.log(`Listening @ port ${SERVER_PORT} ...`))
 ```
 
 The second param, `jsend` , has typed `jsend.success()` and `jsend.fail()` helpers. In addition to helping with typesafety, they  also produce the [JSend API envelope](#jsend-api-envelope), hence the name `jsend`.
 
-#### 3. Hit your endpoints from the frontend. Done!
+### 2.5) Start the backend server:
+From the project (`tapiduck-quickstart`) directory:
+```sh
+npx ts-node-dev src/backend.ts
+```
+
+### 3) Hit your endpoints from the frontend!
+In `src/frontend.ts`:
 ```ts
 import { tapiduck } from 'monoduck'
-import { divisionEndpoint } from './endpoint-shapes'
+import { SERVER_PORT, divisionEndpoint } from './shared'
+
+const tapiFetch = tapiduck.fetchUsing(`http://localhost:${SERVER_PORT}`)
 
 const performDivision = async function (): Promise<void> {
   const numerator = Number(window.prompt('Numerator: ', '1'))
@@ -67,13 +103,55 @@ const performDivision = async function (): Promise<void> {
   const { quotient, remainder } = resp.data // matches zSuccess
   window.alert(`Quotient: ${quotient}; Remainder: ${remainder}`)
 }
+
+window.onload = () => { performDivision() };
 ```
 
-#### Quick notes:
-1. For brevity, we defined a single endpoint here; but you could define more!
-2. We passed an express app to `tapiduck.route`, but you could pass an express router instead.
-3. You needn't pass the app (or router) each time. `tapiduck.routeUsing` helps with that.
-4. On the frontend, you can define a common base URL for multiple endpoints.
+### 3.5) Start the frontend client:
+
+To try our frontend code, we'll use a minimal HTML webpage and serve it with `parcel`.
+
+In `src/frontend.html`:
+```html
+<h4>Tapiduck Quickstart - Minimal Frontend</h4>
+<p>Plesse refresh the page to re-perform division.</p>
+<script type="module" src="./frontend.ts"></script>
+```
+
+In a new terminal window, from the project's root directory:
+```sh
+npx parcel serve src/frontend.html
+```
+
+Finally, visit the URL reported by `parcel` (defaults to http://localhost:1234); and try out the division app!
+
+### 5) Optional: Auto-Generate API Docs via Swagger UI
+
+Install `zod-to-json-schema`:
+```sh
+npm install zod-to-json-schema
+```
+
+Import it on the backend (in `src/backend.ts`):
+```ts
+import { zodToJsonSchema } from 'zod-to-json-schema'
+```
+
+And then, typically right before `app.listen()`:
+```ts
+tapiduck.swaggerfy(app, zodToJsonSchema)
+```
+
+Visit `/swagger-ui` (i.e. http://localhost:3000/swagger-ui) to check out the API docs! And to see the generated OpenAPI definition, visit `/openapi.json`.
+
+
+### Quick notes:
+1. For brevity, we defined a single endpoint above; but you could define more!
+1. We used vanilla TS for the frontend here, but you can use React, Vue, Angular etc.
+1. In larger apps, you'd typically have separate `frontend/`, `backend/` and `shared/` directories.
+    - And yes, instead of seprate directories, they can also be seprate packages.
+1. We passed an express app to `tapiduck.route()`, but you could pass an express router instead.
+1. You needn't pass the app (or router) each time. `tapiduck.routeUsing` helps with that.
 
 ## Larger Example (FlagLeap)
 
