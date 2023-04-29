@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { tapiduck } from './indeps-chatter'
+import { tapiduck } from '../../../index-monoduck'
 
 export interface User {
   nick: string

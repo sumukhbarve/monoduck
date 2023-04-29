@@ -1,5 +1,5 @@
 import { z } from 'zod'
-import { tapiduck } from '../../index-tapiduck'
+import { tapiduck } from '../../../index-monoduck'
 
 export const PRODUCER_PORT = 5050
 export const CONSUMER_PORT = 5055

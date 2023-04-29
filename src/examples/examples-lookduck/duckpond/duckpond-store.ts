@@ -1,5 +1,5 @@
 import React from 'react'
-import { lookduck } from '../../index-lookduck'
+import { lookduck } from '../../../index-monoduck'
 
 const MIN_EXPECTED_DUCK_COUNT = 5
 

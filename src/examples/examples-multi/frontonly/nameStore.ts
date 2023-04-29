@@ -1,4 +1,4 @@
-import { lookduck } from './indeps-frontonly'
+import { lookduck } from '../../../index-monoduck'
 
 const store = {
   f: lookduck.observable('john'),

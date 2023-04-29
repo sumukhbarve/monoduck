@@ -1,6 +1,6 @@
 import express from 'express'
 import cors from 'cors'
-import { tapiduck } from '../../index-tapiduck'
+import { tapiduck } from '../../../index-monoduck'
 import { producerApi, PRODUCER_PORT } from './isofetch-shared'
 
 const factorial = (n: number): number => n <= 1 ? 1 : n * factorial(n - 1)

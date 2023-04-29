@@ -2,7 +2,7 @@ import React from 'react'
 import { store, useStore } from './duckpond-store'
 import ReactDOM from 'react-dom'
 
-import { lookduck } from '../../index-lookduck'
+import { lookduck } from '../../../index-monoduck'
 
 const DuckCountHeading: React.FC = function () {
   const { duckCount, duckNoun } = useStore('duckCount', 'duckNoun')
@@ -31,6 +31,8 @@ const Counter: React.FC = function () {
   }, [count])
   return (
     <>
+      <hr />
+      <h4>Unrelated Counter:</h4>
       <p>The count is {count}, and twice that is {doubleCount}.</p>
       <button onClick={onIncrement}>Increment count</button>
     </>

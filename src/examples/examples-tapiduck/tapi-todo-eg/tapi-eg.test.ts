@@ -1,6 +1,5 @@
 import fetch from 'node-fetch' // Imported for testing only, not req'd by tapiduck
-import { _ } from '../../indeps-tapiduck'
-import { tapiduck } from '../../index-tapiduck'
+import { tapiduck, _ } from '../../../index-monoduck'
 import type { Todo } from './todo-shared'
 import { SERVER_PORT, ept as api } from './todo-shared'
 

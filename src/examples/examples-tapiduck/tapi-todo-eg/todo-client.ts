@@ -1,4 +1,4 @@
-import { tapiduck } from '../../index-tapiduck'
+import { tapiduck } from '../../../index-monoduck'
 import type { Todo } from './todo-shared'
 import { ept, SERVER_PORT } from './todo-shared'
 

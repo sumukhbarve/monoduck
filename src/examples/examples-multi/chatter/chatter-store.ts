@@ -1,5 +1,5 @@
 import React from 'react'
-import { lookduck, _ } from './indeps-chatter'
+import { lookduck, _ } from '../../../index-monoduck'
 import * as shared from './chatter-shared'
 
 export const loading = lookduck.observable('')

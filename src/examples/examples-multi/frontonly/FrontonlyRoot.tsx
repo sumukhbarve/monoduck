@@ -1,12 +1,13 @@
 // Prelims:
 import React from 'react'
 import ReactDOM from 'react-dom'
-import { roqsduck, lookduck, _, injectReact } from './indeps-frontonly'
+import {
+  roqsduck, lookduck, _, injectReact, patchduck
+} from '../../../index-monoduck'
 import { io } from 'socket.io-client'
 import { nameStore } from './nameStore'
-import { useLookables, useLookable } from '../../lookduck/react-hook'
-import { atom, useAtom } from '../../lookduck/atom'
-import { patchduck } from '../../patchduck/index-patchduck'
+
+const { useLookables, useLookable, atom, useAtom } = lookduck
 
 _.noop()
 

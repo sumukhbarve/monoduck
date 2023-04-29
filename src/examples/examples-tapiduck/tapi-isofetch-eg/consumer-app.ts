@@ -1,5 +1,5 @@
 import express from 'express'
-import { tapiduck } from '../../index-tapiduck'
+import { tapiduck } from '../../../index-monoduck'
 import { producerApi, PRODUCER_PORT, CONSUMER_PORT } from './isofetch-shared'
 import fetch from 'node-fetch'
 import { z } from 'zod'

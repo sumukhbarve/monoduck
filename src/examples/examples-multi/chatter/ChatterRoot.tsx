@@ -1,7 +1,7 @@
 import React from 'react'
 import ReactDOM from 'react-dom'
 import { io } from 'socket.io-client'
-import { tapiduck, _ } from './indeps-chatter'
+import { tapiduck, _ } from '../../../index-monoduck'
 import * as shared from './chatter-shared'
 import * as store from './chatter-store'
 

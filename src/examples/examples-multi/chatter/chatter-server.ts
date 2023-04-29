@@ -3,7 +3,7 @@ import http from 'http'
 import express from 'express'
 import cors from 'cors'
 import { Server } from 'socket.io'
-import { tapiduck, _ } from './indeps-chatter'
+import { tapiduck, _ } from '../../../index-monoduck'
 import * as shared from './chatter-shared'
 
 // Prelims:

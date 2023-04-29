@@ -1,5 +1,5 @@
 import React from 'react'
-import { lookduck } from '../../index-lookduck'
+import { lookduck } from '../../../index-monoduck'
 
 export interface Todo {
   id: number
