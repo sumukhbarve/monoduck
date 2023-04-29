@@ -14,9 +14,9 @@
     "test-sqlduck": "jest src/sqlduck/",
     "test-lookduck": "jest src/lookduck/",
     "test-patchduck": "jest src/patchduck/",
-    "test-tapiduck-eg": "jest src/tapiduck/examples-tapiduck",
+    "test-tapiduck-eg": "jest src/examples/examples-tapiduck",
     "lint": "ts-standard --fix",
-    "build": "rm -rf dist && tsc",
+    "build": "rm -rf dist && tsc && rm -rf dist/examples",
     "prepack": "npm run lint && npm run test && npm run build"
   },
   "repository": {
