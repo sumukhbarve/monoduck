@@ -1,13 +1,14 @@
-import type { NoInfer, JsonValue } from './indeps-tapiduck'
+import { NoInfer, JsonValue, ZodyToJsonSchemaFn, injectZodToJsonSchema, _ } from './indeps-tapiduck'
 import type { TapiEndpoint } from './tapiEndpoint'
 import type { JSendOutput, JSendy } from './jsend'
 import { buildJSendy } from './jsend'
-import { _ } from './indeps-tapiduck'
-import { swaggerUiHtml } from './tapiToOpenApi'
+import type { OpenApi3Opt } from './tapiToOpenApi'
+import { swaggerUiHtml, toOpenApi3 } from './tapiToOpenApi'
 
 type JV = JsonValue // Short, local alias
 
-// Highly simplified, eXpress-compatible types:
+// Simplified, eXpress-compatible Types:
+// ------------------------------------
 interface XReq {
   body?: unknown
 }
@@ -23,6 +24,20 @@ interface XRtApp { // Compatible with eXpress apps & routers
   post: (path: string, xHandler: XHandlerFn) => void
 }
 
+// Endpoint Registry:
+// -----------------
+const endpointRegistry: Map<XRtApp, Set<TapiEndpoint<JV, JV, JV>>> = new Map()
+const registerEndpoint = function<ZReq extends JV, ZSuc extends JV, ZFal extends JV> (
+  xRtApp: XRtApp,
+  endpoint: TapiEndpoint<ZReq, ZSuc, ZFal>
+): void {
+  const endpointSet = endpointRegistry.get(xRtApp) ?? new Set()
+  endpointSet.add(endpoint)
+  endpointRegistry.set(xRtApp, endpointSet)
+}
+
+// Route Handling:
+// --------------
 type TapiHandler<ZReq extends JV, ZSuc extends JV, ZErr extends JV> =
   (
     inp: NoInfer<ZReq>,
@@ -35,6 +50,7 @@ const route = function<ZReq extends JV, ZSuc extends JV, ZFal extends JV> (
   handler: TapiHandler<ZReq, ZSuc, ZFal>
 ): void {
   const jSendy = buildJSendy<ZSuc, ZFal>()
+  registerEndpoint(xRtApp, endpoint)
   xRtApp.post(endpoint.path, function (req: XReq, res: XRes) {
     // interna helper:
     const sendJson = function (status: number, data: JsonValue): void {
@@ -77,15 +93,32 @@ const routeUsing = function (xRtApp: XRtApp): BoundRouteFn {
   }
 }
 
-const swaggerfy = function (xRtApp: XRtApp, openApiDefn: Record<string, JV>): void {
-  // OpenAPI related:
+// Swagger/OpenAPI helper:
+// ----------------------
+const swaggerfy = function (
+  xRtApp: XRtApp,
+  zodToJsonSchema: ZodyToJsonSchemaFn,
+  opt?: Partial<Omit<OpenApi3Opt, 'endpoints'>>
+): () => ReturnType<typeof toOpenApi3> {
+  injectZodToJsonSchema(zodToJsonSchema)
+  const getFreshDefn = function (): ReturnType<typeof toOpenApi3> {
+    return toOpenApi3({
+      endpoints: Array.from(endpointRegistry.get(xRtApp) ?? new Set()),
+      serverUrls: opt?.serverUrls ?? ['/'],
+      title: opt?.title ?? 'Tapiduck API',
+      version: opt?.version ?? '0.1.0'
+    })
+  }
   xRtApp.get('/openapi.json', function (_req, res) {
-    res.json(openApiDefn)
+    res.json(getFreshDefn())
   })
   xRtApp.get('/swagger-ui', function (_req, res) {
-    res.send(swaggerUiHtml(openApiDefn))
+    res.send(swaggerUiHtml(getFreshDefn()))
   })
+  return getFreshDefn
 }
 
+// Export:
+// ------
 export type { XReq, XRes, XHandlerFn, XRtApp, BoundRouteFn }
 export { route, routeUsing, swaggerfy }

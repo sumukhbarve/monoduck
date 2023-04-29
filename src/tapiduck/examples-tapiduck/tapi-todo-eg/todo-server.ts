@@ -4,14 +4,16 @@ import { tapiduck } from '../../index-tapiduck'
 import type { Todo } from './todo-shared'
 import { ept, SERVER_PORT } from './todo-shared'
 import { _ } from '../../indeps-tapiduck'
-import { openApiDefnObj, openApiDefnStr, writeOpenApiJsonToFile } from './todo-eg-json-schema'
+import { zodToJsonSchema } from 'zod-to-json-schema'
+import fs from 'fs'
+import path from 'path'
 
 const todos: Todo[] = [] // Temporary, in-memory todo store
 
 const router = express.Router()
 
 tapiduck.route(router, ept.addTodo, async function (reqData, jsend) {
-  // for testing tapCatch @ client
+  // for testing failures @ client
   if (reqData.text === 'no-add') {
     return jsend.fail({ message: 'cannot add no-add' })
   }
@@ -70,20 +72,14 @@ tapiduck.route(router, ept.divisionEndpoint, async function (reqData, jsend) {
   return jsend.success({ quotient, remainder }) // must zSuccess
 })
 
-// OpenAPI related:
-// router.get('/openapi.json', function (_req, res) {
-//   res.contentType('application/json')
-//   res.send(openApiDefnStr)
-// })
-// router.get('/swagger-ui', function (_req, res) {
-//   _.noop(openApiDefnObj, openApiDefnStr)
-//   // res.send(tapiduck.swaggerUiHtml(openApiDefnStr))
-//   res.send(tapiduck.swaggerUiHtml(`/openapi.json`))
-// })
-_.noop(openApiDefnObj, openApiDefnStr)
-tapiduck.swaggerfy(router, openApiDefnObj)
+const getOpenApiDefn = tapiduck.swaggerfy(router, zodToJsonSchema)
+fs.writeFileSync(
+  path.join(__dirname, 'todo-eg.generated.json'),
+  _.pretty(getOpenApiDefn())
+)
 
 // Non-tapi block for fiddling with sync-v-async express (error) behavior
+// vvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvvv
 router.get('/foo/ok/sync', function (_req, res) {
   res.json({ foo: 'ok-sync' })
 }).get('/foo/ok/async', function (_req, res) {
@@ -93,8 +89,7 @@ router.get('/foo/ok/sync', function (_req, res) {
 }).get('/foo/throw/async', function (_req, _res, next) {
   void _.sleep(100).then(() => next(new Error('foo-throw-async')))
 })
-
-writeOpenApiJsonToFile()
+// ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 const app = express()
 app.use(cors(), express.json(), router)
