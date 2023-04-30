@@ -63,7 +63,9 @@ const RESPONSE_ZODFAIL_CONTENT_OUTER = {
 
 const genContent = function (zodSchema: ZodSchema): AnyJsonObject {
   const zodToJsonSchema = getInjectedZodToJsonSchema()
-  const schema = zodToJsonSchema(zodSchema, { target: 'openApi3' })
+  const schema = zodToJsonSchema(zodSchema, {
+    target: 'openApi3', $refStrategy: 'none'
+  })
   if (!_.jsonValueIs(schema)) {
     throw new Error()
   }

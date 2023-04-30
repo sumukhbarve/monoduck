@@ -50,7 +50,7 @@ if (globalThis.fetch !== undefined) {
 }
 
 type ZodyToJsonSchemaFn =
-  (zodSchema: ZodSchema, options: {target: 'openApi3'})
+  (zodSchema: ZodSchema, options: {target: 'openApi3', $refStrategy: 'none'})
   => Record<string, unknown>
 
 const [injectZodToJsonSchema, getInjectedZodToJsonSchema] =

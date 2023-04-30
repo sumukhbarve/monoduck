@@ -2,9 +2,17 @@
 
 ## What is it?
 - End-to-end type-safe JSON APIs with TypeScript, Zod, and Express.
-- Compile-time type safety, and fullstack intillisense in TS-friendly editors.
-- Inspired by [tRPC](https://trpc.io/); but simpler and restful, like [JSend](https://github.com/omniti-labs/jsend).
-- OpenAPI compatible, and can auto-generate API docs (Swagger UI
+- Compile-time type safety, and fullstack IDE intillisense.
+- Inspired by [tRPC](https://trpc.io/); but simpler and restful,  like [JSend](https://github.com/omniti-labs/jsend).
+- OpenAPI compatible; can auto-generate API docs (Swagger UI)
+
+## Motivation
+
+TypeScript is leaps and bounds ahead of JavaScript. Yes, TypeScript can catch/prevent errors, and that’s good. And intillisense is a complete game changer. Thanks to IDE auto-complete, you don’t even need to leave your editor to lookup object properties or function params.
+
+While intillisense works great with objects and fucntions that’re defined in TS, it doesn’t quite work with HTTP APIs. On the server, you can’t trust the shape of the request data sent by the client. And you need to perform type-narrowing before intellisense kicks in. On the client, nothing really stops you form accidentally making misshpaed API requests.
+
+Wouldn’t it be nice to have automatic type-validation on the server, so that intellisense kicks in right away? And on the client, wouldn’t it be nice to enforce request shapes at compile-time? That’s exactly what Tapiduck can do for you. It’s a tool for achieving end-to-end typesafety and intellisense.
 
 ## Quickstart: Typesafe Division API & UI
 
@@ -75,10 +83,12 @@ tapiduck.route(app, divisionEndpoint, async function (reqData, jsend) {
 app.listen(SERVER_PORT, () => console.log(`Listening @ port ${SERVER_PORT} ...`))
 ```
 
-The second param, `jsend` , has typed `jsend.success()` and `jsend.fail()` helpers. In addition to helping with typesafety, they  also produce the [JSend API envelope](#jsend-api-envelope), hence the name `jsend`.
+The route handler's first param, `reqData`, is fully type-validated and intillisense-able. Try typing `reqData.`, and your IDE should suggest `numerator` and `denominator` as options.
+
+The second param, `jsend` , has typed `jsend.success()` and `jsend.fail()` helpers. (They also produce the [JSend API envelope](#jsend-api-envelope), hence the name `jsend`.)
 
 ### 2.5) Start the backend server:
-From the project (`tapiduck-quickstart`) directory:
+From the project directory (`tapiduck-quickstart`), run:
 ```sh
 npx ts-node-dev src/backend.ts
 ```
@@ -107,6 +117,8 @@ const performDivision = async function (): Promise<void> {
 window.onload = () => { performDivision() };
 ```
 
+`tapiFetch` is a fetching/request utility bound to the supplied base URL. The first param is an endpoint object (defined via `tapiduck.endpoint()`). The second param is must match the endpoint's `.zRequest` shape.
+
 ### 3.5) Start the frontend client:
 
 To try our frontend code, we'll use a minimal HTML webpage and serve it with `parcel`.
@@ -118,12 +130,12 @@ In `src/frontend.html`:
 <script type="module" src="./frontend.ts"></script>
 ```
 
-In a new terminal window, from the project's root directory:
+In a new terminal window, from the project directory (`tapiduck-quickstart`), run:
 ```sh
 npx parcel serve src/frontend.html
 ```
 
-Finally, visit the URL reported by `parcel` (defaults to http://localhost:1234); and try out the division app!
+Visit the URL reported by `parcel` (usually http://localhost:1234); and try out the division app!
 
 ### 4) Optional: Auto-Generate API Docs via Swagger UI
 
@@ -147,11 +159,11 @@ Visit `/swagger-ui` (i.e. http://localhost:3000/swagger-ui) to check out the API
 
 ### Quick notes:
 1. For brevity, we defined a single endpoint above; but you could define more!
-1. We used vanilla TS for the frontend here, but you can use React, Vue, Angular etc.
+1. We used vanilla TS for the frontend here, but you could use React, Vue, Angular etc.
 1. In larger apps, you'd typically have separate `frontend/`, `backend/` and `shared/` directories.
-    - And yes, instead of seprate directories, they can also be seprate packages.
+    - And yes, instead of separate directories, they could be separate packages.
 1. We passed an express app to `tapiduck.route()`, but you could pass an express router instead.
-1. You needn't pass the app (or router) each time. `tapiduck.routeUsing` helps with that.
+1. You needn't pass the app (or router) each time. `tapiduck.routeUsing()` helps with that.
 
 ## Larger Example (FlagLeap)
 
@@ -182,7 +194,7 @@ For an endpoint `ept` created via `tapiduck.endpint()`:
     - response shape: `{status: 'zodfail', where: 'server' | 'client', message: string }`
     - HTTP status: 400 Bad Request
 
-Status `zodfail` is Tapiduck-specific; it isn't a part of JSend. If you encounter this error, it essentially means that the client is using a stale version of the endpoint definition; and you should probably ask the user to refresh/update the client app.
+Status `zodfail` is Tapiduck-specific; it isn't a part of JSend. If you encounter this error, it's likely that the client is using a stale endpoint definition. You should ask the user to refresh/update the client app.
 
 ## JSON & CORS Middleware
 
