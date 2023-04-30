@@ -179,7 +179,7 @@ Looking for a larger example of using Tapiduck for end-to-end typesafety? See [F
 
 [JSend](https://github.com/omniti-labs/jsend) is a lightweight envelope spec for JSON APIs, and Tapiduck adopts it almost exactly.
 
-For an endpoint `ept` created via `tapiduck.endpint()`:
+For an endpoint `ept` created via `tapiduck.endpoint()`:
 - if a request succeeds:
     - response shape: `{status: "success", data: z.infer<typeof ept.zSuccess>}`
     - HTTP status: 200 OK
