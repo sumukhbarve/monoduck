@@ -1,16 +1,16 @@
 # Tapiduck
 
 ## What is it?
-- End-to-end type-safe JSON APIs with TypeScript, Zod, and Express.
+- End-to-end typesafe JSON APIs with TypeScript, Zod, and Express.
 - Compile-time type safety, and fullstack IDE intillisense.
 - Inspired by [tRPC](https://trpc.io/); but simpler and restful,  like [JSend](https://github.com/omniti-labs/jsend).
 - OpenAPI compatible; can auto-generate API docs (Swagger UI)
 
 ## Motivation
 
-TypeScript is leaps and bounds ahead of JavaScript. Yes, TypeScript can catch/prevent errors, and that’s good. And intillisense is a complete game changer. Thanks to IDE auto-complete, you don’t even need to leave your editor to lookup object properties or function params.
+TypeScript is leaps and bounds ahead of JavaScript. Yes, TypeScript can catch/prevent errors, and that’s good. But intillisense is the real game changer. Thanks to IDE auto-complete, you don’t even need to leave your editor to lookup object properties or function params.
 
-While intillisense works great with objects and fucntions that’re defined in TS, it doesn’t quite work with HTTP APIs. On the server, you can’t trust the shape of the request data sent by the client. And you need to perform type-narrowing before intellisense kicks in. On the client, nothing really stops you form accidentally making misshpaed API requests.
+While intillisense works great with objects and fucntions that’re defined in TS, it doesn’t quite work with HTTP APIs. On the server, you can’t trust the shape of the request data sent by the client. You need to perform type-narrowing before intellisense kicks in. And on the client, nothing really stops you form accidentally making misshpaed API requests.
 
 Wouldn’t it be nice to have automatic type-validation on the server, so that intellisense kicks in right away? And on the client, wouldn’t it be nice to enforce request shapes at compile-time? That’s exactly what Tapiduck can do for you. It’s a tool for achieving end-to-end typesafety and intellisense.
 
