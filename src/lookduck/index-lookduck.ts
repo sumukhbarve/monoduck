@@ -1,6 +1,6 @@
 import { injectReact } from './indeps-lookduck'
 import { pubsubable } from './pubsubable'
-import { lookableIs } from './lookable'
+import { lookableIs, getEachInLookableMap } from './lookable'
 import { observable, observableIs } from './observable'
 import { observableIdMap } from './observableIdMap'
 import { computed, computedIs } from './computed'
@@ -25,6 +25,7 @@ export const lookduck = {
   // foundation:
   pubsubable,
   lookableIs,
+  getEachInLookableMap,
   // observable:
   observable,
   observableIs,
@@ -39,6 +40,7 @@ export const lookduck = {
   makeUseLookable,
   // store:
   makeUseStore,
+  storeSnapshot: getEachInLookableMap,
   // atom core:
   atom,
   getAtomValue,

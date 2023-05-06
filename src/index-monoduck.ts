@@ -26,3 +26,6 @@ export { injectReact, injectFetch } from './_ringduck/index-ringduck'
 
 export type { Patchlet } from './patchduck/index-patchduck'
 export { patchduck } from './patchduck/index-patchduck'
+
+export type { TappableHtml } from './rainduck/index-rainduck'
+export { rainduck } from './rainduck/index-rainduck'
