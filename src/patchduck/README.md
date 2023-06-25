@@ -21,10 +21,13 @@ const newObj = {
 const newObj = patchduck.patch(obj, { foo: { bar: { baz: 'newValue' } } })
 ```
 
+## Highlights
 
+Unlike [Lodash's `_.merge()`](https://lodash.com/docs#merge) or [Underscore's `_.extend()`](https://underscorejs.org/#extend):
 
-Like with `...spread`, the origianl object is left unchanged; a new object is created instead.
-
+- Patchduck does NOT mutate anything; it creates a new object instead.
+- It is fully typesafe; it won't let you add new properties or clobber existing types.
+- It is React-friendly; it includes a neat little [React hook](#react-hook)!
 
 ## QuickStart
 
@@ -104,6 +107,10 @@ Then, to update the email address in response to user input, consider:
   onChange={event => patchUser({ name: { first: event.target.value } })}
 />
 ```
+
+### `useState()` vs `usePatchable()` vs `useReducer()`
+
+Most developers prefer `useState()` for managing simple/primitive state, and `useReducer` for managing complex/nested object state. But sometimes, state complexity isn't high enough to warrant `useReducer()`, but also isn't low enough to use `useState()`. In situations like these, `usePatchable()` can be the perfect intermediate solution.
 
 ## Array Replacement
 
