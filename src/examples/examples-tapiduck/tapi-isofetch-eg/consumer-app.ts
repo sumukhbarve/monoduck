@@ -1,11 +1,9 @@
 import express from 'express'
 import { tapiduck } from '../../../index-monoduck'
 import { producerApi, PRODUCER_PORT, CONSUMER_PORT } from './isofetch-shared'
-import fetch from 'node-fetch'
 import { z } from 'zod'
 
 const PRODUCER_API_URL = `http://localhost:${PRODUCER_PORT}`
-tapiduck.injectIsomorphicFetch(fetch)
 const tapiFetch = tapiduck.fetchUsing(PRODUCER_API_URL)
 
 const app = express()
