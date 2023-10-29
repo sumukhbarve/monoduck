@@ -68,7 +68,7 @@ const onSubmit = function (listener: Listener<SubmitEvent>): TappableHtml {
 }
 
 // document.addEventListener('input', (evt) => {}), // infers evt: Event
-const onInput = function (listener: Listener<SubmitEvent>): TappableHtml {
+const onInput = function (listener: Listener<Event>): TappableHtml {
   return emitDataOnAttr('input', listener)
 }
 
