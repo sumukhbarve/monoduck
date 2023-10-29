@@ -36,7 +36,7 @@ test(api.getTodos.path, async function () {
   const { data: fetchedTodos } = (await expectStatus(
     'success', tapiFetch(api.getTodos, {})
   ))
-  expect(fetchedTodos).toStrictEqual(addedTodos)
+  expect(sortTodos(fetchedTodos)).toStrictEqual(addedTodos)
 })
 
 test(api.addTodo.path, async function () {
